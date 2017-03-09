@@ -1,5 +1,11 @@
+// Make sure the wp object exists.
+window.wp = window.wp || {};
+
 ( function( $ ) {
 
-	console.log( 'Hello World' )
+	var wpUserMedia      = wpUserMedia || {};
+		_.extend( wpUserMedia, _.pick( window.wp, 'Backbone', 'template' ) );
+
+	console.log( wpUserMedia );
 
 } )( jQuery );
