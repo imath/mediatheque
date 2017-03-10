@@ -18,11 +18,18 @@ defined( 'ABSPATH' ) || exit;
 class WP_User_Media_Admin {
 
 	/**
-	 * Title used in various places.
+	 * The title used in various screens
 	 *
 	 * @var string
 	 */
-	public $title = '';
+	public $title = null;
+
+	/**
+	 * The Post Type object
+	 *
+	 * @var WP_Post_Type
+	 */
+	public $post_type_object = null;
 
 	/**
 	 * The class constructor.
@@ -30,7 +37,6 @@ class WP_User_Media_Admin {
 	 * @since  1.0.0
 	 */
 	public function __construct() {
-		$this->globals();
 		$this->hooks();
 	}
 
@@ -54,26 +60,28 @@ class WP_User_Media_Admin {
 	}
 
 	/**
-	 * Setups globals
-	 *
-	 * @since 1.0.0
-	 */
-	public function globals() {
-		$this->title = __( 'User media', 'wp-user-media' );
-	}
-
-	/**
 	 * Setups hooks
 	 *
 	 * @since 1.0.0
 	 */
 	private function hooks() {
-		add_action( 'admin_menu',            array( $this, 'menus'     ) );
+		add_action( 'admin_menu',            array( $this, 'menus'     )     );
+		add_action( 'init',                  array( $this, 'globals'   ), 14 );
 
 		/** Media Editor **************************************************************/
 
-		add_action( 'wp_enqueue_media',      array( $this, 'scripts'   ) );
-		add_action( 'print_media_templates', array( $this, 'templates' ) );
+		add_action( 'wp_enqueue_media',      array( $this, 'scripts'   )     );
+		add_action( 'print_media_templates', array( $this, 'templates' )     );
+	}
+
+	/**
+	 * Setups globals
+	 *
+	 * @since 1.0.0
+	 */
+	public function globals() {
+		$this->post_type_object = get_post_type_object( 'user_media' );
+		$this->title            = $this->post_type_object->labels->menu_name;
 	}
 
 	/**

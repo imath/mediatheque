@@ -108,6 +108,12 @@ final class WP_User_Media {
 
 		// Load translations
 		add_action( 'init', array( $this, 'load_textdomain' ), 9 );
+
+		// Register objects
+		add_action( 'init', 'wp_user_media_register_objects', 12 );
+
+		// Map capabilities
+		add_filter( 'map_meta_cap', 'wp_user_media_map_meta_caps', 10, 4 );
 	}
 
 	/**

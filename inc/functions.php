@@ -55,3 +55,160 @@ function wp_user_media_min_suffix() {
 	 */
 	return apply_filters( 'wp_user_media_min_suffix', $min );
 }
+
+/**
+ * Get the Debug mode setting.
+ *
+ * @since  1.0.0
+ *
+ * @return bool True if debug mode is on. False otherwise.
+ */
+function wp_user_media_is_debug() {
+	$debug = false;
+
+	if ( defined( 'WP_DEBUG' ) && true === WP_DEBUG && current_user_can( 'manage_options' ) )  {
+		$debug = true;
+	}
+
+	/**
+	 * Filter here to edit the debug value.
+	 *
+	 * @since  1.0.0
+	 *
+	 * @param  bool $debug The minified suffix.
+	 */
+	return apply_filters( 'wp_user_media_is_debug', $debug );
+}
+
+/**
+ * Get the capabilities for the User media post type.
+ *
+ * @since  1.0.0
+ *
+ * @return array The capabilities for the User media post type.
+ */
+function wp_user_media_capabilities() {
+	return array(
+		'edit_post'              => 'edit_user_upload',
+		'read_post'              => 'read_user_upload',
+		'delete_post'            => 'delete_user_upload',
+		'edit_posts'             => 'edit_user_uploads',
+		'edit_others_posts'	     => 'edit_others_user_uploads',
+		'publish_posts'          => 'publish_user_uploads',
+		'read_private_posts'     => 'read_private_user_uploads',
+		'read'                   => 'read_user_upload',
+		'delete_posts'           => 'delete_user_uploads',
+		'delete_private_posts'   => 'delete_private_user_uploads',
+		'delete_published_posts' => 'delete_published_user_uploads',
+		'delete_others_posts'    => 'delete_others_user_uploads',
+		'edit_private_posts'     => 'edit_private_user_uploads',
+		'edit_published_posts'   => 'edit_published_user_uploads',
+		'create_posts'           => 'edit_user_uploads',
+	);
+}
+
+/**
+ * Get the capabilities for the User media types.
+ *
+ * @since  1.0.0
+ *
+ * @return array The capabilities for the User media types.
+ */
+function wp_user_media_types_capabilities() {
+	return array(
+		'manage_terms' => 'manage_upload_types',
+		'edit_terms'   => 'edit_upload_types',
+		'delete_terms' => 'delete_upload_types',
+		'assign_terms' => 'assign_upload_types',
+	);
+}
+
+/**
+ * Get All capabilities for User Media Objects.
+ *
+ * @since  1.0.0
+ *
+ * @return array All capabilities for User Media Objects.
+ */
+function wp_user_media_get_all_caps() {
+	return array_merge( wp_user_media_capabilities(), wp_user_media_types_capabilities() );
+}
+
+/**
+ * Map capabilities for User Media
+ *
+ * @since 1.0.0
+ *
+ * @param  array  $caps    Capabilities for meta capability
+ * @param  string $cap     Capability name
+ * @param  int    $user_id User id
+ * @param  mixed  $args    Arguments
+ * @return array           Actual capabilities for meta capability
+ */
+function wp_user_media_map_meta_caps( $caps = array(), $cap = '', $user_id = 0, $args = array() ) {
+	if ( in_array( $cap, wp_user_media_get_all_caps(), true ) ) {
+		$caps = array( 'manage_options' );
+	}
+
+	return $caps;
+}
+
+/**
+ * Register the post type and the taxonomy used by User Media.
+ *
+ * @since 1.0.0
+ */
+function wp_user_media_register_objects() {
+	register_post_type( 'user_media', array(
+		'labels'  => array(
+			'name'                  => __( 'User Media',                    'wp-user-media' ),
+			'menu_name'             => _x( 'User Media', 'Plugin submenu',  'wp-user-media' ),
+			'all_items'             => __( 'All User Media files',          'wp-user-media' ),
+			'singular_name'         => __( 'User Media',                    'wp-user-media' ),
+			'add_new'               => __( 'New User Media file',           'wp-user-media' ),
+			'add_new_item'          => __( 'Add new User Media file',       'wp-user-media' ),
+			'edit_item'             => __( 'Edit User Media file',          'wp-user-media' ),
+			'new_item'              => __( 'New User Media',                'wp-user-media' ),
+			'view_item'             => __( 'View User Media',               'wp-user-media' ),
+			'search_items'          => __( 'Search User Media files',       'wp-user-media' ),
+			'not_found'             => __( 'User Media not found',          'wp-user-media' ),
+			'not_found_in_trash'    => __( 'User Media not found in trash', 'wp-user-media' ),
+			'insert_into_item'      => __( 'Add User Media to content',     'wp-user-media' ),
+			'uploaded_to_this_item' => __( 'Attached to this content',      'wp-user-media' ),
+			'filter_items_list'     => __( 'Filter User Media',             'wp-user-media' ),
+			'items_list_navigation' => __( 'User Media navigation',         'wp-user-media' ),
+			'items_list'            => __( 'User Media List',               'wp-user-media' ),
+		),
+		'public'              => false,
+		'query_var'           => false,
+		'rewrite'             => false,
+		'has_archive'         => false,
+		'exclude_from_search' => true,
+		'show_in_nav_menus'   => false,
+		'show_ui'             => wp_user_media_is_debug(),
+		'supports'            => array( 'title', 'editor', 'comments' ),
+		'taxonomies'          => array( 'user_media_type' ),
+		'capability_type'     => array( 'user_upload', 'user_uploads' ),
+		'capabilities'        => wp_user_media_capabilities(),
+		'delete_with_user'    => true,
+		'can_export'          => true,
+		'show_in_rest'        => true,
+	) );
+
+	register_taxonomy( 'user_media_types', 'user_media', array(
+		'public'                => false,
+		'hierarchical'          => true,
+		'label'                 => 'User Media Types',
+		'labels'                => array(
+			'name'              => _x( 'Types', 'taxonomy general name', 'wp-user-media' ),
+			'singular_name'     => _x( 'Type', 'taxonomy singular name', 'wp-user-media' ),
+		),
+		'show_ui'               => wp_user_media_is_debug(),
+		'show_admin_column'     => false,
+		'update_count_callback' => '_update_post_term_count',
+		'query_var'             => false,
+		'rewrite'               => false,
+		'capabilities'          => wp_user_media_types_capabilities(),
+		'show_in_rest'          => true,
+	) );
+}
