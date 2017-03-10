@@ -68,12 +68,12 @@ class WP_User_Media_Admin {
 	 * @since 1.0.0
 	 */
 	private function hooks() {
-		add_action( 'admin_menu',            array( $this, 'menus'   )        );
+		add_action( 'admin_menu',            array( $this, 'menus'     ) );
 
 		/** Media Editor **************************************************************/
 
-		add_action( 'wp_enqueue_media',      array( $this, 'scripts' )        );
-		add_filter( 'media_upload_tabs',     array( $this, 'tabs'    ), 10, 1 );
+		add_action( 'wp_enqueue_media',      array( $this, 'scripts'   ) );
+		add_action( 'print_media_templates', array( $this, 'templates' ) );
 	}
 
 	/**
@@ -87,16 +87,23 @@ class WP_User_Media_Admin {
 		wp_enqueue_script(
 			'wp-user-media',
 			sprintf( '%1$sscript%2$s.js', wp_user_media_js_url(), wp_user_media_min_suffix() ),
-			array( 'media-editor' ),
+			array( 'media-editor', 'wp-backbone', 'underscore' ),
 			wp_user_media_version(),
 			true
 		);
 	}
 
-	public function tabs( $tabs = array() ) {
-		return array_merge( $tabs, array(
-			'user_media' => $this->title,
-		) );
+	/**
+	 * Print Media Editor's templates
+	 *
+	 * @since  1.0.0
+	 */
+	public function templates() {
+		?>
+		<script type="text/html" id="tmpl-user-media-main">
+			<h2><?php esc_html_e( 'Hello World!', 'wp-user-media' ); ?></h2>
+		</script>
+		<?php
 	}
 
 	/**
