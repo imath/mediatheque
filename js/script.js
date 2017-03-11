@@ -92,4 +92,4 @@ window.wp = window.wp || {};
 		}
 	} );
 
-} )( wp, jQuery );;
+} )( wp, jQuery );

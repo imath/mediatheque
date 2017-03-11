@@ -212,3 +212,60 @@ function wp_user_media_register_objects() {
 		'show_in_rest'          => true,
 	) );
 }
+
+/**
+ * Get the plugin's templates dir.
+ *
+ * @since  1.0.0
+ *
+ * @return string the plugin's templates dir.
+ */
+function wp_user_media_templates() {
+	return wp_user_media()->templates;
+}
+
+/**
+ * Retrieve the path of the highest priority template file that exists.
+ *
+ * @since  1.0.0
+ *
+ * @param  string  $template The template file name.
+ * @param  string  $name     The Undersore template ID.
+ * @param  bool    $load     Whether to load or return the found template.
+ * @return string            The template path.
+ */
+function wp_user_media_get_template_part( $template = '', $id = '', $load = true ) {
+	if ( empty( $template ) || empty( $id ) ) {
+		return '';
+	}
+
+	$template = trim( $template, '.html' );
+	$located  = '';
+
+	$template_locations = (array) apply_filters( 'wp_user_media_get_template_part', array(
+		trailingslashit( get_stylesheet_directory() ) . 'wp-user-media/' . $template . '.html',
+		trailingslashit( get_template_directory() ) . 'wp-user-media/' . $template . '.html',
+		wp_user_media_templates() . $template . '.html',
+	) );
+
+	foreach ( $template_locations as $template_location ) {
+		if ( ! $template_location ) {
+			continue;
+		}
+
+		if ( file_exists( $template_location ) ) {
+			$located = $template_location;
+			break;
+		}
+	}
+
+	if ( $load && $located ) {
+		printf( '<script type="text/html" id="tmpl-%1$s">%2$s', esc_attr( $id ), "\n" );
+
+		load_template( $located, true );
+
+		print( "</script>\n" );
+	}
+
+	return $located;
+}

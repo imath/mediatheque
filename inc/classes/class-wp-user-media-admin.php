@@ -135,10 +135,21 @@ class WP_User_Media_Admin {
 	 * @since 1.0.0
 	 */
 	public function media_grid() {
+		wp_enqueue_script(
+			'wp-user-media-admin',
+			sprintf( '%1$sadmin%2$s.js', wp_user_media_js_url(), wp_user_media_min_suffix() ),
+			array( 'wp-api', 'wp-backbone' ),
+			wp_user_media_version(),
+			true
+		);
+
 		printf( '
 			<div class="wrap">
 				<h1>%s</h1>
+				<div id="wp-user-media-container"></div>
 			</div>
 		', esc_html( $this->title ) );
+
+		wp_user_media_get_template_part( 'user', 'wp-user-media-user' );
 	}
 }
