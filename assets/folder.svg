@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<svg viewBox="0 0 500 500" xmlns="http://www.w3.org/2000/svg">
+  <path d="M 64.524 93.681 H 440.336 V 469.493 H 64.524 V 93.681 Z"/>
+  <path d="M 74.052 52.375 H 243.329 V 90.442 H 74.052 V 52.375 Z" transform="matrix(1, 0, -0.269999, 1, 19.280243, 0)"/>
+  <path d="M -74.052 -52.374 H 95.225 V -14.307 H -74.052 V -52.374 Z" transform="matrix(-1, 0, 0.269998, 1, 191.3748, 104.774805)"/>
+  <path style="stroke: black; fill: none;" d="M 213.552 77.483 Z" transform="matrix(-1, 0, 0, -1, 427.10396, 154.966005)"/>
+</svg>
