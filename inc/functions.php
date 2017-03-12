@@ -32,6 +32,10 @@ function wp_user_media_js_url() {
 	return wp_user_media()->js_url;
 }
 
+function wp_user_media_assets_url() {
+	return wp_user_media()->assets_url;
+}
+
 /**
  * Get the JS minified suffix.
  *
@@ -179,20 +183,21 @@ function wp_user_media_register_objects() {
 			'items_list_navigation' => __( 'User Media navigation',         'wp-user-media' ),
 			'items_list'            => __( 'User Media List',               'wp-user-media' ),
 		),
-		'public'              => false,
-		'query_var'           => false,
-		'rewrite'             => false,
-		'has_archive'         => false,
-		'exclude_from_search' => true,
-		'show_in_nav_menus'   => false,
-		'show_ui'             => wp_user_media_is_debug(),
-		'supports'            => array( 'title', 'editor', 'comments' ),
-		'taxonomies'          => array( 'user_media_type' ),
-		'capability_type'     => array( 'user_upload', 'user_uploads' ),
-		'capabilities'        => wp_user_media_capabilities(),
-		'delete_with_user'    => true,
-		'can_export'          => true,
-		'show_in_rest'        => true,
+		'public'                => false,
+		'query_var'             => false,
+		'rewrite'               => false,
+		'has_archive'           => false,
+		'exclude_from_search'   => true,
+		'show_in_nav_menus'     => false,
+		'show_ui'               => wp_user_media_is_debug(),
+		'supports'              => array( 'title', 'editor', 'comments' ),
+		'taxonomies'            => array( 'user_media_type' ),
+		'capability_type'       => array( 'user_upload', 'user_uploads' ),
+		'capabilities'          => wp_user_media_capabilities(),
+		'delete_with_user'      => true,
+		'can_export'            => true,
+		'show_in_rest'          => true,
+		'rest_controller_class' => 'WP_User_Media_REST_Controller',
 	) );
 
 	register_taxonomy( 'user_media_types', 'user_media', array(

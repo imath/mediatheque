@@ -1,0 +1,79 @@
+#drag-drop-area {
+    position: relative;
+    top: auto;
+    right: auto;
+    left: auto;
+    bottom: auto;
+    padding-top: 0;
+    margin-top: 0;
+    border: 4px dashed #b4b9be;
+}
+
+#drag-drop-area.drag-over {
+	 border: 4px dashed #0073aa;
+}
+
+#drag-drop-area .close {
+    background-color: transparent;
+    border: 0;
+    cursor: pointer;
+    height: 48px;
+    position: absolute;
+    right: 0;
+    text-align: center;
+    top: 0;
+    width: 50px;
+    z-index: 1;
+}
+
+.drag-drop-inside {
+	margin: 2em 0;
+}
+
+.drag-drop-inside p.drag-drop-info {
+	display: block;
+	font-size: 12px;
+    margin: 0.5em 0;
+    text-align: center;
+}
+
+p.drag-drop-buttons {
+	text-align: center;
+}
+
+p.drag-drop-buttons input[type="button"] {
+	display: inline-block !important;
+}
+
+#drag-drop-area h2.drag-drop-info {
+	font-size: 20px;
+    line-height: 28px;
+    font-weight: 400;
+    margin: 0;
+    text-align: center;
+}
+
+#wp-user-media-upload-status .wp-user-media-status {
+	overflow: hidden;
+	margin: 1em 0;
+}
+
+#wp-user-media-upload-status .wp-user-media-progress {
+	background: none;
+	border: 1px solid #d1d1d1;
+	float: right;
+	height: 22px;
+	line-height: 2em;
+	margin: 6px 10px 0 0;
+	margin-bottom: 2px;
+	padding: 0;
+	overflow: hidden;
+	width: 200px;
+}
+
+#wp-user-media-upload-status .wp-user-media-bar {
+	background-color: #0073aa;
+	width: 0;
+	height: 100%;
+	z-index: 9;
+}

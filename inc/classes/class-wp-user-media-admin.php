@@ -138,18 +138,36 @@ class WP_User_Media_Admin {
 		wp_enqueue_script(
 			'wp-user-media-admin',
 			sprintf( '%1$sadmin%2$s.js', wp_user_media_js_url(), wp_user_media_min_suffix() ),
-			array( 'wp-api', 'wp-backbone' ),
+			array( 'wp-api', 'wp-backbone', 'wp-plupload' ),
 			wp_user_media_version(),
 			true
 		);
 
+		wp_localize_script( 'wp-user-media-admin', 'wpUserMediaParams', array(
+			'container' => 'wp-user-media-ui',
+			'browser'   => 'wp-user-media-browse',
+			'dropzone'  => 'drag-drop-area',
+		) );
+
+		wp_enqueue_style(
+			'wp-user-media-uploader',
+			sprintf( '%1$suploader%2$s.css', wp_user_media_assets_url(), wp_user_media_min_suffix() ),
+			array(),
+			wp_user_media_version()
+		);
+
+		wp_plupload_default_settings();
+
 		printf( '
 			<div class="wrap">
 				<h1>%s</h1>
+				<div id="wp-user-media-uploader"></div>
 				<div id="wp-user-media-container"></div>
 			</div>
 		', esc_html( $this->title ) );
 
 		wp_user_media_get_template_part( 'user', 'wp-user-media-user' );
+		wp_user_media_get_template_part( 'uploader', 'wp-user-media-uploader' );
+		wp_user_media_get_template_part( 'progress', 'wp-user-media-progress' );
 	}
 }

@@ -78,11 +78,12 @@ final class WP_User_Media {
 		$this->basename  = plugin_basename( $this->file );
 
 		// Path and URL
-		$this->dir       = plugin_dir_path( $this->file );
-		$this->url       = plugin_dir_url ( $this->file );
-		$this->js_url    = trailingslashit( $this->url . 'js' );
-		$this->inc_dir   = trailingslashit( $this->dir . 'inc' );
-		$this->templates = trailingslashit( $this->dir . 'templates' );
+		$this->dir        = plugin_dir_path( $this->file );
+		$this->url        = plugin_dir_url ( $this->file );
+		$this->js_url     = trailingslashit( $this->url . 'js' );
+		$this->assets_url = trailingslashit( $this->url . 'assets' );
+		$this->inc_dir    = trailingslashit( $this->dir . 'inc' );
+		$this->templates  = trailingslashit( $this->dir . 'templates' );
 	}
 
 	/**
