@@ -32,8 +32,88 @@ function wp_user_media_js_url() {
 	return wp_user_media()->js_url;
 }
 
+/**
+ * Get the plugin's Assets Url.
+ *
+ * @since  1.0.0
+ *
+ * @return string the plugin's Assets Url.
+ */
 function wp_user_media_assets_url() {
 	return wp_user_media()->assets_url;
+}
+
+/**
+ * Get the User Media Post type root slug.
+ *
+ * @since  1.0.0
+ *
+ * @return string the User Media Post type root slug.
+ */
+function wp_user_media_get_root_slug() {
+	/**
+	 * Filter here to edit the root slug for the User Media Post type.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param string $value The root slug for the User Media Post type.
+	 */
+	return apply_filters( 'wp_user_media_get_root_slug', 'user-media' );
+}
+
+/**
+ * Get the download rewrite tag for the User Media Post type.
+ *
+ * @since  1.0.0
+ *
+ * @return string The download rewrite tag for the User Media Post type.
+ */
+function wp_user_media_get_download_rewrite_tag() {
+	/**
+	 * Filter here to edit the download action rewrite tag for the User Media Post type.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param string $value The download action rewrite tag for the User Media Post type.
+	 */
+	return apply_filters( 'wp_user_media_get_download_rewrite_tag', 'download' );
+}
+
+/**
+ * Get the download rewrite slug for the User Media Post type.
+ *
+ * @since  1.0.0
+ *
+ * @return string The download rewrite slug for the User Media Post type.
+ */
+function wp_user_media_get_download_rewrite_slug() {
+	/**
+	 * Filter here to edit the download action rewrite slug for the User Media Post type.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param string $value The download action rewrite slug for the User Media Post type.
+	 */
+	return apply_filters( 'wp_user_media_get_download_rewrite_slug', 'download' );
+}
+
+/**
+ * Get the download url for a User Media Item.
+ *
+ * @since 1.0.0
+ *
+ * @param  WP_Post|int The User Media object or the ID of the User Media item.
+ * @return string      The download url for the User Media Item.
+ */
+function wp_user_media_get_download_url( $user_media = null ) {
+	$user_media = get_post( $user_media );
+	$url        = '#';
+
+	if ( ! is_a( $user_media, 'WP_Post' ) || 'user_media' !== $user_media->post_type ) {
+		return $url;
+	}
+
+	return sprintf( '%1$s/%2$s/', trim( get_post_permalink( $user_media ), '/' ), wp_user_media_get_download_rewrite_slug() );
 }
 
 /**
@@ -183,9 +263,12 @@ function wp_user_media_register_objects() {
 			'items_list_navigation' => __( 'User Media navigation',         'wp-user-media' ),
 			'items_list'            => __( 'User Media List',               'wp-user-media' ),
 		),
-		'public'                => false,
-		'query_var'             => false,
-		'rewrite'               => false,
+		'public'                => true,
+		'query_var'             => 'wp_user_media',
+		'rewrite'               => array(
+			'slug'              => wp_user_media_get_root_slug(),
+			'with_front'        => false
+		),
 		'has_archive'           => false,
 		'exclude_from_search'   => true,
 		'show_in_nav_menus'     => false,
@@ -216,6 +299,19 @@ function wp_user_media_register_objects() {
 		'capabilities'          => wp_user_media_types_capabilities(),
 		'show_in_rest'          => true,
 	) );
+
+	/** Rewrites *************************************************************/
+
+	add_rewrite_tag(
+		'%' . wp_user_media_get_download_rewrite_tag() . '%',
+		'([1]{1,})'
+	);
+
+	add_rewrite_rule(
+		wp_user_media_get_root_slug() . '/([^/]+)/'  . wp_user_media_get_download_rewrite_slug() . '/?$',
+		'index.php?wp_user_media=$matches[1]&' . wp_user_media_get_download_rewrite_tag()  . '=1',
+		'top'
+	);
 }
 
 /**

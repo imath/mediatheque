@@ -136,6 +136,10 @@ class WP_User_Media_REST_Controller extends WP_REST_Attachments_Controller {
 		$headers = $request->get_headers();
 		$action  = $request->get_param( 'action' );
 
+		/**
+		 * A folder can be created.
+		 * @todo We should first check the term.
+		 */
 
 		if ( ! empty( $files ) ) {
 			$file = $this->upload_from_file( $files, $headers, $action );
