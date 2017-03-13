@@ -344,8 +344,8 @@ function wp_user_meta_disk_usage_update( $user_id = 0, $bytes = 0, $remove = fal
 function wp_user_media_additionnal_user_rest_param( $query_params = array() ) {
 	return array_merge( $query_params, array(
 		'has_disk_usage' => array(
-			'description'        => __( 'True to limit the users to the ones who uploaded some files.' ),
-			'type'               => 'boolean',
+			'description' => __( 'True to limit the users to the ones who uploaded some files.' ),
+			'type'        => 'boolean',
 		)
 	) );
 }
@@ -368,6 +368,69 @@ function wp_user_media_rest_user_query( $prepared_args = array(), WP_REST_Reques
 	}
 
 	return $prepared_args;
+}
+
+/**
+ * Get the User Media base Uploads dir data.
+ *
+ * @since 1.0.0
+ *
+ * @return array The User Media base Uploads dir data.
+ */
+function wp_user_media_get_upload_dir() {
+	$wp_user_media = wp_user_media();
+
+	if ( ! isset( $wp_user_media->upload_dir ) ) {
+		wp_user_media_register_upload_dir();
+	}
+
+	return $wp_user_media->upload_dir;
+}
+
+/**
+ * Set the User Media base Uploads dir data.
+ *
+ * @since  1.0.0
+ *
+ * @param  array  $dir The wp_upload_dir() data.
+ * @return array       The User Media base Uploads dir data.
+ */
+function wp_user_media_set_upload_base_dir( $dir = array() ) {
+	if ( empty( $dir['basedir'] ) || empty( $dir['baseurl'] ) ) {
+		_doing_it_wrong( __FUNCTION__, __( 'Missing parameters.', 'wp-user-media' ) );
+		return $dir;
+	}
+
+	return array_merge( $dir, array(
+		'path'   => $dir['basedir'] . '/wp-user-media',
+		'url'    => $dir['baseurl'] . '/wp-user-media',
+		'subdir' => '/wp-user-media',
+	) );
+}
+
+/**
+ * Register the User Media Uploads dir into the plugin's global.
+ *
+ * @since 1.0.0
+ */
+function wp_user_media_register_upload_dir() {
+	$needs_switch = false;
+	$network_id   = (int) get_current_network_id();
+
+	if ( is_multisite() && (int) get_current_blog_id() !== $network_id ) {
+		$needs_switch = true;
+		switch_to_blog( $network_id );
+	}
+
+	add_filter( 'upload_dir', 'wp_user_media_set_upload_base_dir', 10, 1 );
+
+	wp_user_media()->upload_dir = wp_upload_dir( null, true );
+
+	remove_filter( 'upload_dir', 'wp_user_media_set_upload_base_dir', 10, 1 );
+
+	if ( $needs_switch ) {
+		restore_current_blog();
+	}
 }
 
 /**
@@ -467,6 +530,10 @@ function wp_user_media_register_objects() {
 			)
 		)
 	);
+
+	/** Uploads dir **********************************************************/
+
+	wp_user_media_register_upload_dir();
 }
 
 /**

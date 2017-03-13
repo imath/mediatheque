@@ -16,8 +16,10 @@ defined( 'ABSPATH' ) || exit;
  * @since  1.0.0
  */
 class WP_User_Media_REST_Controller extends WP_REST_Attachments_Controller {
+	public $user_media_status = 'publish';
+
 	/**
-	 * Temporarly Adds specific idea metas to the registered post metas.
+	 * Temporarly Adds specific User Media metas to the registered post metas.
 	 *
 	 * @since 1.0.0
 	 * @access protected
@@ -31,7 +33,7 @@ class WP_User_Media_REST_Controller extends WP_REST_Attachments_Controller {
 	}
 
 	/**
-	 * Removes specific idea metas from the registered post metas.
+	 * Removes specific User Media metas from the registered post metas.
 	 *
 	 * @since 1.0.0
 	 * @access protected
@@ -46,17 +48,36 @@ class WP_User_Media_REST_Controller extends WP_REST_Attachments_Controller {
 		}
 	}
 
+	/**
+	 * Set the Post Status for the User Media GET requests.
+	 *
+	 * @since 1.0.0
+	 * @access protected
+	 *
+	 * @param  array           $prepared_args The User Media query arguments.
+	 * @param  WP_REST_Request $request       Full details about the request.
+	 * @return array                          The User Media query arguments.
+	 */
 	protected function prepare_items_query( $prepared_args = array(), $request = null ) {
-		$query_args = array_merge(
-			parent::prepare_items_query( $prepared_args, $request ),
-			array( 'post_status' => 'publish' )
+		$parent_args = parent::prepare_items_query( $prepared_args, $request );
+		$post_status = $request->get_param( 'post_status');
+
+		if ( ! $post_status ) {
+			$post_status = array( 'publish' );
+		} else {
+			$post_status = explode( ',', $post_status );
+		}
+
+		$prepared_args = array_merge(
+			$parent_args,
+			array( 'post_status' => $post_status )
 		);
 
-		return $query_args;
+		return $prepared_args;
 	}
 
 	/**
-	 * Retrieves a collection of User Meta.
+	 * Retrieves a collection of User Media.
 	 *
 	 * @since 1.0.0
 	 * @access public
@@ -74,6 +95,34 @@ class WP_User_Media_REST_Controller extends WP_REST_Attachments_Controller {
 		return $response;
 	}
 
+	/**
+	 * Temporarly set the WordPress Uploads dir to be the User Media one.
+	 *
+	 * @since  1.0.0
+	 *
+	 * @return array The Uploads dir data.
+	 */
+	public function upload_dir_filter() {
+		$dir = wp_user_media_get_upload_dir();
+
+		$dir['subdir'] .= sprintf( '/%1$s/%2$s', get_current_user_id(), $this->user_media_status );
+		$dir['path']    = sprintf( '%s%s', $dir['basedir'], $dir['subdir'] );
+		$dir['url']     = sprintf( '%s%s', $dir['baseurl'], $dir['subdir'] );
+
+		return $dir;
+	}
+
+	/**
+	 * Handles an upload via multipart/form-data ($_FILES).
+	 *
+	 * @since 1.0.0
+	 * @access protected
+	 *
+	 * @param  array          $files   Data from the `$_FILES` superglobal.
+	 * @param  array          $headers HTTP headers from the request.
+	 * @param  string         $action  The form action input value.
+	 * @return array|WP_Error          Data from wp_handle_upload().
+	 */
 	protected function upload_from_file( $files, $headers, $action = '' ) {
 		if ( empty( $files ) ) {
 			return new WP_Error( 'rest_upload_no_data', __( 'No data supplied.' ), array( 'status' => 400 ) );
@@ -102,7 +151,11 @@ class WP_User_Media_REST_Controller extends WP_REST_Attachments_Controller {
 		/** Include admin functions to get access to wp_handle_upload() */
 		require_once ABSPATH . 'wp-admin/includes/admin.php';
 
+		add_filter( 'upload_dir', array( $this, 'upload_dir_filter' ), 1, 0 );
+
 		$file = wp_handle_upload( $files['wp_user_media_upload'], $overrides );
+
+		remove_filter( 'upload_dir', array( $this, 'upload_dir_filter' ), 1, 0 );
 
 		if ( isset( $file['error'] ) ) {
 			return new WP_Error( 'rest_upload_unknown_error', $file['error'], array( 'status' => 500 ) );
@@ -111,14 +164,23 @@ class WP_User_Media_REST_Controller extends WP_REST_Attachments_Controller {
 		return $file;
 	}
 
+	/**
+	 * Prepares a single User Media for create or update.
+	 *
+	 * @since  1.0.0
+	 * @access protected
+	 *
+	 * @param  WP_REST_Request   $request Full details about the request.
+	 * @return WP_Error|stdClass          User Media object.
+	 */
 	protected function prepare_item_for_database( $request ) {
-		$prepared_attachment = parent::prepare_item_for_database( $request );
+		$prepared_user_media = parent::prepare_item_for_database( $request );
 
 		if ( ! isset( $request['post_status'] ) ) {
-			$prepared_attachment->post_status = 'publish';
+			$prepared_user_media->post_status = $this->user_media_status;
 		}
 
-		return $prepared_attachment;
+		return $prepared_user_media;
 	}
 
 	/**
@@ -136,6 +198,11 @@ class WP_User_Media_REST_Controller extends WP_REST_Attachments_Controller {
 		$headers = $request->get_headers();
 		$action  = $request->get_param( 'action' );
 		$size    = 0;
+
+		$requested_status = $request->get_param( 'post_status' );
+		if ( $requested_status && get_post_status_object( $requested_status ) ) {
+			$this->user_media_status = $requested_status;
+		}
 
 		/**
 		 * A folder can be created.
@@ -195,6 +262,7 @@ class WP_User_Media_REST_Controller extends WP_REST_Attachments_Controller {
 
 		// Create the Attached file & update the user's disk usage.
 		} else {
+			// @todo Multisite probably requires to do a switch to blog there
 			update_attached_file( $id, $file );
 
 			if ( $size ) {
@@ -219,6 +287,7 @@ class WP_User_Media_REST_Controller extends WP_REST_Attachments_Controller {
 		// Include admin functions to get access to wp_generate_attachment_metadata().
 		require_once ABSPATH . 'wp-admin/includes/admin.php';
 
+		// @todo Multisite probably requires to do a switch to blog there
 		wp_update_attachment_metadata( $id, wp_generate_attachment_metadata( $id, $file ) );
 
 		if ( isset( $request['alt_text'] ) ) {
