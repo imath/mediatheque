@@ -1,0 +1,11 @@
+.wp-embed-download {
+	display: inline;
+}
+
+.dashicons-download {
+	background-image: url("data:image/svg+xml;charset=utf8,%3C%3Fxml%20version%3D%221.0%22%20encoding%3D%22utf-8%22%3F%3E%3Csvg%20version%3D%221.1%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20xmlns%3Axlink%3D%22http%3A%2F%2Fwww.w3.org%2F1999%2Fxlink%22%20width%3D%2220%22%20height%3D%2220%22%20viewBox%3D%220%200%2020%2020%22%20fill%3D%27%2382878c%27%3E%3Cpath%20d%3D%22M14.010%204v6h2v-8h-12.010v8h2.010v-6h8zM12.010%206v6h3l-5%206-5-6h3v-6h4z%22%3E%3C%2Fpath%3E%3C%2Fsvg%3E" );
+}
+
+.wp-embed-download a:hover .dashicons-download {
+	background-image: url("data:image/svg+xml;charset=utf8,%3C%3Fxml%20version%3D%221.0%22%20encoding%3D%22utf-8%22%3F%3E%3Csvg%20version%3D%221.1%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20xmlns%3Axlink%3D%22http%3A%2F%2Fwww.w3.org%2F1999%2Fxlink%22%20width%3D%2220%22%20height%3D%2220%22%20viewBox%3D%220%200%2020%2020%22%20fill%3D%27%230073aa%27%3E%3Cpath%20d%3D%22M14.010%204v6h2v-8h-12.010v8h2.010v-6h8zM12.010%206v6h3l-5%206-5-6h3v-6h4z%22%3E%3C%2Fpath%3E%3C%2Fsvg%3E" );
+}

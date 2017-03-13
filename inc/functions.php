@@ -106,14 +106,37 @@ function wp_user_media_get_download_rewrite_slug() {
  * @return string      The download url for the User Media Item.
  */
 function wp_user_media_get_download_url( $user_media = null ) {
-	$user_media = get_post( $user_media );
-	$url        = '#';
+	if ( null === $user_media && isset( wp_user_media()->user_media_link ) ) {
+		return wp_user_media()->user_media_link;
+	} else {
+		$user_media = get_post( $user_media );
+	}
+
+	$url = '#';
 
 	if ( ! is_a( $user_media, 'WP_Post' ) || 'user_media' !== $user_media->post_type ) {
 		return $url;
 	}
 
 	return sprintf( '%1$s/%2$s/', trim( get_post_permalink( $user_media ), '/' ), wp_user_media_get_download_rewrite_slug() );
+}
+
+/**
+ * Filter the Attachment Link for the User Media Download one when necessary.
+ *
+ * @since  1.0.0
+ *
+ * @param  string  $link The Attachment Link.
+ * @return string        The User Media link.
+ */
+function wp_user_media_attachment_link( $link = '' ) {
+	$user_media_link = wp_user_media_get_download_url( null );
+
+	if ( '#' !== $user_media_link ) {
+		$link = preg_replace( '/(?<=href=\').+(?=\')/', $user_media_link, $link );
+	}
+
+	return $link;
 }
 
 /**
@@ -548,6 +571,79 @@ function wp_user_media_templates() {
 }
 
 /**
+ * Add a custom default template for embedded User Media.
+ *
+ * @since  1.0.0
+ *
+ * @param  string $template  Path to the template. See locate_template().
+ * @return string            Path to the template. See locate_template().
+ */
+function wp_user_media_embed_template( $template = '' ) {
+	$filename = pathinfo( $template, PATHINFO_FILENAME );
+
+	/**
+	 * If the theme is not overriding the template yet
+	 * override it with the plugin's default template.
+	 */
+	if ( 'embed-user_media' !== $filename ) {
+		$template = wp_user_media_templates() . 'embed-user_media.php';
+	}
+
+	return $template;
+}
+
+/**
+ * Print the User Media excerpt for the embed template.
+ *
+ * @since  1.0.0
+ */
+function wp_user_media_embed_excerpt() {
+	$excerpt = apply_filters( 'the_excerpt_embed', get_the_excerpt() );
+	$excerpt = wp_user_media_prepend_user_media( $excerpt );
+
+	echo apply_filters( 'wp_user_media_embed_excerpt', $excerpt );
+}
+
+/**
+ * Prints the necessary markup for the embed download button.
+ *
+ * @since 1.0.0
+ */
+function wp_user_media_embed_download_button() {
+	if ( 'private' === get_post_status() ) {
+		return;
+	}
+
+	printf(
+		'<div class="wp-embed-download">
+			<a href="%1$s" target="_top">
+				<span class="dashicons dashicons-download"></span>
+				%2$s
+			</a>
+		</div>',
+		esc_url( wp_user_media_get_download_url() ),
+		sprintf(
+			__( 'Download<span class="screen-reader-text"> %s</span>', 'wp-user-media' ),
+			esc_html( get_the_title() )
+		)
+	);
+}
+
+/**
+ * Enqueue the Embed styles.
+ *
+ * @since 1.0.0
+ */
+function wp_user_media_embed_style() {
+	wp_enqueue_style(
+		'wp-user-media-embed',
+		sprintf( '%1$sembed%2$s.css', wp_user_media_assets_url(), wp_user_media_min_suffix() ),
+		array(),
+		wp_user_media_version()
+	);
+}
+
+/**
  * Retrieve the path of the highest priority template file that exists.
  *
  * @since  1.0.0
@@ -592,3 +688,68 @@ function wp_user_media_get_template_part( $template = '', $id = '', $load = true
 
 	return $located;
 }
+
+/**
+ * Set some WP_Query parameters so that the Attachment template is used.
+ *
+ * @since  1.0.0
+ *
+ * @param  WP_Query $query The WordPress Main Query
+ */
+function wp_user_media_parse_query( WP_Query $query ) {
+	$bail = false;
+
+	if ( ! $query->is_main_query() || true === $query->get( 'suppress_filters' ) ) {
+		$bail = true;
+	}
+
+	if ( ! $bail && is_admin() ) {
+		$bail = ! wp_doing_ajax();
+	}
+
+	if ( $bail ) {
+		return;
+	}
+
+	if ( 'user_media' !== $query->get( 'post_type' ) || 1 === (int) $query->get( wp_user_media_get_download_rewrite_tag() ) || true === $query->is_embed ) {
+		return;
+	}
+
+	$query->is_attachment = true;
+	add_filter( 'the_content', 'wp_user_media_prepend_user_media', 11 );
+}
+
+/**
+ * Make sure the User Media file is prepended to its description.
+ *
+ * @since  1.0.0
+ *
+ * @param  string $content The User Media description.
+ * @return string          The User Media description.
+ */
+function wp_user_media_prepend_user_media( $content = '' ) {
+	if ( 'user_media' !== get_post_type() || empty( $GLOBALS['post'] ) ) {
+		return $content;
+	}
+
+	wp_user_media()->user_media_link = wp_user_media_get_download_url( $GLOBALS['post'] );
+
+	// Overrides
+	$reset_post = clone $GLOBALS['post'];
+	$GLOBALS['post']->post_type = 'attachment';
+	wp_cache_set( $reset_post->ID, $GLOBALS['post'], 'posts' );
+	add_filter( 'wp_get_attachment_link', 'wp_user_media_attachment_link', 10, 1 );
+
+	$content = prepend_attachment( $content );
+
+	// Resets
+	$GLOBALS['post'] = $reset_post;
+	wp_cache_set( $reset_post->ID, $reset_post, 'posts' );
+	remove_filter( 'the_content',            'wp_user_media_prepend_user_media', 11    );
+	remove_filter( 'wp_get_attachment_link', 'wp_user_media_attachment_link',    10, 1 );
+
+	unset( wp_user_media()->user_media_link );
+
+	return $content;
+}
+

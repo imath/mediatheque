@@ -120,6 +120,13 @@ final class WP_User_Media {
 		// Add a new query parameter to Users rest request
 		add_filter( 'rest_user_collection_params', 'wp_user_media_additionnal_user_rest_param', 10, 1 );
 		add_filter( 'rest_user_query',             'wp_user_media_rest_user_query',             10, 2 );
+
+		// Set the single User Media Templates
+		add_action( 'parse_query',                      'wp_user_media_parse_query'           );
+		add_filter( 'embed_template',                   'wp_user_media_embed_template'        );
+		add_action( 'wp_user_media_embed_content_meta', 'wp_user_media_embed_download_button' );
+		add_action( 'wp_user_media_embed_content_meta', 'print_embed_sharing_button'          );
+		add_action( 'enqueue_embed_scripts',            'wp_user_media_embed_style'           );
 	}
 
 	/**
