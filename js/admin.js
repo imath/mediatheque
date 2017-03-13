@@ -301,7 +301,7 @@ window.wp = window.wp || {};
 
 			this.attachUploader();
 			this.displayUsers();
-			this.users.fetch();
+			this.users.fetch( { data: { 'has_disk_usage' : true } } );
 		},
 
 		displayUsers: function() {

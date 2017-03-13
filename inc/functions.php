@@ -238,11 +238,147 @@ function wp_user_media_map_meta_caps( $caps = array(), $cap = '', $user_id = 0, 
 }
 
 /**
+ * Sanitize the disk usage user meta.
+ *
+ * @since 1.0.0
+ *
+ * @param  int    $value    The raw value of the disk usage user meta.
+ * @param  string $meta_key The user meta key.
+ * @return int    $value    The sanitized disk usage user meta.
+ */
+function wp_user_meta_disk_usage_sanitize_value( $value = '', $meta_key = '' ) {
+	if ( '_wp_user_meta_disk_usage' === $meta_key ) {
+		$value = (int) $value;
+	}
+
+	return $value;
+}
+
+/**
+ * Prepare the disk usage user meta for rest requests.
+ *
+ * @since 1.0.0
+ *
+ * @param  mixed           $value   Meta value to prepare.
+ * @param  WP_REST_Request $request Rest request object.
+ * @param  array           $args    Options for the field.
+ * @return string          $value   The prepared value.
+ */
+function wp_user_meta_disk_usage_prepare( $value, WP_REST_Request $request, $args ) {
+	$unit = ' KB';
+
+	if ( empty( $value ) ) {
+		return 0 . $unit;
+	}
+
+	$value     = absint( $value );
+	$megabytes = $value / 1000;
+	$gigabytes = $megabytes / 1000;
+
+	if ( 1 < $gigabytes ) {
+		$unit  = ' GB';
+		$value = $gigabytes;
+	} elseif ( 1 < $megabytes ) {
+		$unit  = ' MB';
+		$value = $megabytes;
+	}
+
+	return number_format_i18n( $value, 2 ) . $unit;
+}
+
+/**
+ * Update a user's disk usage.
+ *
+ * @since  1.0.0
+ *
+ * @param  int     $user_id  The ID of the user.
+ * @param  int     $bytes    The number of bytes to add to user's disk usage.
+ * @return bool              True on success, false otherwise.
+ */
+function wp_user_meta_disk_usage_update( $user_id = 0, $bytes = 0, $remove = false ) {
+	if ( empty( $user_id ) || empty( $bytes ) ) {
+		return false;
+	}
+
+	$kilo_bytes = absint( $bytes / 1000 );
+
+	// Do nothing if the file is less than a kilobyte.
+	if ( ! $kilo_bytes ) {
+		return true;
+	}
+
+	// Get the user's disk usage
+	$disk_usage = (int) get_user_meta( $user_id, '_wp_user_meta_disk_usage', true );
+
+	if ( $disk_usage ) {
+		if ( true === $remove ) {
+			$disk_usage = $disk_usage - $kilo_bytes;
+		} else {
+			$disk_usage = $disk_usage + $kilo_bytes;
+		}
+
+	} elseif ( true !== $remove ) {
+		$disk_usage = $kilo_bytes;
+	}
+
+	// no negative disk usage!
+	if ( $disk_usage < 0 ) {
+		delete_user_meta( $user_id, '_wp_user_meta_disk_usage' );
+
+	// Update user's disk usage.
+	} else {
+		update_user_meta( $user_id, '_wp_user_meta_disk_usage', absint( $disk_usage ) );
+	}
+
+	return true;
+}
+
+/**
+ * Add an additionnal rest query params to users.
+ *
+ * @since  1.0.0
+ *
+ * @param  array $query_params  The query params for the users collection
+ * @return array                The query params for the users collection.
+ */
+function wp_user_media_additionnal_user_rest_param( $query_params = array() ) {
+	return array_merge( $query_params, array(
+		'has_disk_usage' => array(
+			'description'        => __( 'True to limit the users to the ones who uploaded some files.' ),
+			'type'               => 'boolean',
+		)
+	) );
+}
+
+/**
+ * Prepare the disk usage user meta for rest requests.
+ *
+ * @since 1.0.0
+ *
+ * @param  array           $prepared_args The prepared params for the users collection.
+ * @param  WP_REST_Request $request       Rest request object.
+ * @return array           $prepared_args The prepared params for the users collection.
+ */
+function wp_user_media_rest_user_query( $prepared_args = array(), WP_REST_Request $request ) {
+	if ( $request->get_param( 'has_disk_usage' ) ) {
+		$prepared_args = array_merge( $prepared_args, array(
+			'meta_key'     => '_wp_user_meta_disk_usage',
+			'meta_compare' => 'EXISTS',
+		) );
+	}
+
+	return $prepared_args;
+}
+
+/**
  * Register the post type and the taxonomy used by User Media.
  *
  * @since 1.0.0
  */
 function wp_user_media_register_objects() {
+
+	/** Post Type ************************************************************/
+
 	register_post_type( 'user_media', array(
 		'labels'  => array(
 			'name'                  => __( 'User Media',                    'wp-user-media' ),
@@ -283,6 +419,8 @@ function wp_user_media_register_objects() {
 		'rest_controller_class' => 'WP_User_Media_REST_Controller',
 	) );
 
+	/** Taxonomy *************************************************************/
+
 	register_taxonomy( 'user_media_types', 'user_media', array(
 		'public'                => false,
 		'hierarchical'          => true,
@@ -311,6 +449,23 @@ function wp_user_media_register_objects() {
 		wp_user_media_get_root_slug() . '/([^/]+)/'  . wp_user_media_get_download_rewrite_slug() . '/?$',
 		'index.php?wp_user_media=$matches[1]&' . wp_user_media_get_download_rewrite_tag()  . '=1',
 		'top'
+	);
+
+	/** User Meta ************************************************************/
+
+	register_meta(
+		'user',
+		'_wp_user_meta_disk_usage',
+		array(
+			'sanitize_callback' => 'wp_user_meta_disk_usage_sanitize_value',
+			'type'              => 'integer',
+			'description'       => 'The disk usage of the user in KB.',
+			'single'            => true,
+			'show_in_rest'      => array(
+				'name'             => 'disk_usage',
+				'prepare_callback' => 'wp_user_meta_disk_usage_prepare',
+			)
+		)
 	);
 }
 

@@ -116,6 +116,10 @@ final class WP_User_Media {
 
 		// Map capabilities
 		add_filter( 'map_meta_cap', 'wp_user_media_map_meta_caps', 10, 4 );
+
+		// Add a new query parameter to Users rest request
+		add_filter( 'rest_user_collection_params', 'wp_user_media_additionnal_user_rest_param', 10, 1 );
+		add_filter( 'rest_user_query',             'wp_user_media_rest_user_query',             10, 2 );
 	}
 
 	/**

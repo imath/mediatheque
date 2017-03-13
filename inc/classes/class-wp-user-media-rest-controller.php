@@ -135,6 +135,7 @@ class WP_User_Media_REST_Controller extends WP_REST_Attachments_Controller {
 		$files   = $request->get_file_params();
 		$headers = $request->get_headers();
 		$action  = $request->get_param( 'action' );
+		$size    = 0;
 
 		/**
 		 * A folder can be created.
@@ -142,6 +143,7 @@ class WP_User_Media_REST_Controller extends WP_REST_Attachments_Controller {
 		 */
 
 		if ( ! empty( $files ) ) {
+			$size = $files['wp_user_media_upload']['size'];
 			$file = $this->upload_from_file( $files, $headers, $action );
 		} else {
 			return new WP_Error( 'rest_upload_no_data', __( 'No data supplied.' ), array( 'status' => 400 ) );
@@ -191,9 +193,13 @@ class WP_User_Media_REST_Controller extends WP_REST_Attachments_Controller {
 			}
 			return $id;
 
-		// Create the Attached file to avoid notices.
+		// Create the Attached file & update the user's disk usage.
 		} else {
 			update_attached_file( $id, $file );
+
+			if ( $size ) {
+				wp_user_meta_disk_usage_update( get_current_user_id(), $size );
+			}
 		}
 
 		$user_media = get_post( $id );
