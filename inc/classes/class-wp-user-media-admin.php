@@ -120,13 +120,27 @@ class WP_User_Media_Admin {
 	 * @since 1.0.0
 	 */
 	public function menus() {
-		add_media_page(
-			$this->title,
-			$this->title,
-			'manage_options',
-			'user-media',
-			array( $this, 'media_grid' )
-		);
+		// Regular user
+		if ( is_user_logged_in() && ! current_user_can( 'upload_files' ) ) {
+			add_menu_page(
+				$this->title,
+				$this->title,
+				'exist',
+				'user-media',
+				array( $this, 'media_grid' ),
+				'dashicons-admin-media'
+			);
+
+		// Contributors and Up.
+		} else {
+			add_media_page(
+				$this->title,
+				$this->title,
+				'upload_files',
+				'user-media',
+				array( $this, 'media_grid' )
+			);
+		}
 	}
 
 	/**
@@ -167,6 +181,7 @@ class WP_User_Media_Admin {
 		', esc_html( $this->title ) );
 
 		wp_user_media_get_template_part( 'user', 'wp-user-media-user' );
+		wp_user_media_get_template_part( 'user-media', 'wp-user-media-media' );
 		wp_user_media_get_template_part( 'uploader', 'wp-user-media-uploader' );
 		wp_user_media_get_template_part( 'progress', 'wp-user-media-progress' );
 	}

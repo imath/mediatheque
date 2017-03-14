@@ -254,7 +254,7 @@ function wp_user_media_get_all_caps() {
  */
 function wp_user_media_map_meta_caps( $caps = array(), $cap = '', $user_id = 0, $args = array() ) {
 	if ( in_array( $cap, wp_user_media_get_all_caps(), true ) ) {
-		$caps = array( 'manage_options' );
+		$caps = array( 'read' );
 	}
 
 	return $caps;
@@ -384,13 +384,47 @@ function wp_user_media_additionnal_user_rest_param( $query_params = array() ) {
  */
 function wp_user_media_rest_user_query( $prepared_args = array(), WP_REST_Request $request ) {
 	if ( $request->get_param( 'has_disk_usage' ) ) {
-		$prepared_args = array_merge( $prepared_args, array(
-			'meta_key'     => '_wp_user_meta_disk_usage',
-			'meta_compare' => 'EXISTS',
-		) );
+		// Regular users can't browse or edit other users files.
+		if ( ! current_user_can( 'list_users' ) ) {
+			return array( 'id' => 0 );
+
+		// Authorized users can browse and edit other users files.
+		} else {
+			// We are only listing the users who uploaded at least one file.
+			$prepared_args = array_merge( $prepared_args, array(
+				'meta_key'     => '_wp_user_meta_disk_usage',
+				'meta_compare' => 'EXISTS',
+			) );
+
+			$user_id = get_current_user_id();
+
+			// Always include the Current user on first page
+			if ( 1 === $request->get_param( 'page' ) ) {
+				$prepared_args['include'] = array( $user_id );
+
+				add_action( 'pre_user_query', 'wp_user_media_user_query_always_include' );
+
+			// Always exclude the Current user from next pages
+			} else {
+				$prepared_args['exclude'] = array( $user_id );
+			}
+		}
 	}
 
 	return $prepared_args;
+}
+
+/**
+ * Temporary action to make sure the current user is always included in query results.
+ *
+ * @since 1.0.0
+ *
+ * @param WP_User_Query $u_query The WP User Query object.
+ */
+function wp_user_media_user_query_always_include( WP_User_Query $u_query ) {
+	$u_query->query_where = str_replace( 'AND wp_users.ID', 'OR wp_users.ID', $u_query->query_where );
+
+	remove_action( 'pre_user_query', 'wp_user_media_user_query_always_include' );
 }
 
 /**
@@ -503,6 +537,7 @@ function wp_user_media_register_objects() {
 		'can_export'            => true,
 		'show_in_rest'          => true,
 		'rest_controller_class' => 'WP_User_Media_REST_Controller',
+		'rest_base'             => 'user-media',
 	) );
 
 	/** Taxonomy *************************************************************/

@@ -60,7 +60,7 @@ class WP_User_Media_REST_Controller extends WP_REST_Attachments_Controller {
 	 */
 	protected function prepare_items_query( $prepared_args = array(), $request = null ) {
 		$parent_args = parent::prepare_items_query( $prepared_args, $request );
-		$post_status = $request->get_param( 'post_status');
+		$post_status = $request->get_param( 'post_status' );
 
 		if ( ! $post_status ) {
 			$post_status = array( 'publish' );
@@ -72,6 +72,25 @@ class WP_User_Media_REST_Controller extends WP_REST_Attachments_Controller {
 			$parent_args,
 			array( 'post_status' => $post_status )
 		);
+
+		// In Admin, uploads are editable: control their access.
+		$context = $request->get_param( 'user_media_context' );
+		if ( 'admin' === $context ) {
+			$post_author = $request->get_param( 'user_id' );
+
+			// Admins can edit any media.
+			if ( $post_author && current_user_can( 'manage_options' ) ) {
+				$prepared_args['author'] = (int) $post_author;
+
+			// How could this be possible into the Administration :)
+			} elseif ( ! is_user_logged_in() ) {
+				$prepared_args['author'] = -1;
+
+			// Regular users can only edit their media.
+			} else {
+				$prepared_args['author'] = get_current_user_id();
+			}
+		}
 
 		return $prepared_args;
 	}

@@ -223,7 +223,15 @@ window.wp = window.wp || {};
 	wpUserMedia.Views.User = wpUserMedia.View.extend( {
 		tagName:    'li',
 		className:  'user',
-		template: wpUserMedia.template( 'wp-user-media-user' )
+		template: wpUserMedia.template( 'wp-user-media-user' ),
+
+		events: {
+			'click' : 'displayUserMedia'
+		},
+
+		displayUserMedia: function() {
+			this.model.set( 'current', true );
+		}
 	} );
 
 	wpUserMedia.Views.Users = wpUserMedia.View.extend( {
@@ -236,6 +244,30 @@ window.wp = window.wp || {};
 
 		addUserView: function( user ) {
 			this.views.add( new wpUserMedia.Views.User( { model: user } ) );
+		}
+	} );
+
+	wpUserMedia.Views.UserMedia = wpUserMedia.View.extend( {
+		tagName:    'li',
+		className:  'user-media',
+		template: wpUserMedia.template( 'wp-user-media-media' )
+	} );
+
+	wpUserMedia.Views.UserMedias = wpUserMedia.View.extend( {
+		tagName:   'ul',
+		className: 'user-media',
+
+		initialize: function() {
+			var query_vars = this.options.query_vars || { user_media_context: 'admin' };
+
+			this.collection.fetch( {
+				data : query_vars
+			} );
+			this.collection.on( 'add', this.addUserView, this );
+		},
+
+		addUserView: function( user_media ) {
+			this.views.add( new wpUserMedia.Views.UserMedia( { model: user_media } ) );
 		}
 	} );
 
@@ -289,7 +321,7 @@ window.wp = window.wp || {};
 		init: function( restUrl ) {
 			this.views     = new Backbone.Collection();
 			this.users     = new wp.api.collections.Users();
-			//this.userMedia = new wp.api.collections.User_media();
+			this.userMedia = new wp.api.collections.UserMedia();
 
 			this.overrides = {
 				url: restUrl,
@@ -301,7 +333,37 @@ window.wp = window.wp || {};
 
 			this.attachUploader();
 			this.displayUsers();
-			this.users.fetch( { data: { 'has_disk_usage' : true } } );
+
+			this.users.fetch( {
+				data: { 'has_disk_usage' : true },
+				error   : _.bind( this.displayUserMedia, this )
+			} );
+
+			this.users.on( 'change:current', this.displayUserMedia, this );
+		},
+
+		displayUserMedia: function( model ) {
+			var query_vars = { user_media_context: 'admin' };
+
+			if ( _.isUndefined( model.attributes ) || ! model.get( 'current' ) ) {
+				query_vars.user_id = 0;
+			} else {
+				query_vars.user_id =  model.get( 'id' );
+			}
+
+			var users = this.views.get( 'users_view' );
+			users.get( 'view' ).remove();
+
+			var userMedia = new wpUserMedia.Views.UserMedias( {
+				collection: this.userMedia,
+				query_vars: query_vars
+			} );
+
+			// Add it to views
+			this.views.add( { id: 'usermedia_view', view: userMedia } );
+
+			// Display it
+			userMedia.inject( '#wp-user-media-container' );
 		},
 
 		displayUsers: function() {
@@ -331,7 +393,7 @@ window.wp = window.wp || {};
 		var restUrl;
 
 		if ( api.get( 'apiRoot' ) && api.get( 'versionString' ) ) {
-			restUrl = api.get( 'apiRoot' ) + api.get( 'versionString' ) + 'user_media';
+			restUrl = api.get( 'apiRoot' ) + api.get( 'versionString' ) + 'user-media';
 		}
 
 		wpUserMedia.App.init( restUrl );

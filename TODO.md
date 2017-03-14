@@ -5,3 +5,5 @@
 [] Make sure the create_item() method can handle folders.
 [] Make sure to switch_to_blog() before saving the User Media metadata.
 [x] The way the embed template is filter is not right. I should check the post type first.
+[] Create the 2 User Media Types on activation (File/Folder).
+[] Improve the way Views are added to the screen in admin.js
