@@ -579,6 +579,13 @@ function wp_user_media_templates() {
  * @return string            Path to the template. See locate_template().
  */
 function wp_user_media_embed_template( $template = '' ) {
+	$object = get_queried_object();
+
+	// Only Apply the template override on Embedded User Media
+	if ( 'user_media' !== $object->post_type ) {
+		return $template;
+	}
+
 	$filename = pathinfo( $template, PATHINFO_FILENAME );
 
 	/**
