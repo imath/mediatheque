@@ -49,6 +49,25 @@ class WP_User_Media_REST_Controller extends WP_REST_Attachments_Controller {
 	}
 
 	/**
+	 * Checks if a given request has access to create a User Media.
+	 *
+	 * @since 1.0.0
+	 * @access public
+	 *
+	 * @param WP_REST_Request $request Full details about the request.
+	 * @return WP_Error|true Boolean true if the User Media may be created, or a WP_Error if not.
+	 */
+	public function create_item_permissions_check( $request ) {
+		$ret = WP_REST_Posts_Controller::create_item_permissions_check( $request );
+
+		if ( ! $ret || is_wp_error( $ret ) ) {
+			return $ret;
+		}
+
+		return true;
+	}
+
+	/**
 	 * Set the Post Status for the User Media GET requests.
 	 *
 	 * @since 1.0.0
@@ -188,8 +207,18 @@ class WP_User_Media_REST_Controller extends WP_REST_Attachments_Controller {
 				// Include admin functions to get access to insert_with_markers().
 				require_once ABSPATH . 'wp-admin/includes/misc.php';
 
+				$slashed_home = trailingslashit( get_option( 'home' ) );
+				$base         = parse_url( $slashed_home, PHP_URL_PATH );
+
 				// Defining the rule, we need to make it unreachable and use php to reach it
-				$rules = array( 'Order Allow,Deny','Deny from all' );
+				$rules = array(
+					'<IfModule mod_rewrite.c>',
+					'RewriteEngine On',
+					sprintf( 'RewriteBase %s', $base ),
+					'RewriteCond %{HTTP_COOKIE} !^.*wordpress_logged_in.*$ [NC]',
+					'RewriteRule  .* wp-login.php [NC,L]',
+					'</IfModule>',
+				);
 
 				// creating the .htaccess file
 				insert_with_markers( $up_parent_dir .'/.htaccess', 'WP User Status', $rules );
