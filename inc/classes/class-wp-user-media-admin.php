@@ -68,10 +68,16 @@ class WP_User_Media_Admin {
 		add_action( 'admin_menu',            array( $this, 'menus'     )     );
 		add_action( 'init',                  array( $this, 'globals'   ), 14 );
 
-		/** Media Editor **************************************************************/
+		/** Media Editor ******************************************************/
 
-		add_action( 'wp_enqueue_media',      array( $this, 'scripts'   )     );
-		add_action( 'print_media_templates', array( $this, 'templates' )     );
+		add_action( 'wp_enqueue_media',      array( $this, 'scripts'   ) );
+		add_action( 'print_media_templates', array( $this, 'templates' ) );
+
+		/** Settings *********************************************************/
+
+		add_action( 'admin_enqueue_scripts',                       array( $this, 'inline_scripts'          ) );
+		add_action( 'admin_head',                                  array( $this, 'admin_head'              ) );
+		add_action( 'admin_head-settings_page_user-media-options', array( $this, 'settings_menu_highlight' ) );
 	}
 
 	/**
@@ -99,6 +105,54 @@ class WP_User_Media_Admin {
 			wp_user_media_version(),
 			true
 		);
+	}
+
+	/**
+	 * Add a navigation to the Media options
+	 *
+	 * @since 1.0.0
+	 */
+	public function inline_scripts() {
+		$screen = get_current_screen();
+
+		if ( ! isset( $screen->id ) ) {
+			return;
+		}
+
+		$inline_scripts = '';
+		if ( 'options-media' === $screen->id || 'settings_page_user-media-options' === $screen->id ) {
+			$links = array(
+				sprintf( '<a href="%1$s"%2$s>%3$s</a>',
+					esc_url( admin_url( 'options-media.php' ) ),
+					'options-media' === $screen->id ? ' class="current"' : '',
+					esc_html__( 'Shared Media', 'wp-user-media' )
+				),
+				sprintf( '<a href="%1$s"%2$s>%3$s</a>',
+					esc_url( add_query_arg( 'page', 'user-media-options', admin_url( 'options-general.php' ) ) ),
+					'settings_page_user-media-options' === $screen->id ? ' class="current"' : '',
+					esc_html( $this->title )
+				),
+			);
+
+			$inline_scripts .= sprintf( '
+				( function($) {
+					$( \'.wrap h1\' ).first().after( $( \'<div></div>\' )
+						.addClass( \'wp-filter\')
+						.html(
+							$( \'<ul></ul>\' )
+							.addClass( \'filter-links\')
+							.html(
+								%s
+							)
+						)
+					)
+				} )( jQuery );
+			', '\'<li>' . join( '</li><li>', $links ) . '</li>\'' );
+		}
+
+		if ( $inline_scripts ) {
+			wp_add_inline_script( 'common', $inline_scripts );
+		}
 	}
 
 	/**
@@ -141,6 +195,46 @@ class WP_User_Media_Admin {
 				array( $this, 'media_grid' )
 			);
 		}
+
+		// User Media options
+		add_options_page(
+			$this->title,
+			$this->title,
+			'manage_options',
+			'user-media-options',
+			array( $this, 'do_settings' )
+		);
+	}
+
+	/**
+	 * Remove the subnav as User Media options is a subtab of shared media.
+	 *
+	 * @since 1.0.0
+	 */
+	public function admin_head() {
+		remove_submenu_page( 'options-general.php', 'user-media-options' );
+	}
+
+	/**
+	 * Make sure the highlighted submenu is the Media Options for User Media Options.
+	 *
+	 * @since 1.0.0
+	 */
+	public function settings_menu_highlight() {
+		$GLOBALS['submenu_file'] = 'options-media.php';
+	}
+
+	/**
+	 * Media options' form
+	 *
+	 * @since 1.0.0
+	 */
+	function do_settings() {
+		?>
+		<div class="wrap">
+			<h1><?php esc_html_e( 'Media Settings', 'wp-user-media' ); ?></h1>
+		</div>
+		<?php
 	}
 
 	/**
