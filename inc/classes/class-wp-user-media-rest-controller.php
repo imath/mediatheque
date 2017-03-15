@@ -124,7 +124,7 @@ class WP_User_Media_REST_Controller extends WP_REST_Attachments_Controller {
 	public function upload_dir_filter() {
 		$dir = wp_user_media_get_upload_dir();
 
-		$dir['subdir'] .= sprintf( '/%1$s/%2$s', get_current_user_id(), $this->user_media_status );
+		$dir['subdir'] .= sprintf( '/%1$s/%2$s', $this->user_media_status, get_current_user_id() );
 		$dir['path']    = sprintf( '%s%s', $dir['basedir'], $dir['subdir'] );
 		$dir['url']     = sprintf( '%s%s', $dir['baseurl'], $dir['subdir'] );
 
@@ -178,6 +178,22 @@ class WP_User_Media_REST_Controller extends WP_REST_Attachments_Controller {
 
 		if ( isset( $file['error'] ) ) {
 			return new WP_Error( 'rest_upload_unknown_error', $file['error'], array( 'status' => 500 ) );
+		}
+
+		if ( 'private' === $this->user_media_status && ! empty( $GLOBALS['is_apache'] ) ) {
+			$upload_dir = $this->upload_dir_filter();
+			$up_parent_dir = dirname( $upload_dir['path'] );
+
+			if ( ! file_exists( $up_parent_dir .'/.htaccess' ) ) {
+				// Include admin functions to get access to insert_with_markers().
+				require_once ABSPATH . 'wp-admin/includes/misc.php';
+
+				// Defining the rule, we need to make it unreachable and use php to reach it
+				$rules = array( 'Order Allow,Deny','Deny from all' );
+
+				// creating the .htaccess file
+				insert_with_markers( $up_parent_dir .'/.htaccess', 'WP User Status', $rules );
+			}
 		}
 
 		return $file;
