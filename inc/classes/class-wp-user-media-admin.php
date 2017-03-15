@@ -233,6 +233,20 @@ class WP_User_Media_Admin {
 		?>
 		<div class="wrap">
 			<h1><?php esc_html_e( 'Media Settings', 'wp-user-media' ); ?></h1>
+
+			<?php if ( ! empty( $GLOBALS['is_nginx'] ) ) {
+
+				printf(
+					'<textarea class="code" readonly="readonly" cols="100" rows="5">%s</textarea>',
+					sprintf( '
+location ~* /(?:uploads|files)/wp-user-media/private/.* {
+	if ($http_cookie !~* "wordpress_logged_in") {
+		return 301 %s;
+	}
+}', wp_login_url() )
+				);
+
+			} ?>
 		</div>
 		<?php
 	}

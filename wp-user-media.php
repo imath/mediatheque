@@ -95,6 +95,7 @@ final class WP_User_Media {
 		spl_autoload_register( array( $this, 'autoload' ) );
 
 		require( $this->inc_dir . 'functions.php' );
+		require( $this->inc_dir . 'upgrade.php' );
 	}
 
 	/**
