@@ -81,6 +81,11 @@ function wp_user_media_upgrade() {
 		do_action( 'wp_user_media_upgrade', $db_version );
 	}
 
+	// Force rewrite rules to be refreshed
+	if ( get_option( 'permalink_structure' ) ) {
+		delete_option( 'rewrite_rules' );
+	}
+
 	// Update the db version.
 	update_option( 'wp_user_media_version', $db_version );
 }
