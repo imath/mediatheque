@@ -119,7 +119,7 @@ class WP_User_Media_Admin {
 			return;
 		}
 
-		$inline_scripts = '';
+		$inline_scripts = array();
 		if ( 'options-media' === $screen->id || 'settings_page_user-media-options' === $screen->id ) {
 			$links = array(
 				sprintf( '<a href="%1$s"%2$s>%3$s</a>',
@@ -134,23 +134,83 @@ class WP_User_Media_Admin {
 				),
 			);
 
-			$inline_scripts .= sprintf( '
-				( function($) {
-					$( \'.wrap h1\' ).first().after( $( \'<div></div>\' )
-						.addClass( \'wp-filter\')
+			$inline_scripts['media-tabs']= sprintf( '
+				$( \'.wrap h1\' ).first().after( $( \'<div></div>\' )
+					.addClass( \'wp-filter\')
+					.html(
+						$( \'<ul></ul>\' )
+						.addClass( \'filter-links\')
 						.html(
-							$( \'<ul></ul>\' )
-							.addClass( \'filter-links\')
-							.html(
-								%s
-							)
+							%s
 						)
 					)
-				} )( jQuery );
-			', '\'<li>' . join( '</li><li>', $links ) . '</li>\'' );
+				);', '\'<li>' . join( '</li><li>', $links ) . '</li>\'' );
+		}
+
+		$pointer = '';
+		$pointer_placeholders = '
+			$( document ).ready( function( $ ) {
+				$( \'#%1$s\' ).pointer( {
+					content: \'<h3>%2$s</h3><p>%3$s</p>\',
+					position: {
+						my: \'left top\',
+						at: \'center bottom\',
+						offset: \'-25 0\'
+					},
+					close: function() {
+						setUserSetting( \'%4$s\', 1 );
+					}
+				} ).pointer( \'open\' );
+			} );
+		';
+
+		$pointers = wp_user_media_get_pointers();
+
+		if ( $pointers ) {
+			$can_manage_options  = current_user_can( 'manage_options' );
+			$permalink_structure = get_option( 'permalink_structure' );
+
+			foreach ( $pointers as $key => $p ) {
+				$selector_id = $key;
+				$setting     = sanitize_key( $key );
+
+				if ( 'toplevel_page_user-media' !== $key && ! $can_manage_options ) {
+					continue;
+
+				// Permalink is specific
+				} elseif ( 'user-media-permalinks' === $key && $can_manage_options ) {
+					if ( ! get_option( 'permalink_structure' ) ) {
+						$selector_id = 'menu-settings';
+					} else {
+						continue;
+					}
+				} elseif ( ! $permalink_structure ) {
+					continue;
+				}
+
+				if ( ! get_user_setting( $setting ) ) {
+					$pointer = sprintf(
+						$pointer_placeholders,
+						$selector_id,
+						$p['title'],
+						$p['content'],
+						$setting
+					);
+					break;
+				}
+			}
+		}
+
+		if ( $pointer ) {
+			array_push( $inline_scripts, $pointer );
+			wp_enqueue_style( 'wp-pointer' );
+			wp_enqueue_script( 'wp-pointer' );
+			wp_enqueue_script( 'utils' );
 		}
 
 		if ( $inline_scripts ) {
+			$inline_scripts = sprintf( '( function($) {%1$s%2$s%1$s} )( jQuery );', "\n", join( "\n", $inline_scripts ) );
+
 			wp_add_inline_script( 'common', $inline_scripts );
 		}
 	}

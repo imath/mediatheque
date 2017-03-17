@@ -90,3 +90,29 @@ function wp_user_media_upgrade() {
 	update_option( 'wp_user_media_version', $db_version );
 }
 add_action( 'admin_init', 'wp_user_media_upgrade', 999 );
+
+/**
+ * Used to guide the user when new features are added.
+ *
+ * @since 1.0.0.
+ */
+function wp_user_media_get_pointers() {
+	return array(
+		'user-media-permalinks' => array(
+			'title'   => __( 'Edit your permalink settings.', 'wp-user-media' ),
+			'content' => __( 'WP User Media requires the permalinks to be set to something different than Default', 'wp-user-media' ),
+		),
+		'menu-settings' => array(
+			'title'   => __( 'User Media Options', 'wp-user-media' ),
+			'content' => __( 'Customize the User Media Options from the Media settings.', 'wp-user-media' ),
+		),
+		'menu-media' => array(
+			'title'   => __( 'User Media Administration', 'wp-user-media' ),
+			'content' => __( 'You can manage the User Media from the corresponding Media sub menu.', 'wp-user-media' ),
+		),
+		'toplevel_page_user-media' => array(
+			'title'   => __( 'Access to your Media', 'wp-user-media' ),
+			'content' => __( 'You can add or edit Media at anytime from this menu.', 'wp-user-media' ),
+		),
+	);
+}
