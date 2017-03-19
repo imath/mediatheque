@@ -1,0 +1,11 @@
+<# if ( 'upload' === data.id || 'directory' === data.id ) { #>
+	<button class="button media-button button-large <# if ( 'upload' === data.id ) { #>button-primary<# } else { #>button-secondary<# } #>" disabled="disabled">
+		<a href="#" data-id="{{data.id}}" data-disable="{{data.disable}}">
+			<span class="label">{{data.name}}</span>
+		</a>
+	</button>
+<# } else { #>
+	<a href="#" data-id="{{data.id}}" data-disable="{{data.disable}}">
+		<span class="label">{{data.name}}</span>
+	</a>
+<# } #>

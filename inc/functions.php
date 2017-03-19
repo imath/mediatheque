@@ -491,6 +491,50 @@ function wp_user_media_register_upload_dir() {
 }
 
 /**
+ * Register Post Statuses for User Media.
+ *
+ * @since  1.0.0
+ */
+function wp_user_media_register_post_statuses() {
+	$supported     = (array) apply_filters( 'wp_user_media_supported_post_statuses', array( 'publish', 'private' ) );
+	$wp_user_media = wp_user_media();
+	$wp_user_media->statuses = array();
+
+	foreach ( $supported as $status ) {
+		$wp_user_media->statuses[ $status ] = get_post_status_object( $status );
+
+		// Override the Publish status label
+		if ( 'publish' === $status ) {
+			$wp_user_media->statuses[ $status ]->label = __( 'Public', 'wp-user-media' );
+		}
+
+		if ( null === $wp_user_media->statuses[ $status ] ) {
+			unset( $wp_user_media->statuses[ $status ] );
+		}
+	}
+}
+
+/**
+ * Get all User Media Post statuses or a specific one.
+ *
+ * @since  1.0.0
+ *
+ * @param  string       $status Name of the status (or All to get all post statuses).
+ * @return object|array         A specific status object or all status objects.
+ */
+function wp_user_media_get_post_statuses( $status = '' ) {
+	$wp_user_media = wp_user_media();
+
+	if ( 'all' === $status ) {
+		return $wp_user_media->statuses;
+	} elseif ( ! isset( $wp_user_media->statuses[ $status ] ) ) {
+		return null;
+	}
+
+	return $wp_user_media->statuses[ $status ];
+}
+
+/**
  * Register the post type and the taxonomy used by User Media.
  *
  * @since 1.0.0
@@ -558,6 +602,10 @@ function wp_user_media_register_objects() {
 		'capabilities'          => wp_user_media_types_capabilities(),
 		'show_in_rest'          => true,
 	) );
+
+	/** Post statuses ********************************************************/
+
+	wp_user_media_register_post_statuses();
 
 	/** Rewrites *************************************************************/
 
@@ -700,7 +748,7 @@ function wp_user_media_get_template_part( $template = '', $id = '', $load = true
 		return '';
 	}
 
-	$template = trim( $template, '.html' );
+	$template = str_replace( '.html', '', $template );
 	$located  = '';
 
 	$template_locations = (array) apply_filters( 'wp_user_media_get_template_part', array(

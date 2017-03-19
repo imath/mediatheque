@@ -239,10 +239,7 @@ class WP_User_Media_REST_Controller extends WP_REST_Attachments_Controller {
 	 */
 	protected function prepare_item_for_database( $request ) {
 		$prepared_user_media = parent::prepare_item_for_database( $request );
-
-		if ( ! isset( $request['post_status'] ) ) {
-			$prepared_user_media->post_status = $this->user_media_status;
-		}
+		$prepared_user_media->post_status = $this->user_media_status;
 
 		return $prepared_user_media;
 	}

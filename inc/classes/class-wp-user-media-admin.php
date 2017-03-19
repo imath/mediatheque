@@ -325,10 +325,21 @@ location ~* /(?:uploads|files)/wp-user-media/private/.* {
 			true
 		);
 
-		wp_localize_script( 'wp-user-media-admin', 'wpUserMediaParams', array(
-			'container' => 'wp-user-media-ui',
-			'browser'   => 'wp-user-media-browse',
-			'dropzone'  => 'drag-drop-area',
+		wp_localize_script( 'wp-user-media-admin', 'wpUserMediaSettings', array(
+			'params' => array(
+				'container' => 'wp-user-media-ui',
+				'browser'   => 'wp-user-media-browse',
+				'dropzone'  => 'drag-drop-area',
+			),
+			'toolbarItems' => array_merge( array(
+					'users'    => __( 'Browse Users', 'wp-user-media' )
+				),
+				wp_list_pluck( wp_user_media_get_post_statuses( 'all' ), 'label', 'name' ),
+				array(
+					'upload'    => __( 'Upload file(s)', 'wp-user-media' ),
+					'directory' => __( 'Add a directory', 'wp-user-media' ),
+				)
+			),
 		) );
 
 		wp_enqueue_style(
@@ -342,12 +353,17 @@ location ~* /(?:uploads|files)/wp-user-media/private/.* {
 
 		printf( '
 			<div class="wrap">
-				<h1>%s</h1>
-				<div id="wp-user-media-uploader"></div>
-				<div id="wp-user-media-container"></div>
+				<h1 id="wp-user-media-title">%s</h1>
+				<div id="wp-user-media-container">
+					<div id="toolbar" class="wp-filter"></div>
+					<div id="forms"></div>
+					<div id="users"></div>
+					<div id="media"></div>
+				</div>
 			</div>
 		', esc_html( $this->title ) );
 
+		wp_user_media_get_template_part( 'toolbar-item', 'wp-user-media-toolbar-item' );
 		wp_user_media_get_template_part( 'user', 'wp-user-media-user' );
 		wp_user_media_get_template_part( 'user-media', 'wp-user-media-media' );
 		wp_user_media_get_template_part( 'uploader', 'wp-user-media-uploader' );

@@ -205,12 +205,6 @@ window.wp = window.wp || {};
 
 	// Extend wp.Backbone.View with .prepare() and .inject()
 	wpUserMedia.View = wpUserMedia.Backbone.View.extend( {
-		inject: function( selector ) {
-			this.render();
-			$(selector).html( this.el );
-			this.views.ready();
-		},
-
 		prepare: function() {
 			if ( ! _.isUndefined( this.model ) && _.isFunction( this.model.toJSON ) ) {
 				return this.model.toJSON();
@@ -288,11 +282,11 @@ window.wp = window.wp || {};
 	} );
 
 	wpUserMedia.Views.Uploader = wpUserMedia.View.extend( {
-		id: wpUserMediaParams.container,
+		id: wpUserMediaSettings.params.container,
 		template: wpUserMedia.template( 'wp-user-media-uploader' ),
 
 		initialize: function() {
-			this.model = new Backbone.Model( _.pick( wpUserMediaParams, 'container', 'browser', 'dropzone' ) );
+			this.model = new Backbone.Model( _.pick( wpUserMediaSettings.params, 'container', 'browser', 'dropzone' ) );
 			this.on( 'ready', this.initUploader );
 		},
 
@@ -317,11 +311,215 @@ window.wp = window.wp || {};
 		}
 	} );
 
+	wpUserMedia.Views.ToolbarItem = wpUserMedia.View.extend( {
+		tagName  : 'li',
+		template: wpUserMedia.template( 'wp-user-media-toolbar-item' ),
+
+		initialize: function() {
+			if ( this.model.get( 'current' ) ) {
+				this.el.className = 'current';
+			}
+
+			this.model.on( 'change:disable', this.refreshItem, this );
+		},
+
+		refreshItem: function( model, changed ) {
+			var element = $( this.$el ).find( 'a' ).first();
+
+			element.attr( 'data-disable', changed );
+			element.data( 'disable', changed );
+
+			if ( element.parent( 'button' ) ) {
+				element.parent( 'button' ).prop( 'disabled', changed );
+			}
+		}
+	} );
+
+	wpUserMedia.Views.Toolbar = wpUserMedia.View.extend( {
+		tagName  : 'ul',
+		className: 'filter-links',
+
+		events: {
+			'click a' : 'activateView'
+		},
+
+		initialize: function() {
+			var o = this.options || {}, position = 0, current = false;
+
+			_.each( wpUserMediaSettings.toolbarItems, function( name, id ) {
+				position += 1;
+
+				if ( o.users.length && 'users' === id || 0 === o.users.length && 'publish' === id ) {
+					current = true;
+				} else {
+					current = false;
+				}
+
+				this.collection.add( {
+					id: id,
+					name: name,
+					position: position,
+					current: current,
+					disable: 0 !== o.users.length && 'users' !== id,
+				} );
+
+				this.addItemBar( this.collection.get( id ) );
+			}, this );
+
+			this.collection.on( 'change:current', this.refreshToolbar, this );
+		},
+
+		addItemBar: function( toolbarItem ) {
+			this.views.add( new wpUserMedia.Views.ToolbarItem( { model: toolbarItem } ) );
+		},
+
+		refreshToolbar: function( model, changed ) {
+			if ( false === changed || 'false' === changed ) {
+				return;
+			}
+
+			_.each( this.$el.children(), function( e ) {
+				$( e ).removeClass( 'current' );
+			} );
+
+			$( this.$el ).find( '[data-id="' + model.get( 'id' ) + '"]' ).parent( 'li' ).addClass( 'current' );
+		},
+
+		activateView: function( event ) {
+			event.preventDefault();
+
+			var current = $( event.currentTarget ), model, disable = false, subview = null;
+
+			if ( current.data( 'disable' ) ) {
+				return;
+			}
+
+			if ( 'upload' === current.data( 'id' ) || 'directory' === current.data( 'id' ) ) {
+				subview = current.data( 'id' );
+			} else if ( 'users' === current.data( 'id' ) ) {
+				disable = true;
+			}
+
+			_.each( this.collection.models, function( model ) {
+				var attributes = { disable: disable, current: false, active: false };
+
+				if ( ! _.isNull( subview ) ) {
+					if ( model.get( 'id' ) === subview ) {
+						attributes.active  = true;
+					} else {
+						attributes.current = model.get( 'current' );
+					}
+
+				} else if ( model.get( 'id' ) === current.data( 'id' ) ) {
+					attributes.current = true;
+
+					if ( 'users' === model.get( 'id' ) ) {
+						attributes.disable = false;
+					}
+				}
+
+				model.set( attributes );
+			}, this );
+		}
+	} );
+
+	wpUserMedia.Views.Root = wpUserMedia.View.extend( {
+
+		initialize: function() {
+			var o = this.options || {};
+
+			this.views.add( '#users', new wpUserMedia.Views.Users( { collection: o.users } ) );
+
+			o.users.fetch( {
+				data: { 'has_disk_usage' : true },
+				success : _.bind( this.displayToolbar, this ),
+				error   : _.bind( this.displayUserMedia, this )
+			} );
+
+			o.users.on( 'change:current', this.displayUserMedia, this );
+			o.toolbarItems.on( 'change:active', this.displayForms, this );
+		},
+
+		displayToolbar: function() {
+			var o = this.options || {};
+
+			this.views.add( '#toolbar', new wpUserMedia.Views.Toolbar( {
+				collection: o.toolbarItems,
+				users: o.users
+			} ) );
+		},
+
+		displayUserMedia: function( model ) {
+			var query_vars = { user_media_context: 'admin' },
+			    o = this.options || {};
+
+			if ( _.isUndefined( this.views._views['#toolbar'] ) ) {
+				delete wpUserMediaSettings.toolbarItems.users;
+
+				this.displayToolbar();
+			} else {
+				_.each( o.toolbarItems.models, function( model ) {
+					var attributes = { disable: false, current: false };
+					if ( 'publish' === model.get( 'id' ) ) {
+						attributes.current = true;
+					}
+
+					o.toolbarItems.get( model ).set( attributes );
+				} );
+			}
+
+			if ( _.isUndefined( model.attributes ) || ! model.get( 'current' ) ) {
+				query_vars.user_id = 0;
+			} else {
+				query_vars.user_id =  model.get( 'id' );
+			}
+
+			_.first( this.views._views['#users'] ).remove();
+
+			this.views.add( '#media', new wpUserMedia.Views.UserMedias( {
+				collection: o.media,
+				query_vars: query_vars
+			} ) );
+		},
+
+		displayForms: function( model, active ) {
+			var o = this.options || {}, params = { 'post_status': 'publish' },
+			    s = null;
+
+			if ( -1 === _.indexOf( ['upload', 'directory'], model.get( 'id' ) ) ) {
+				return;
+			}
+
+			if ( _.isUndefined( this.views._views['#forms'] ) || 0 === this.views._views['#forms'].length ) {
+				s = o.toolbarItems.findWhere( { current: true } );
+
+				if ( _.isObject( s ) ) {
+					params.post_status = s.get( 'id' );
+				}
+
+				if ( true === active ) {
+					if ( 'upload' === model.get( 'id' ) ) {
+						this.views.add( '#forms', new wpUserMedia.Views.Uploader( {
+							overrides: o.overrides,
+							params: params
+						} ) );
+					} else {
+						this.views.add( '#forms', new wpUserMedia.Views.MkDir( {
+							overrides: o.overrides,
+							params: params
+						} ) );
+					}
+				}
+			}
+		}
+	} );
+
 	wpUserMedia.App = {
 		init: function( restUrl ) {
-			this.views     = new Backbone.Collection();
-			this.users     = new wp.api.collections.Users();
-			this.userMedia = new wp.api.collections.UserMedia();
+			this.views        = new Backbone.Collection();
+			this.users        = new wp.api.collections.Users();
+			this.userMedia    = new wp.api.collections.UserMedia();
+			this.toolbarItems = new Backbone.Collection();
 
 			this.overrides = {
 				url: restUrl,
@@ -331,61 +529,13 @@ window.wp = window.wp || {};
 				}
 			};
 
-			this.attachUploader();
-			this.displayUsers();
-
-			this.users.fetch( {
-				data: { 'has_disk_usage' : true },
-				error   : _.bind( this.displayUserMedia, this )
-			} );
-
-			this.users.on( 'change:current', this.displayUserMedia, this );
-		},
-
-		displayUserMedia: function( model ) {
-			var query_vars = { user_media_context: 'admin' };
-
-			if ( _.isUndefined( model.attributes ) || ! model.get( 'current' ) ) {
-				query_vars.user_id = 0;
-			} else {
-				query_vars.user_id =  model.get( 'id' );
-			}
-
-			var users = this.views.get( 'users_view' );
-			users.get( 'view' ).remove();
-
-			var userMedia = new wpUserMedia.Views.UserMedias( {
-				collection: this.userMedia,
-				query_vars: query_vars
-			} );
-
-			// Add it to views
-			this.views.add( { id: 'usermedia_view', view: userMedia } );
-
-			// Display it
-			userMedia.inject( '#wp-user-media-container' );
-		},
-
-		displayUsers: function() {
-			var users = new wpUserMedia.Views.Users( {
-				collection: this.users
-			} );
-
-			// Add it to views
-			this.views.add( { id: 'users_view', view: users } );
-
-			// Display it
-			users.inject( '#wp-user-media-container' );
-		},
-
-		attachUploader: function() {
-			var uploader = new wpUserMedia.Views.Uploader( { overrides: this.overrides, params: {} } );
-
-			// Add it to views
-			this.views.add( { id: 'uploader_view', view: uploader } );
-
-			// Display it
-			uploader.inject( '#wp-user-media-uploader' );
+			var rootView = new wpUserMedia.Views.Root( {
+				el:           $( '#wp-user-media-container' ),
+				users:        this.users,
+				media:        this.userMedia,
+				overrides:    this.overrides,
+				toolbarItems: this.toolbarItems
+			} ).render();
 		}
 	};
 

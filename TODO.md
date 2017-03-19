@@ -9,4 +9,4 @@
 [] Improve the way Views are added to the screen in admin.js
 [] Only folder will have the choice to be saved as private. Uploading files in it should set their post status as private.
 [x] Add a message about how to configure the private folder with nginx: [@see](http://nicknotfound.com/2009/01/12/iphone-website-with-nginx/)
-[] Use the wp-pointer to guide the user in finishing the plugin's setup (default links vs pretty links, where are the options, where is the main admin)
+[x] Use the wp-pointer to guide the user in finishing the plugin's setup (default links vs pretty links, where are the options, where is the main admin)

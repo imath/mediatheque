@@ -77,3 +77,13 @@ p.drag-drop-buttons input[type="button"] {
 	height: 100%;
 	z-index: 9;
 }
+
+#toolbar button {
+	vertical-align: inherit;
+	margin: 0 1em;
+}
+
+#toolbar button a,
+#toolbar button a:hover {
+	color: inherit;
+}
