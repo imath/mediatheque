@@ -396,35 +396,17 @@ function wp_user_media_rest_user_query( $prepared_args = array(), WP_REST_Reques
 				'meta_compare' => 'EXISTS',
 			) );
 
+			// Make sure the Admin has the meta set to include him in results.
 			$user_id = get_current_user_id();
 
-			// Always include the Current user on first page
-			if ( 1 === $request->get_param( 'page' ) ) {
-				$prepared_args['include'] = array( $user_id );
-
-				add_action( 'pre_user_query', 'wp_user_media_user_query_always_include' );
-
-			// Always exclude the Current user from next pages
-			} else {
-				$prepared_args['exclude'] = array( $user_id );
+			$disk_usage = get_user_meta( $user_id, '_wp_user_meta_disk_usage', true );
+			if ( ! is_numeric( $disk_usage ) ) {
+				update_user_meta( $user_id, '_wp_user_meta_disk_usage', 0 );
 			}
 		}
 	}
 
 	return $prepared_args;
-}
-
-/**
- * Temporary action to make sure the current user is always included in query results.
- *
- * @since 1.0.0
- *
- * @param WP_User_Query $u_query The WP User Query object.
- */
-function wp_user_media_user_query_always_include( WP_User_Query $u_query ) {
-	$u_query->query_where = str_replace( 'AND wp_users.ID', 'OR wp_users.ID', $u_query->query_where );
-
-	remove_action( 'pre_user_query', 'wp_user_media_user_query_always_include' );
 }
 
 /**

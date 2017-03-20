@@ -217,20 +217,16 @@ window.wp = window.wp || {};
 	wpUserMedia.Views.User = wpUserMedia.View.extend( {
 		tagName:    'li',
 		className:  'user',
-		template: wpUserMedia.template( 'wp-user-media-user' ),
-
-		events: {
-			'click' : 'displayUserMedia'
-		},
-
-		displayUserMedia: function() {
-			this.model.set( 'current', true );
-		}
+		template: wpUserMedia.template( 'wp-user-media-user' )
 	} );
 
 	wpUserMedia.Views.Users = wpUserMedia.View.extend( {
 		tagName:   'ul',
 		className: 'users',
+
+		events: {
+			'click a.user-link' : 'displayUserMedia'
+		},
 
 		initialize: function() {
 			this.collection.on( 'add', this.addUserView, this );
@@ -238,6 +234,21 @@ window.wp = window.wp || {};
 
 		addUserView: function( user ) {
 			this.views.add( new wpUserMedia.Views.User( { model: user } ) );
+		},
+
+		displayUserMedia: function( event ) {
+			event.preventDefault();
+
+			var user_id = $( event.currentTarget ).data( 'id' );
+
+			_.each( this.collection.models, function( model ) {
+				var attributes = { current: false };
+				if ( user_id === model.get( 'id' ) ) {
+					attributes.current = true;
+				}
+
+				model.set( attributes );
+			} );
 		}
 	} );
 
@@ -252,12 +263,18 @@ window.wp = window.wp || {};
 		className: 'user-media',
 
 		initialize: function() {
+			this.collection.on( 'reset', this.queryMedia, this );
+			this.collection.on( 'add', this.addUserView, this );
+
+			this.collection.reset();
+		},
+
+		queryMedia: function() {
 			var query_vars = this.options.query_vars || { user_media_context: 'admin' };
 
 			this.collection.fetch( {
 				data : query_vars
 			} );
-			this.collection.on( 'add', this.addUserView, this );
 		},
 
 		addUserView: function( user_media ) {
@@ -349,7 +366,7 @@ window.wp = window.wp || {};
 			_.each( wpUserMediaSettings.toolbarItems, function( name, id ) {
 				position += 1;
 
-				if ( o.users.length && 'users' === id || 0 === o.users.length && 'publish' === id ) {
+				if ( o.users.length && 'users' === id ) {
 					current = true;
 				} else {
 					current = false;
@@ -427,21 +444,41 @@ window.wp = window.wp || {};
 
 		initialize: function() {
 			var o = this.options || {};
+			this.query_vars = { user_media_context: 'admin' };
 
 			this.views.add( '#users', new wpUserMedia.Views.Users( { collection: o.users } ) );
+
+			o.users.on( 'reset', this.queryUsers, this );
+			o.users.on( 'change:current', this.setToolbar, this );
+			o.toolbarItems.on( 'change:active', this.displayForms, this );
+			o.toolbarItems.on( 'change:current', this.manageLists, this );
+
+			o.users.reset();
+		},
+
+		/**
+		 * Admins will be able to list users. Listing a user's files needs to select the user.
+		 * Regular users won't be able to do that and their own files will be automatically loaded.
+		 */
+		queryUsers: function() {
+			var o = this.options || {};
 
 			o.users.fetch( {
 				data: { 'has_disk_usage' : true },
 				success : _.bind( this.displayToolbar, this ),
-				error   : _.bind( this.displayUserMedia, this )
+				error   : _.bind( this.setToolbar, this )
 			} );
-
-			o.users.on( 'change:current', this.displayUserMedia, this );
-			o.toolbarItems.on( 'change:active', this.displayForms, this );
 		},
 
+		/**
+		 * Display the Main Toolbar
+		 */
 		displayToolbar: function() {
 			var o = this.options || {};
+
+			if ( ! _.isUndefined( this.views._views['#toolbar'] ) ) {
+				return;
+			}
 
 			this.views.add( '#toolbar', new wpUserMedia.Views.Toolbar( {
 				collection: o.toolbarItems,
@@ -449,14 +486,26 @@ window.wp = window.wp || {};
 			} ) );
 		},
 
-		displayUserMedia: function( model ) {
-			var query_vars = { user_media_context: 'admin' },
-			    o = this.options || {};
+		/**
+		 * Adjust the Toolbar according to the current user's capabilities.
+		 */
+		setToolbar: function( model, changed ) {
+			var o = this.options || {};
 
+			if ( ! _.isUndefined( changed ) && false === changed ) {
+				return;
+			}
+
+			// The User is not an admin.
 			if ( _.isUndefined( this.views._views['#toolbar'] ) ) {
 				delete wpUserMediaSettings.toolbarItems.users;
 
 				this.displayToolbar();
+
+				// Set the Public view as current one.
+				o.toolbarItems.get( 'publish' ).set( { current: true } );
+
+			// The User is an admin and has selected a user.
 			} else {
 				_.each( o.toolbarItems.models, function( model ) {
 					var attributes = { disable: false, current: false };
@@ -464,22 +513,9 @@ window.wp = window.wp || {};
 						attributes.current = true;
 					}
 
-					o.toolbarItems.get( model ).set( attributes );
+					model.set( attributes );
 				} );
 			}
-
-			if ( _.isUndefined( model.attributes ) || ! model.get( 'current' ) ) {
-				query_vars.user_id = 0;
-			} else {
-				query_vars.user_id =  model.get( 'id' );
-			}
-
-			_.first( this.views._views['#users'] ).remove();
-
-			this.views.add( '#media', new wpUserMedia.Views.UserMedias( {
-				collection: o.media,
-				query_vars: query_vars
-			} ) );
 		},
 
 		displayForms: function( model, active ) {
@@ -509,6 +545,38 @@ window.wp = window.wp || {};
 							params: params
 						} ) );
 					}
+				}
+			}
+		},
+
+		manageLists: function( model, changed ) {
+			var o = this.options || {};
+
+			if ( false === changed ) {
+				if ( 'users' !== model.get( 'id' ) ) {
+					_.first( this.views._views['#media'] ).remove();
+				} else {
+					_.first( this.views._views['#users'] ).remove();
+				}
+			} else {
+				if ( 'users' === model.get( 'id' ) ) {
+					this.views.add( '#users', new wpUserMedia.Views.Users( { collection: o.users } ) );
+					o.users.reset();
+				} else {
+					this.query_vars.post_status = model.get( 'id' );
+
+					// Set the User ID.
+					if ( o.users.length ) {
+						var author = o.users.findWhere( { current: true } );
+						this.query_vars.user_id = author.get( 'id' );
+					} else {
+						this.query_vars.user_id = 0;
+					}
+
+					this.views.add( '#media', new wpUserMedia.Views.UserMedias( {
+						collection: o.media,
+						query_vars: this.query_vars
+					} ) );
 				}
 			}
 		}
