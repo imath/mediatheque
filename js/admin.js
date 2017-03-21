@@ -255,7 +255,27 @@ window.wp = window.wp || {};
 	wpUserMedia.Views.UserMedia = wpUserMedia.View.extend( {
 		tagName:    'li',
 		className:  'user-media',
-		template: wpUserMedia.template( 'wp-user-media-media' )
+		template: wpUserMedia.template( 'wp-user-media-media' ),
+
+		initialize: function() {
+			if ( 'dir' === this.model.get( 'media_type' ) ) {
+				this.el.className += ' dir';
+			} else {
+				if ( 'image' === this.model.get( 'media_type' ) ) {
+					var bgUrl = this.model.get( 'guid' ).rendered,
+					    mediaDetails = this.model.get( 'media_details' ), fileName;
+
+					if ( _.isObject( mediaDetails.medium ) ) {
+						fileName = mediaDetails.file.split( '/' );
+						bgUrl = bgUrl.replace( fileName[ oFile.length - 1 ], mediaDetails.medium.file );
+					}
+
+					this.model.set( { background: bgUrl }, { silent: true } );
+				}
+
+				this.model.set( { download: this.model.get( 'link' ) + 'download/' }, { silent: true } );
+			}
+		}
 	} );
 
 	wpUserMedia.Views.UserMedias = wpUserMedia.View.extend( {

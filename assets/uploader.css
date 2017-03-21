@@ -137,17 +137,26 @@ p.drag-drop-buttons input[type="button"] {
 	list-style: none;
 }
 
-#wp-user-media-container #users ul li.user {
+#wp-user-media-container #users ul li.user,
+#wp-user-media-container #media ul li.user-media {
 	float: left;
 	width: 200px;
 	min-height: 200px;
-	background-image: url( 'folder.svg' );
-	background-size: cover;
-	background-repeat: no-repeat;
 	-webkit-box-shadow: 0 1px 1px rgba(0,0,0,0.04);
 	box-shadow: 0 1px 1px rgba(0,0,0,0.04);
 	text-align: center;
 	margin: 0 0.5em 1.5em 0.5em;
+}
+
+#wp-user-media-container #media ul li.user-media:not( .dir ) {
+	background-color: #fff;
+}
+
+#wp-user-media-container #users ul li.user,
+#wp-user-media-container #media ul li.user-media.dir {
+	background-image: url( 'folder.svg' );
+	background-size: cover;
+	background-repeat: no-repeat;
 }
 
 #wp-user-media-container #users ul li.user a {
@@ -160,3 +169,35 @@ p.drag-drop-buttons input[type="button"] {
 #wp-user-media-container #users ul li.user .stats {
 	margin-bottom: 0.5em;
 }
+
+#wp-user-media-container #media ul li.user-media div.user-media-content {
+	width: 100%;
+	min-height: 175px;
+	position: relative;
+}
+
+#wp-user-media-container #media ul li.user-media:not( .dir ) div.user-media-content {
+	background-size: cover;
+	background-repeat: no-repeat;
+}
+
+#wp-user-media-container #media ul li.user-media div.user-media-content h4 {
+	position: absolute;
+	bottom: 0;
+	width: 100%;
+}
+
+#wp-user-media-container #media ul li.user-media div.user-media-actions {
+	overflow: hidden;
+	text-align: center;
+	vertical-align: bottom;
+	height: 100%;
+}
+
+#wp-user-media-container #media ul li.user-media div.user-media-actions a {
+	display: inline-block;
+	margin: 0 0.5em;
+	text-decoration: none;
+	border: none;
+}
+
