@@ -1,6 +1,8 @@
-<label for="dir-name">
-	<input type="text" value="" id="dir-name"/>
-</label>
-<div class="action">
-	<input type="submit" value="Ok"/>
-</div>
+<form>
+	<button class="close dashicons dashicons-no"><span class="screen-reader-text">Close</span></button>
+	<p>
+		<label for="dir-name">{{data.label}}</label>
+		<input type="text" value="" id="dir-name" class="widefat"/>
+		<input type="submit" value="{{data.saveBtn}}" class="button-primary button-large"/>
+	</p>
+</form>

@@ -340,6 +340,10 @@ location ~* /(?:uploads|files)/wp-user-media/private/.* {
 					'directory' => __( 'Add a directory', 'wp-user-media' ),
 				)
 			),
+			'dirmaker' => array(
+				'label'   => __( 'Name of your directory', 'wp-user-media' ),
+				'saveBtn' => __( 'Create', 'wp-user-media' ),
+			),
 		) );
 
 		wp_enqueue_style(

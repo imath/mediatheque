@@ -298,13 +298,27 @@ window.wp = window.wp || {};
 		}
 	} );
 
-	wpUserMedia.Views.Uploader = wpUserMedia.View.extend( {
-		id: wpUserMediaSettings.params.container,
-		template: wpUserMedia.template( 'wp-user-media-uploader' ),
+	wpUserMedia.Views.MkDir = wpUserMedia.View.extend( {
+		tagName: 'div',
+		id: 'directory-form',
+		className: 'postbox',
+		template: wpUserMedia.template( 'wp-user-media-dirmaker' ),
 
 		events: {
 			'click button.close' : 'removeSelf'
 		},
+
+		removeSelf: function( event ) {
+			event.preventDefault();
+
+			wpUserMedia.App.toolbarItems.get( this.options.toolbarItem ).set( { active: false } );
+		}
+	} );
+
+	wpUserMedia.Views.Uploader = wpUserMedia.Views.MkDir.extend( {
+		id: wpUserMediaSettings.params.container,
+		className: 'wp-user-media-uploader-box',
+		template: wpUserMedia.template( 'wp-user-media-uploader' ),
 
 		initialize: function() {
 			this.model = new Backbone.Model( _.pick( wpUserMediaSettings.params, 'container', 'browser', 'dropzone' ) );
@@ -329,19 +343,7 @@ window.wp = window.wp || {};
 
 		addProgressView: function( file ) {
 			this.views.add( '#wp-user-media-upload-status', new wpUserMedia.Views.uploaderProgress( { model: file } ) );
-		},
-
-		removeSelf: function( event ) {
-			event.preventDefault();
-
-			wpUserMedia.App.toolbarItems.get( 'upload' ).set( { active: false } );
 		}
-	} );
-
-	wpUserMedia.Views.MkDir = wpUserMedia.View.extend( {
-		tagName: 'form',
-		className: 'directory-form',
-		template: wpUserMedia.template( 'wp-user-media-dirmaker' )
 	} );
 
 	wpUserMedia.Views.ToolbarItem = wpUserMedia.View.extend( {
@@ -563,12 +565,15 @@ window.wp = window.wp || {};
 				if ( 'upload' === model.get( 'id' ) ) {
 					this.views.add( '#forms', new wpUserMedia.Views.Uploader( {
 						overrides: o.overrides,
-						params: params
+						params: params,
+						toolbarItem: 'upload'
 					} ) );
 				} else {
 					this.views.add( '#forms', new wpUserMedia.Views.MkDir( {
 						overrides: o.overrides,
-						params: params
+						params: params,
+						toolbarItem: 'directory',
+						model: new Backbone.Model( wpUserMediaSettings.dirmaker )
 					} ) );
 				}
 			}
