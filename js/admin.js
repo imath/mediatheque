@@ -278,7 +278,13 @@ window.wp = window.wp || {};
 		},
 
 		addUserView: function( user_media ) {
-			this.views.add( new wpUserMedia.Views.UserMedia( { model: user_media } ) );
+			var position = user_media.get( 'at' );
+
+			if ( _.isUndefined( position ) ) {
+				this.views.add( new wpUserMedia.Views.UserMedia( { model: user_media } ) );
+			} else {
+				this.views.add( new wpUserMedia.Views.UserMedia( { model: user_media } ), { at: position } );
+			}
 		}
 	} );
 
@@ -305,13 +311,55 @@ window.wp = window.wp || {};
 		template: wpUserMedia.template( 'wp-user-media-dirmaker' ),
 
 		events: {
-			'click button.close' : 'removeSelf'
+			'click button.close' : 'removeSelf',
+			'click #create-dir'  : 'createDir'
 		},
 
 		removeSelf: function( event ) {
-			event.preventDefault();
+			if ( _.isObject( event ) ) {
+				event.preventDefault();
+			}
 
 			wpUserMedia.App.toolbarItems.get( this.options.toolbarItem ).set( { active: false } );
+		},
+
+		createDir: function( event ) {
+			event.preventDefault();
+
+			var form = $( event.currentTarget ).closest( 'form' ), dirData = {},
+			    p = this.options.params || {};
+
+			_.each( $( form ).serializeArray(), function( pair ) {
+				pair.name = pair.name.replace( '[]', '' );
+				dirData[ pair.name ] = pair.value;
+			} );
+
+			// Missing title!
+			if ( ! dirData.title ) {
+				return;
+			}
+
+			_.extend( dirData, p );
+
+			var dir = new wp.api.models.UserMedia( dirData );
+			dir.save( {
+					action: 'mkdir_user_media'
+				},
+				{
+					success: _.bind( this.mkdirSuccess, this ),
+					error: _.bind( this.mkdirError, this )
+				}
+			);
+		},
+
+		mkdirSuccess: function( model ) {
+			model.set( { at: 0 }, { silent: true } );
+			wpUserMedia.App.userMedia.add( model );
+			this.removeSelf();
+		},
+
+		mkdirError: function( error ) {
+			console.log( error );
 		}
 	} );
 
@@ -570,7 +618,6 @@ window.wp = window.wp || {};
 					} ) );
 				} else {
 					this.views.add( '#forms', new wpUserMedia.Views.MkDir( {
-						overrides: o.overrides,
 						params: params,
 						toolbarItem: 'directory',
 						model: new Backbone.Model( wpUserMediaSettings.dirmaker )

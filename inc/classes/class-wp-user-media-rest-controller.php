@@ -17,6 +17,7 @@ defined( 'ABSPATH' ) || exit;
  */
 class WP_User_Media_REST_Controller extends WP_REST_Attachments_Controller {
 	public $user_media_status = 'publish';
+	public $user_media_type_ids = array();
 
 	/**
 	 * Temporarly Adds specific User Media metas to the registered post metas.
@@ -46,6 +47,24 @@ class WP_User_Media_REST_Controller extends WP_REST_Attachments_Controller {
 		foreach( array_keys( $this->user_meta_fields ) as $user_meta_field ) {
 			unregister_meta_key( 'post', $user_meta_field );
 		}
+	}
+
+	public function get_user_media_type_id( $type = '' ) {
+		if ( ! $type ) {
+			return false;
+		}
+
+		if ( ! isset( $this->user_media_type_ids[ $type ] ) ) {
+			$user_media_type = get_term_by( 'slug', $type, 'user_media_types' );
+
+			if ( empty( $user_media_type->term_id ) ) {
+				return false;
+			}
+
+			$user_media_type_ids[ $type ] = $user_media_type->term_id;
+		}
+
+		return (int) $user_media_type_ids[ $type ];
 	}
 
 	/**
@@ -245,6 +264,39 @@ class WP_User_Media_REST_Controller extends WP_REST_Attachments_Controller {
 	}
 
 	/**
+	 * Prepares a single User Media output for response.
+	 *
+	 * @since 1.0.0
+	 * @access public
+	 *
+	 * @param  WP_Post         $post    User Media object.
+	 * @param  WP_REST_Request $request Request object.
+	 * @return WP_REST_Response Response object.
+	 */
+	public function prepare_item_for_response( $post, $request ) {
+		$response = parent::prepare_item_for_response( $post, $request );
+		$data     = $response->get_data();
+
+		if ( in_array( $this->get_user_media_type_id( 'wp-user-media-directory' ), $data['user_media_types'], true ) ) {
+			$data['media_type'] = 'dir';
+			$response = rest_ensure_response( $data );
+		}
+
+		/**
+		 * Filters a User Media returned from the REST API.
+		 *
+		 * Allows modification of the attachment right before it is returned.
+		 *
+		 * @since 1.0.0
+		 *
+		 * @param WP_REST_Response $response The response object.
+		 * @param WP_Post          $post     The original User Media post.
+		 * @param WP_REST_Request  $request  Request used to generate the response.
+		 */
+		return apply_filters( 'rest_prepare_user_media', $response, $post, $request );
+	}
+
+	/**
 	 * Creates a User Media.
 	 *
 	 * @since 1.0.0
@@ -254,8 +306,6 @@ class WP_User_Media_REST_Controller extends WP_REST_Attachments_Controller {
 	 * @return WP_Error|WP_REST_Response Response object on success, WP_Error object on failure.
 	 */
 	public function create_item( $request ) {
-		// Get the file via $_FILES or raw data.
-		$files   = $request->get_file_params();
 		$headers = $request->get_headers();
 		$action  = $request->get_param( 'action' );
 		$size    = 0;
@@ -265,50 +315,65 @@ class WP_User_Media_REST_Controller extends WP_REST_Attachments_Controller {
 			$this->user_media_status = $requested_status;
 		}
 
-		/**
-		 * A folder can be created.
-		 * @todo We should first check the term.
-		 */
+		// Add a file
+		if ( 'upload_user_media' === $action ) {
+			// Get the file via $_FILES or raw data.
+			$files   = $request->get_file_params();
 
-		if ( ! empty( $files ) ) {
-			$size = $files['wp_user_media_upload']['size'];
-			$file = $this->upload_from_file( $files, $headers, $action );
+			if ( ! empty( $files ) ) {
+				$size = $files['wp_user_media_upload']['size'];
+				$file = $this->upload_from_file( $files, $headers, $action );
+			} else {
+				return new WP_Error( 'rest_upload_no_data', __( 'No data supplied.', 'wp-user-media' ), array( 'status' => 400 ) );
+			}
+
+			if ( is_wp_error( $file ) ) {
+				return $file;
+			}
+
+			$name       = basename( $file['file'] );
+			$name_parts = pathinfo( $name );
+			$name       = trim( substr( $name, 0, -(1 + strlen( $name_parts['extension'] ) ) ) );
+
+			$url     = $file['url'];
+			$type    = $file['type'];
+			$file    = $file['file'];
+
+			// use image exif/iptc data for title and caption defaults if possible
+			$image_meta = @wp_read_image_metadata( $file );
+
+			if ( ! empty( $image_meta ) ) {
+				if ( empty( $request['title'] ) && trim( $image_meta['title'] ) && ! is_numeric( sanitize_title( $image_meta['title'] ) ) ) {
+					$request['title'] = $image_meta['title'];
+				}
+
+				if ( empty( $request['caption'] ) && trim( $image_meta['caption'] ) ) {
+					$request['caption'] = $image_meta['caption'];
+				}
+			}
+
+			$user_media = $this->prepare_item_for_database( $request );
+			$user_media->file = $file;
+			$user_media->post_mime_type = $type;
+			$user_media->guid = $url;
+
+			if ( empty( $user_media->post_title ) ) {
+				$user_media->post_title = preg_replace( '/\.[^.]+$/', '', basename( $file ) );
+			}
+
+			$user_media_type_id = $this->get_user_media_type_id( 'wp-user-media-file' );
+
+		// Add a folder
 		} else {
-			return new WP_Error( 'rest_upload_no_data', __( 'No data supplied.' ), array( 'status' => 400 ) );
+			$user_media         = $this->prepare_item_for_database( $request );
+			$user_media_type_id = $this->get_user_media_type_id( 'wp-user-media-directory' );
 		}
 
-		if ( is_wp_error( $file ) ) {
-			return $file;
-		}
-
-		$name       = basename( $file['file'] );
-		$name_parts = pathinfo( $name );
-		$name       = trim( substr( $name, 0, -(1 + strlen( $name_parts['extension'] ) ) ) );
-
-		$url     = $file['url'];
-		$type    = $file['type'];
-		$file    = $file['file'];
-
-		// use image exif/iptc data for title and caption defaults if possible
-		$image_meta = @wp_read_image_metadata( $file );
-
-		if ( ! empty( $image_meta ) ) {
-			if ( empty( $request['title'] ) && trim( $image_meta['title'] ) && ! is_numeric( sanitize_title( $image_meta['title'] ) ) ) {
-				$request['title'] = $image_meta['title'];
-			}
-
-			if ( empty( $request['caption'] ) && trim( $image_meta['caption'] ) ) {
-				$request['caption'] = $image_meta['caption'];
-			}
-		}
-
-		$user_media = $this->prepare_item_for_database( $request );
-		$user_media->file = $file;
-		$user_media->post_mime_type = $type;
-		$user_media->guid = $url;
-
-		if ( empty( $user_media->post_title ) ) {
-			$user_media->post_title = preg_replace( '/\.[^.]+$/', '', basename( $file ) );
+		// Dir or file types are terms
+		if ( ! empty( $user_media_type_id ) ) {
+			$user_media->tax_input = array(
+				'user_media_types' => array( $user_media_type_id ),
+			);
 		}
 
 		$id = wp_insert_post( wp_slash( (array) $user_media ), true );
@@ -320,14 +385,15 @@ class WP_User_Media_REST_Controller extends WP_REST_Attachments_Controller {
 				$id->add_data( array( 'status' => 400 ) );
 			}
 			return $id;
-
-		// Create the Attached file & update the user's disk usage.
 		} else {
-			// @todo Multisite probably requires to do a switch to blog there
-			update_attached_file( $id, $file );
+			// Create the Attached file & update the user's disk usage.
+			if ( 'upload_user_media' === $action ) {
+				// @todo Multisite probably requires to do a switch to blog there
+				update_attached_file( $id, $file );
 
-			if ( $size ) {
-				wp_user_meta_disk_usage_update( get_current_user_id(), $size );
+				if ( $size ) {
+					wp_user_meta_disk_usage_update( get_current_user_id(), $size );
+				}
 			}
 		}
 
@@ -341,18 +407,45 @@ class WP_User_Media_REST_Controller extends WP_REST_Attachments_Controller {
 		 * @param WP_Post         $user_media Inserted or updated User media
 		 *                                    object.
 		 * @param WP_REST_Request $request    The request sent to the API.
-		 * @param bool            $creating   True when creating an attachment, false when updating.
+		 * @param bool            $creating   True when creating a User Media/Dir, false when updating.
+		 * @param string          $action     The action being performed.
 		 */
-		do_action( 'rest_insert_user_media', $user_media, $request, true );
+		do_action( 'rest_insert_user_media', $user_media, $request, true, $action );
 
-		// Include admin functions to get access to wp_generate_attachment_metadata().
-		require_once ABSPATH . 'wp-admin/includes/admin.php';
+		if ( 'upload_user_media' === $action ) {
+			// Include admin functions to get access to wp_generate_attachment_metadata().
+			require_once ABSPATH . 'wp-admin/includes/admin.php';
 
-		// @todo Multisite probably requires to do a switch to blog there
-		wp_update_attachment_metadata( $id, wp_generate_attachment_metadata( $id, $file ) );
+			// @todo Multisite probably requires to do a switch to blog there
+			wp_update_attachment_metadata( $id, wp_generate_attachment_metadata( $id, $file ) );
 
-		if ( isset( $request['alt_text'] ) ) {
-			update_post_meta( $id, '_wp_attachment_image_alt', sanitize_text_field( $request['alt_text'] ) );
+			if ( isset( $request['alt_text'] ) ) {
+				update_post_meta( $id, '_wp_attachment_image_alt', sanitize_text_field( $request['alt_text'] ) );
+			}
+
+		} elseif ( 'mkdir_user_media' === $action ) {
+			$parent     = wp_get_post_parent_id( $user_media );
+			$upload_dir = $this->upload_dir_filter();
+
+			if ( 0 === (int) $parent ) {
+				$relative_path = $upload_dir['subdir'];
+			} else {
+				$relative_path = get_post_meta( $parent, '_wp_user_media_relative_path' );
+			}
+
+			$dir = $upload_dir['basedir'] . '/' . $relative_path;
+
+			if ( ! is_dir( $dir ) ) {
+				return new WP_Error( 'rest_mkdir_no_parent_dir', __( 'No data supplied.', 'wp-user-media' ), array( 'status' => 400 ) );
+			}
+
+			$dirname = wp_unique_filename( $dir, $user_media->post_name );
+
+			if ( ! wp_mkdir_p( $dir . '/' . $dirname ) ) {
+				return new WP_Error( 'rest_mkdir_failed', __( 'Writing the directory failed.', 'wp-user-media' ), array( 'status' => 400 ) );
+			}
+
+			update_post_meta( $id, '_wp_user_media_relative_path', $dir . '/' . $dirname );
 		}
 
 		$fields_update = $this->update_additional_fields_for_object( $user_media, $request );
