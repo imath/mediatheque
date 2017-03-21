@@ -368,5 +368,6 @@ location ~* /(?:uploads|files)/wp-user-media/private/.* {
 		wp_user_media_get_template_part( 'user-media', 'wp-user-media-media' );
 		wp_user_media_get_template_part( 'uploader', 'wp-user-media-uploader' );
 		wp_user_media_get_template_part( 'progress', 'wp-user-media-progress' );
+		wp_user_media_get_template_part( 'dirmaker', 'wp-user-media-dirmaker' );
 	}
 }

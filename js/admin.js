@@ -302,6 +302,10 @@ window.wp = window.wp || {};
 		id: wpUserMediaSettings.params.container,
 		template: wpUserMedia.template( 'wp-user-media-uploader' ),
 
+		events: {
+			'click button.close' : 'removeSelf'
+		},
+
 		initialize: function() {
 			this.model = new Backbone.Model( _.pick( wpUserMediaSettings.params, 'container', 'browser', 'dropzone' ) );
 			this.on( 'ready', this.initUploader );
@@ -325,7 +329,19 @@ window.wp = window.wp || {};
 
 		addProgressView: function( file ) {
 			this.views.add( '#wp-user-media-upload-status', new wpUserMedia.Views.uploaderProgress( { model: file } ) );
+		},
+
+		removeSelf: function( event ) {
+			event.preventDefault();
+
+			wpUserMedia.App.toolbarItems.get( 'upload' ).set( { active: false } );
 		}
+	} );
+
+	wpUserMedia.Views.MkDir = wpUserMedia.View.extend( {
+		tagName: 'form',
+		className: 'directory-form',
+		template: wpUserMedia.template( 'wp-user-media-dirmaker' )
 	} );
 
 	wpUserMedia.Views.ToolbarItem = wpUserMedia.View.extend( {
@@ -341,14 +357,9 @@ window.wp = window.wp || {};
 		},
 
 		refreshItem: function( model, changed ) {
-			var element = $( this.$el ).find( 'a' ).first();
+			var element = $( this.$el ).find( 'button' ).first();
 
-			element.attr( 'data-disable', changed );
-			element.data( 'disable', changed );
-
-			if ( element.parent( 'button' ) ) {
-				element.parent( 'button' ).prop( 'disabled', changed );
-			}
+			element.prop( 'disabled', changed );
 		}
 	} );
 
@@ -357,7 +368,7 @@ window.wp = window.wp || {};
 		className: 'filter-links',
 
 		events: {
-			'click a' : 'activateView'
+			'click button' : 'activateView'
 		},
 
 		initialize: function() {
@@ -407,7 +418,7 @@ window.wp = window.wp || {};
 
 			var current = $( event.currentTarget ), model, disable = false, subview = null;
 
-			if ( current.data( 'disable' ) ) {
+			if ( current.prop( 'disabled' ) ) {
 				return;
 			}
 
@@ -520,31 +531,45 @@ window.wp = window.wp || {};
 
 		displayForms: function( model, active ) {
 			var o = this.options || {}, params = { 'post_status': 'publish' },
-			    s = null;
+			    s = null, empty = _.isUndefined( this.views._views['#forms'] ) || 0 === this.views._views['#forms'].length;
 
 			if ( -1 === _.indexOf( ['upload', 'directory'], model.get( 'id' ) ) ) {
 				return;
 			}
 
-			if ( _.isUndefined( this.views._views['#forms'] ) || 0 === this.views._views['#forms'].length ) {
+			if ( false === active ) {
+				if ( empty ) {
+					return;
+				} else {
+					_.each( this.views._views['#forms'], function( view ) {
+						if ( ( 'upload' === model.get( 'id' ) && view.uploader ) || ( 'directory' === model.get( 'id' ) && ! view.uploader ) ) {
+							view.remove();
+						}
+					} );
+				}
+			} else {
+				if ( ! empty ) {
+					_.each( this.views._views['#forms'], function( view ) {
+						view.remove();
+					} );
+				}
+
 				s = o.toolbarItems.findWhere( { current: true } );
 
 				if ( _.isObject( s ) ) {
 					params.post_status = s.get( 'id' );
 				}
 
-				if ( true === active ) {
-					if ( 'upload' === model.get( 'id' ) ) {
-						this.views.add( '#forms', new wpUserMedia.Views.Uploader( {
-							overrides: o.overrides,
-							params: params
-						} ) );
-					} else {
-						this.views.add( '#forms', new wpUserMedia.Views.MkDir( {
-							overrides: o.overrides,
-							params: params
-						} ) );
-					}
+				if ( 'upload' === model.get( 'id' ) ) {
+					this.views.add( '#forms', new wpUserMedia.Views.Uploader( {
+						overrides: o.overrides,
+						params: params
+					} ) );
+				} else {
+					this.views.add( '#forms', new wpUserMedia.Views.MkDir( {
+						overrides: o.overrides,
+						params: params
+					} ) );
 				}
 			}
 		},

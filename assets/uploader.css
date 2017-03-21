@@ -80,10 +80,17 @@ p.drag-drop-buttons input[type="button"] {
 
 #toolbar button {
 	vertical-align: inherit;
-	margin: 0 1em;
+	margin: 0 0.5em;
 }
 
-#toolbar button a,
-#toolbar button a:hover {
-	color: inherit;
+#toolbar button:not( .button-primary ):not( .button-secondary ) {
+	border: none;
+	border-radius: 0;
+	background: none!important;
+	box-shadow: none!important;
+}
+
+#toolbar li {
+    margin: 0 10px;
+    padding: 15px 0;
 }

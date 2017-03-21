@@ -6,7 +6,7 @@
 [] Make sure to switch_to_blog() before saving the User Media metadata.
 [x] The way the embed template is filter is not right. I should check the post type first.
 [x] Create the 2 User Media Types on activation (File/Folder).
-[] Improve the way Views are added to the screen in admin.js
-[] Only folder will have the choice to be saved as private. Uploading files in it should set their post status as private.
+[x] Improve the way Views are added to the screen in admin.js
 [x] Add a message about how to configure the private folder with nginx: [@see](http://nicknotfound.com/2009/01/12/iphone-website-with-nginx/)
 [x] Use the wp-pointer to guide the user in finishing the plugin's setup (default links vs pretty links, where are the options, where is the main admin)
+[] Make sure an admin can upload a file in another user's folder.
