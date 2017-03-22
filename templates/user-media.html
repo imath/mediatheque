@@ -1,19 +1,27 @@
-<div class="user-media-content" <# if ( data.background ) { #>style="background-image:url( {{{data.background}}} );"<# } #>>
+<# if ( data.uploading ) { #>
+	<div id="{{data.id}}">
+		<div class="wp-user-media-progress">
+			<div class="wp-user-media-bar"></div>
+		</div>
+	</div>
+<# } else { #>
+	<div class="user-media-content" <# if ( data.background ) { #>style="background-image:url( {{{data.background}}} );"<# } #>>
 
-	<# if ( 'image' !== data.media_type ) { #>
-		<# if ( data.media_icon ) { #>
-			<img src="{{data.media_icon}}" alt="{{data.media_type}}">
+		<# if ( 'image' !== data.media_type ) { #>
+			<# if ( data.media_icon ) { #>
+				<img src="{{data.media_icon}}" alt="{{data.media_type}}">
+			<# } #>
+
+			<h4><a href="#/name/{{data.slug}}">{{{data.title.rendered}}}</a></h4>
 		<# } #>
 
-		<h4><a href="#/name/{{data.slug}}">{{{data.title.rendered}}}</a></h4>
-	<# } #>
-
-</div>
-<div class="user-media-actions">
-	<a href="#/name/{{data.slug}}" class="edit"><span class="dashicons dashicons-edit"></span></a>
-	<# if ( data.download ) { #>
-		<a href="{{data.download}}" class="download"><span class="dashicons dashicons-download"></span></a>
-	<# } #>
-	<a href="{{data.link}}" class="view"><span class="dashicons dashicons-visibility"></span></a>
-	<a href="#/delete/{{data.slug}}" class="delete"><span class="dashicons dashicons-trash"></span></a>
-</div>
+	</div>
+	<div class="user-media-actions">
+		<a href="#/name/{{data.slug}}" class="edit"><span class="dashicons dashicons-edit"></span></a>
+		<# if ( data.download ) { #>
+			<a href="{{data.download}}" class="download"><span class="dashicons dashicons-download"></span></a>
+		<# } #>
+		<a href="{{data.link}}" class="view"><span class="dashicons dashicons-visibility"></span></a>
+		<a href="#/delete/{{data.slug}}" class="delete"><span class="dashicons dashicons-trash"></span></a>
+	</div>
+<# } #>

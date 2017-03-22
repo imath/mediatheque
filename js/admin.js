@@ -79,8 +79,7 @@ window.wp = window.wp || {};
 					file:      file,
 					uploading: true,
 					date:      new Date(),
-					filename:  file.name,
-					menuOrder: 0,
+					filename:  file.name
 				}, _.pick( file, 'loaded', 'size', 'percent' ) );
 
 				// Handle early mime type scanning for images.
@@ -203,7 +202,7 @@ window.wp = window.wp || {};
 		}
 	} );
 
-	// Extend wp.Backbone.View with .prepare() and .inject()
+	// Extend wp.Backbone.View with .prepare()
 	wpUserMedia.View = wpUserMedia.Backbone.View.extend( {
 		prepare: function() {
 			if ( ! _.isUndefined( this.model ) && _.isFunction( this.model.toJSON ) ) {
@@ -258,23 +257,52 @@ window.wp = window.wp || {};
 		template: wpUserMedia.template( 'wp-user-media-media' ),
 
 		initialize: function() {
-			if ( 'dir' === this.model.get( 'media_type' ) ) {
+			if ( this.model.get( 'uploading' ) ) {
+				// Show Upload progress
+				this.model.on( 'change:percent', this.progress, this );
+
+				// Replace the uploaded file with the User Media model.
+				this.model.on( 'change:guid', this.update, this );
+
+			// The dir background is specific.
+			} else if ( 'dir' === this.model.get( 'media_type' ) ) {
 				this.el.className += ' dir';
+
+			// Set additionnal urls
 			} else {
-				if ( 'image' === this.model.get( 'media_type' ) ) {
-					var bgUrl = this.model.get( 'guid' ).rendered,
-					    mediaDetails = this.model.get( 'media_details' ), fileName;
+				this.setMediaUrls();
+			}
+		},
 
-					if ( _.isObject( mediaDetails.medium ) ) {
-						fileName = mediaDetails.file.split( '/' );
-						bgUrl = bgUrl.replace( fileName[ oFile.length - 1 ], mediaDetails.medium.file );
-					}
+		setMediaUrls: function() {
+			if ( 'image' === this.model.get( 'media_type' ) && this.model.get( 'guid' ) ) {
+				var bgUrl = this.model.get( 'guid' ).rendered,
+				    mediaDetails = this.model.get( 'media_details' ), fileName;
 
-					this.model.set( { background: bgUrl }, { silent: true } );
+				if ( _.isObject( mediaDetails.medium ) ) {
+					fileName = mediaDetails.file.split( '/' );
+					bgUrl = bgUrl.replace( fileName[ oFile.length - 1 ], mediaDetails.medium.file );
 				}
 
-				this.model.set( { download: this.model.get( 'link' ) + wpUserMediaSettings.common.downloadSlug + '/' }, { silent: true } );
+				this.model.set( { background: bgUrl }, { silent: true } );
 			}
+
+			this.model.set( { download: this.model.get( 'link' ) + wpUserMediaSettings.common.downloadSlug + '/' }, { silent: true } );
+		},
+
+		progress: function( file ) {
+			if ( ! _.isUndefined( file.get( 'percent' ) ) ) {
+				$( '#' + file.get( 'id' ) + ' .wp-user-media-progress .wp-user-media-bar' ).css( 'width', file.get('percent') + '%' );
+			}
+		},
+
+		update: function( file ) {
+			_.each( ['date', 'filename', 'uploading', 'subtype' ], function( attribute ) {
+				file.unset( attribute, { silent: true } );
+			} );
+
+			this.setMediaUrls();
+			this.render();
 		}
 	} );
 
@@ -416,7 +444,13 @@ window.wp = window.wp || {};
 		},
 
 		addProgressView: function( file ) {
-			this.views.add( '#wp-user-media-upload-status', new wpUserMedia.Views.uploaderProgress( { model: file } ) );
+			var o = this.options || {};
+
+			if ( ! _.isObject( o.mediaView ) ) {
+				this.views.add( '#wp-user-media-upload-status', new wpUserMedia.Views.uploaderProgress( { model: file } ) );
+			} else {
+				o.mediaView.collection.add( file.set( { at: 0 }, { silent: true } ) );
+			}
 		}
 	} );
 
@@ -640,7 +674,8 @@ window.wp = window.wp || {};
 					this.views.add( '#forms', new wpUserMedia.Views.Uploader( {
 						overrides: o.overrides,
 						params: params,
-						toolbarItem: 'upload'
+						toolbarItem: 'upload',
+						mediaView: _.first( this.views._views['#media'] )
 					} ) );
 				} else {
 					this.views.add( '#forms', new wpUserMedia.Views.MkDir( {

@@ -58,7 +58,8 @@ p.drag-drop-buttons input[type="button"] {
 	margin: 1em 0;
 }
 
-#wp-user-media-upload-status .wp-user-media-progress {
+#wp-user-media-upload-status .wp-user-media-progress,
+#wp-user-media-container #media ul li.user-media .wp-user-media-progress {
 	background: none;
 	border: 1px solid #d1d1d1;
 	float: right;
@@ -71,7 +72,14 @@ p.drag-drop-buttons input[type="button"] {
 	width: 200px;
 }
 
-#wp-user-media-upload-status .wp-user-media-bar {
+#wp-user-media-container #media ul li.user-media .wp-user-media-progress {
+	float: left;
+	margin: 45% 2% 45% 2%;
+	width: 95%;
+}
+
+#wp-user-media-upload-status .wp-user-media-bar,
+#wp-user-media-container #media ul li.user-media .wp-user-media-bar {
 	background-color: #0073aa;
 	width: 0;
 	height: 100%;
