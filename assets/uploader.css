@@ -187,10 +187,20 @@ p.drag-drop-buttons input[type="button"] {
 	width: 100%;
 }
 
+#wp-user-media-container #media ul li.user-media div.user-media-content img {
+	position: absolute;
+	bottom: 20px;
+	top: 0;
+	left: 0;
+	right: 0;
+	margin: auto;
+}
+
 #wp-user-media-container #media ul li.user-media div.user-media-actions {
+	margin: 0.5em 0;
 	overflow: hidden;
 	text-align: center;
-	vertical-align: bottom;
+	vertical-align: middle;
 	height: 100%;
 }
 

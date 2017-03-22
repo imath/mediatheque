@@ -280,6 +280,12 @@ class WP_User_Media_REST_Controller extends WP_REST_Attachments_Controller {
 		if ( in_array( $this->get_user_media_type_id( 'wp-user-media-directory' ), $data['user_media_types'], true ) ) {
 			$data['media_type'] = 'dir';
 			$response = rest_ensure_response( $data );
+		} elseif ( 'image' !== $data['media_type'] ) {
+			$filepath = get_attached_file( $data['id'] );
+			$filetype = wp_check_filetype( $filepath );
+			$type     = wp_ext2type( $filetype['ext'] );
+			$data['media_icon'] = wp_mime_type_icon( $type );
+			$response = rest_ensure_response( $data );
 		}
 
 		/**
