@@ -273,7 +273,7 @@ window.wp = window.wp || {};
 					this.model.set( { background: bgUrl }, { silent: true } );
 				}
 
-				this.model.set( { download: this.model.get( 'link' ) + 'download/' }, { silent: true } );
+				this.model.set( { download: this.model.get( 'link' ) + wpUserMediaSettings.common.downloadSlug + '/' }, { silent: true } );
 			}
 		}
 	} );
@@ -335,6 +335,10 @@ window.wp = window.wp || {};
 			'click #create-dir'  : 'createDir'
 		},
 
+		initialize: function() {
+			this.model.set( _.pick( wpUserMediaSettings.common, 'closeBtn' ), { silent: true } );
+		},
+
 		removeSelf: function( event ) {
 			if ( _.isObject( event ) ) {
 				event.preventDefault();
@@ -389,12 +393,14 @@ window.wp = window.wp || {};
 		template: wpUserMedia.template( 'wp-user-media-uploader' ),
 
 		initialize: function() {
-			this.model = new Backbone.Model( _.pick( wpUserMediaSettings.params, 'container', 'browser', 'dropzone' ) );
+			this.model = new Backbone.Model( wpUserMediaSettings.params );
 			this.on( 'ready', this.initUploader );
+
+			wpUserMedia.Views.MkDir.prototype.initialize.apply( this, arguments );
 		},
 
 		initUploader: function() {
-			var pluploadOptions = _.mapObject( this.model.attributes, function( v, k ) {
+			var pluploadOptions = _.mapObject( _.pick( this.model.attributes, 'container', 'browser', 'dropzone' ), function( v, k ) {
 				return '#' + v;
 			} );
 

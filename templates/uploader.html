@@ -1,11 +1,11 @@
 <div id="{{data.dropzone}}">
-	<button class="close dashicons dashicons-no"><span class="screen-reader-text">Close</span></button>
+	<button class="close dashicons dashicons-no"><span class="screen-reader-text">{{data.closeBtn}}</span></button>
 	<div class="drag-drop-inside">
-		<h2 class="drag-drop-info">Drop files anywhere to upload</h2>
-		<p class="drag-drop-info">or</p>
+		<h2 class="drag-drop-info">{{data.dropHelp}}</h2>
+		<p class="drag-drop-info">{{data.dropOr}}</p>
 		<p class="drag-drop-buttons">
 			<label for="{{data.browser}}" class="screen-reader-text"></label>
-			<input id="{{data.browser}}" type="button" value="Select files" class="browser button button-hero" />
+			<input id="{{data.browser}}" type="button" value="{{data.btnBrowse}}" class="browser button button-hero" />
 		</p>
 	</div>
 </div>

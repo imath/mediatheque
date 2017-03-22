@@ -330,6 +330,9 @@ location ~* /(?:uploads|files)/wp-user-media/private/.* {
 				'container' => 'wp-user-media-ui',
 				'browser'   => 'wp-user-media-browse',
 				'dropzone'  => 'drag-drop-area',
+				'dropHelp'  => __( 'Drop files anywhere to upload', 'wp-user-media' ),
+				'dropOr'    => __( 'or', 'wp-user-media' ),
+				'btnBrowse' => __( 'Select files', 'wp-user-media' ),
 			),
 			'toolbarItems' => array_merge( array(
 					'users'    => __( 'Browse Users', 'wp-user-media' )
@@ -343,6 +346,10 @@ location ~* /(?:uploads|files)/wp-user-media/private/.* {
 			'dirmaker' => array(
 				'label'   => __( 'Name of your directory', 'wp-user-media' ),
 				'saveBtn' => __( 'Create', 'wp-user-media' ),
+			),
+			'common' => array(
+				'downloadSlug' => wp_user_media_get_download_rewrite_slug(),
+				'closeBtn'     => __( 'Close', 'wp-user-media' ),
 			),
 		) );
 
