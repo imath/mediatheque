@@ -368,7 +368,7 @@ window.wp = window.wp || {};
 		},
 
 		removeSelf: function( event ) {
-			if ( _.isObject( event ) ) {
+			if ( _.isObject( event ) && event.currentTarget ) {
 				event.preventDefault();
 			}
 
@@ -437,6 +437,7 @@ window.wp = window.wp || {};
 
 			this.uploader.filesError.on( 'add', this.uploadError, this );
 			this.uploader.filesQueue.on( 'add', this.addProgressView, this );
+			this.uploader.filesQueue.on( 'reset', this.removeSelf, this );
 		},
 
 		uploadError: function( error ) {
