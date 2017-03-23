@@ -140,7 +140,8 @@ p.drag-drop-buttons input[type="button"] {
 	box-shadow: 0 1px 0 #ccc;
 }
 
-#wp-user-media-container #users ul.users {
+#wp-user-media-container #users ul.users,
+#wp-user-media-container #media ul.user-media {
 	overflow: hidden;
 	list-style: none;
 }

@@ -228,10 +228,14 @@ window.wp = window.wp || {};
 		},
 
 		initialize: function() {
-			this.collection.on( 'add', this.addUserView, this );
+			this.collection.on( 'add', this.addItemView, this );
+
+			this.isRequestingMore = false;
+
+			$( document ).on( 'scroll', _.bind( this.scroll, this ) );
 		},
 
-		addUserView: function( user ) {
+		addItemView: function( user ) {
 			this.views.add( new wpUserMedia.Views.User( { model: user } ) );
 		},
 
@@ -248,6 +252,27 @@ window.wp = window.wp || {};
 
 				model.set( attributes );
 			} );
+		},
+
+		scroll: function() {
+			var listOffset = $( this.el ).offset(), el = document.body,
+			    scrollTop = $(document).scrollTop();
+
+			if ( ! this.collection.hasMore() || this.isRequestingMore ) {
+				return;
+			}
+
+			if ( el.scrollHeight - scrollTop < el.scrollHeight - listOffset.top ) {
+				this.isRequestingMore = true;
+				this.collection.more( {
+					success : _.bind( this.resetRequestingMore, this ),
+					error   : _.bind( this.resetRequestingMore, this )
+				} );
+			}
+		},
+
+		resetRequestingMore: function() {
+			this.isRequestingMore = false;
 		}
 	} );
 
@@ -306,13 +331,14 @@ window.wp = window.wp || {};
 		}
 	} );
 
-	wpUserMedia.Views.UserMedias = wpUserMedia.View.extend( {
+	wpUserMedia.Views.UserMedias = wpUserMedia.Views.Users.extend( {
 		tagName:   'ul',
 		className: 'user-media',
 
 		initialize: function() {
+			wpUserMedia.Views.Users.prototype.initialize.apply( this, arguments );
+
 			this.collection.on( 'reset', this.queryMedia, this );
-			this.collection.on( 'add', this.addUserView, this );
 
 			this.collection.reset();
 		},
@@ -325,7 +351,7 @@ window.wp = window.wp || {};
 			} );
 		},
 
-		addUserView: function( user_media ) {
+		addItemView: function( user_media ) {
 			var position = user_media.get( 'at' );
 
 			if ( _.isUndefined( position ) ) {
