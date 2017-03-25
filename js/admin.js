@@ -256,13 +256,17 @@ window.wp = window.wp || {};
 
 		scroll: function() {
 			var listOffset = $( this.el ).offset(), el = document.body,
-			    scrollTop = $(document).scrollTop();
+			    scrollTop = $( document ).scrollTop(), sensibility = 20;
+
+			if ( $( '#wpadminbar' ).length ) {
+				sensibility += $( '#wpadminbar' ).height();
+			}
 
 			if ( ! this.collection.hasMore() || this.isRequestingMore ) {
 				return;
 			}
 
-			if ( el.scrollHeight - scrollTop < el.scrollHeight - listOffset.top ) {
+			if ( el.scrollHeight - scrollTop < ( this.el.clientHeight + listOffset.top ) + sensibility ) {
 				this.isRequestingMore = true;
 				this.collection.more( {
 					success : _.bind( this.resetRequestingMore, this ),
