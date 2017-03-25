@@ -266,7 +266,7 @@ window.wp = window.wp || {};
 				return;
 			}
 
-			if ( el.scrollHeight - scrollTop < ( this.el.clientHeight + listOffset.top ) + sensibility ) {
+			if ( scrollTop + el.clientHeight + sensibility > this.el.clientHeight + listOffset.top ) {
 				this.isRequestingMore = true;
 				this.collection.more( {
 					success : _.bind( this.resetRequestingMore, this ),
