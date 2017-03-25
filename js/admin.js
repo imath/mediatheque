@@ -340,28 +340,23 @@ window.wp = window.wp || {};
 		className: 'user-media',
 
 		initialize: function() {
+			var o = this.options || {};
+
 			wpUserMedia.Views.Users.prototype.initialize.apply( this, arguments );
 
-			this.collection.on( 'reset', this.queryMedia, this );
-
 			this.collection.reset();
-		},
-
-		queryMedia: function() {
-			var query_vars = this.options.query_vars || { user_media_context: 'admin' };
-
 			this.collection.fetch( {
-				data : query_vars
+				data : o.queryVars.attributes
 			} );
 		},
 
-		addItemView: function( user_media ) {
-			var position = user_media.get( 'at' );
+		addItemView: function( userMedia ) {
+			var position = userMedia.get( 'at' );
 
 			if ( _.isUndefined( position ) ) {
-				this.views.add( new wpUserMedia.Views.UserMedia( { model: user_media } ) );
+				this.views.add( new wpUserMedia.Views.UserMedia( { model: userMedia } ) );
 			} else {
-				this.views.add( new wpUserMedia.Views.UserMedia( { model: user_media } ), { at: position } );
+				this.views.add( new wpUserMedia.Views.UserMedia( { model: userMedia } ), { at: position } );
 			}
 		}
 	} );
@@ -596,12 +591,13 @@ window.wp = window.wp || {};
 
 		initialize: function() {
 			var o = this.options || {};
-			this.query_vars = { user_media_context: 'admin' };
+			o.queryVars.set( { user_media_context: 'admin' } );
 
 			this.views.add( '#users', new wpUserMedia.Views.Users( { collection: o.users } ) );
 
-			o.users.on( 'reset', this.queryUsers, this );
+			this.listenTo( o.users, 'reset', this.queryUsers );
 			o.users.on( 'change:current', this.setToolbar, this );
+
 			o.toolbarItems.on( 'change:active', this.displayForms, this );
 			o.toolbarItems.on( 'change:current', this.manageLists, this );
 
@@ -732,19 +728,19 @@ window.wp = window.wp || {};
 					this.views.add( '#users', new wpUserMedia.Views.Users( { collection: o.users } ) );
 					o.users.reset();
 				} else {
-					this.query_vars.post_status = model.get( 'id' );
+					o.queryVars.set( { 'post_status': model.get( 'id' ) } );
 
 					// Set the User ID.
 					if ( o.users.length ) {
 						var author = o.users.findWhere( { current: true } );
-						this.query_vars.user_id = author.get( 'id' );
+						o.queryVars.set( { 'user_id': author.get( 'id' ) } );
 					} else {
-						this.query_vars.user_id = 0;
+						o.queryVars.set( { 'user_id': 0 } );
 					}
 
 					this.views.add( '#media', new wpUserMedia.Views.UserMedias( {
 						collection: o.media,
-						query_vars: this.query_vars
+						queryVars: o.queryVars
 					} ) );
 				}
 			}
@@ -757,6 +753,7 @@ window.wp = window.wp || {};
 			this.users        = new wp.api.collections.Users();
 			this.userMedia    = new wp.api.collections.UserMedia();
 			this.toolbarItems = new Backbone.Collection();
+			this.queryVars    = new Backbone.Model();
 
 			this.overrides = {
 				url: restUrl,
@@ -771,7 +768,8 @@ window.wp = window.wp || {};
 				users:        this.users,
 				media:        this.userMedia,
 				overrides:    this.overrides,
-				toolbarItems: this.toolbarItems
+				toolbarItems: this.toolbarItems,
+				queryVars:    this.queryVars
 			} ).render();
 		}
 	};
