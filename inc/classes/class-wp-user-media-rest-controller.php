@@ -16,8 +16,10 @@ defined( 'ABSPATH' ) || exit;
  * @since  1.0.0
  */
 class WP_User_Media_REST_Controller extends WP_REST_Attachments_Controller {
-	public $user_media_status = 'publish';
-	public $user_media_type_ids = array();
+	public $user_media_status     = 'publish';
+	public $user_media_type_ids   = array();
+	public $user_media_parent     = 0;
+	public $user_media_parent_dir = '';
 
 	/**
 	 * Temporarly Adds specific User Media metas to the registered post metas.
@@ -84,6 +86,29 @@ class WP_User_Media_REST_Controller extends WP_REST_Attachments_Controller {
 		}
 
 		return true;
+	}
+
+	/**
+	 * Retrieves the query params for collections of User Media.
+	 *
+	 * @since 1.0.0
+	 * @access public
+	 *
+	 * @return array Query parameters for the User Media collection as an array.
+	 */
+	public function get_collection_params() {
+		$params = parent::get_collection_params();
+
+		$params['parent'] = array(
+			'description'       => __( 'Limit result set to those of particular parent IDs.', 'wp-user-media' ),
+			'type'              => 'array',
+			'items'             => array(
+				'type'          => 'integer',
+			),
+			'default'           => array(),
+		);
+
+		return $params;
 	}
 
 	/**
@@ -162,7 +187,13 @@ class WP_User_Media_REST_Controller extends WP_REST_Attachments_Controller {
 	public function upload_dir_filter() {
 		$dir = wp_user_media_get_upload_dir();
 
-		$dir['subdir'] .= sprintf( '/%1$s/%2$s', $this->user_media_status, get_current_user_id() );
+		if ( $this->user_media_parent_dir ) {
+			$dir['subdir'] = '/' . $this->user_media_parent_dir;
+		} else {
+			// Should check the request for a user ID and fall back to current user ID.
+			$dir['subdir'] .= sprintf( '/%1$s/%2$s', $this->user_media_status, get_current_user_id() );
+		}
+
 		$dir['path']    = sprintf( '%s%s', $dir['basedir'], $dir['subdir'] );
 		$dir['url']     = sprintf( '%s%s', $dir['baseurl'], $dir['subdir'] );
 
@@ -182,7 +213,7 @@ class WP_User_Media_REST_Controller extends WP_REST_Attachments_Controller {
 	 */
 	protected function upload_from_file( $files, $headers, $action = '' ) {
 		if ( empty( $files ) ) {
-			return new WP_Error( 'rest_upload_no_data', __( 'No data supplied.' ), array( 'status' => 400 ) );
+			return new WP_Error( 'rest_upload_no_data', __( 'No data supplied.', 'wp-user-media' ), array( 'status' => 400 ) );
 		}
 
 		// Verify hash, if given.
@@ -192,7 +223,7 @@ class WP_User_Media_REST_Controller extends WP_REST_Attachments_Controller {
 			$actual      = md5_file( $files['file']['tmp_name'] );
 
 			if ( $expected !== $actual ) {
-				return new WP_Error( 'rest_upload_hash_mismatch', __( 'Content hash did not match expected.' ), array( 'status' => 412 ) );
+				return new WP_Error( 'rest_upload_hash_mismatch', __( 'Content hash did not match expected.', 'wp-user-media' ), array( 'status' => 412 ) );
 			}
 		}
 
@@ -259,6 +290,7 @@ class WP_User_Media_REST_Controller extends WP_REST_Attachments_Controller {
 	protected function prepare_item_for_database( $request ) {
 		$prepared_user_media = parent::prepare_item_for_database( $request );
 		$prepared_user_media->post_status = $this->user_media_status;
+		$prepared_user_media->post_parent = $this->user_media_parent;
 
 		return $prepared_user_media;
 	}
@@ -319,6 +351,16 @@ class WP_User_Media_REST_Controller extends WP_REST_Attachments_Controller {
 		$requested_status = $request->get_param( 'post_status' );
 		if ( $requested_status && get_post_status_object( $requested_status ) ) {
 			$this->user_media_status = $requested_status;
+		}
+
+		$parent_dir = $request->get_param( 'post_parent' );
+		if ( $parent_dir ) {
+			$post_parent = get_post( $parent_dir );
+
+			if ( ! empty( $post_parent->ID ) ) {
+				$this->user_media_parent     = $post_parent->ID;
+				$this->user_media_parent_dir = get_post_meta( $this->user_media_parent, '_wp_user_media_relative_path', true );
+			}
 		}
 
 		// Add a file
@@ -443,7 +485,7 @@ class WP_User_Media_REST_Controller extends WP_REST_Attachments_Controller {
 			if ( ! $parent ) {
 				$relative_path = $upload_dir['subdir'];
 			} else {
-				$relative_path = get_post_meta( $parent, '_wp_user_media_relative_path' );
+				$relative_path = get_post_meta( $parent, '_wp_user_media_relative_path', true );
 			}
 
 			$dir = $upload_dir['basedir'] . $relative_path;

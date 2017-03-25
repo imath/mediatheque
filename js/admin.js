@@ -296,6 +296,7 @@ window.wp = window.wp || {};
 			// The dir background is specific.
 			} else if ( 'dir' === this.model.get( 'media_type' ) ) {
 				this.el.className += ' dir';
+				$( this.el ).attr( 'data-id', this.model.get( 'id' ) );
 
 			// Set additionnal urls
 			} else {
@@ -339,10 +340,29 @@ window.wp = window.wp || {};
 		tagName:   'ul',
 		className: 'user-media',
 
+		events: {
+			'click .dir .user-media-content' : 'openDir'
+		},
+
 		initialize: function() {
+			wpUserMedia.Views.Users.prototype.initialize.apply( this, arguments );
+
+			this.queryUserMedia();
+		},
+
+		queryUserMedia: function( options ) {
 			var o = this.options || {};
 
-			wpUserMedia.Views.Users.prototype.initialize.apply( this, arguments );
+			if ( _.isObject( options ) ) {
+				o.queryVars.set( options );
+			}
+
+			// Clean subviews.
+			if ( ! _.isUndefined( this.views._views[''] ) && this.views._views[''].length ) {
+				_.each( this.views._views[''], function( view ) {
+					view.remove();
+				} );
+			}
 
 			this.collection.reset();
 			this.collection.fetch( {
@@ -358,6 +378,19 @@ window.wp = window.wp || {};
 			} else {
 				this.views.add( new wpUserMedia.Views.UserMedia( { model: userMedia } ), { at: position } );
 			}
+		},
+
+		openDir: function( event ) {
+			event.preventDefault();
+
+			var parent = $( event.currentTarget ).parent( '.dir' ).data( 'id' ),
+			    o = this.options || {};
+
+			if ( ! parent ) {
+				return;
+			}
+
+			this.queryUserMedia( { 'parent': parent } );
 		}
 	} );
 
@@ -591,17 +624,17 @@ window.wp = window.wp || {};
 
 		initialize: function() {
 			var o = this.options || {};
-			o.queryVars.set( { user_media_context: 'admin' } );
 
 			this.views.add( '#users', new wpUserMedia.Views.Users( { collection: o.users } ) );
 
 			this.listenTo( o.users, 'reset', this.queryUsers );
 			o.users.on( 'change:current', this.setToolbar, this );
+			o.users.reset();
 
 			o.toolbarItems.on( 'change:active', this.displayForms, this );
 			o.toolbarItems.on( 'change:current', this.manageLists, this );
 
-			o.users.reset();
+			this.listenTo( o.queryVars, 'change:parent', this.userMediaQueryChanges );
 		},
 
 		/**
@@ -697,6 +730,10 @@ window.wp = window.wp || {};
 					params.post_status = s.get( 'id' );
 				}
 
+				if ( o.queryVars.get( 'parent' ) ) {
+					params.post_parent = o.queryVars.get( 'parent' );
+				}
+
 				if ( 'upload' === model.get( 'id' ) ) {
 					this.views.add( '#forms', new wpUserMedia.Views.Uploader( {
 						overrides: o.overrides,
@@ -728,7 +765,12 @@ window.wp = window.wp || {};
 					this.views.add( '#users', new wpUserMedia.Views.Users( { collection: o.users } ) );
 					o.users.reset();
 				} else {
-					o.queryVars.set( { 'post_status': model.get( 'id' ) } );
+					o.queryVars.clear();
+					o.queryVars.set( {
+						'user_media_context': 'admin',
+						'post_status': model.get( 'id' ),
+						'parent'     : 0
+					} );
 
 					// Set the User ID.
 					if ( o.users.length ) {
@@ -744,6 +786,15 @@ window.wp = window.wp || {};
 					} ) );
 				}
 			}
+		},
+
+		userMediaQueryChanges( model, changed ) {
+			if ( _.isUndefined( changed ) ) {
+				return;
+			}
+
+			// Add to trail the current displayed folder.
+			//console.log( this.options.media.get( changed ) );
 		}
 	} );
 

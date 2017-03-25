@@ -11,5 +11,6 @@
 [x] Add a message about how to configure the private folder with nginx: [@see](http://nicknotfound.com/2009/01/12/iphone-website-with-nginx/)
 [x] Use the wp-pointer to guide the user in finishing the plugin's setup (default links vs pretty links, where are the options, where is the main admin)
 [] Make sure an admin can upload a file in another user's folder.
-[] Use a Backbone Model to store query vars (eg: user ID, parent directory ID etc..)
+[x] Use a Backbone Model to store query vars (eg: user ID, parent directory ID etc..)
 [] Add a breadcrumb to navigate into parent directories when inside a directory.
+[] Add a check to make sure the destination folder is within /wp-content/uploads.
