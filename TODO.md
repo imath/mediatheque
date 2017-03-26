@@ -14,3 +14,4 @@
 [x] Use a Backbone Model to store query vars (eg: user ID, parent directory ID etc..)
 [] Add a breadcrumb to navigate into parent directories when inside a directory.
 [] Add a check to make sure the destination folder is within /wp-content/uploads.
+[] Make sure to use copy and unlink because rename breaks streams.

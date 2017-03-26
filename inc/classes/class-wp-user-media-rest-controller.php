@@ -194,8 +194,8 @@ class WP_User_Media_REST_Controller extends WP_REST_Attachments_Controller {
 			$dir['subdir'] .= sprintf( '/%1$s/%2$s', $this->user_media_status, get_current_user_id() );
 		}
 
-		$dir['path']    = sprintf( '%s%s', $dir['basedir'], $dir['subdir'] );
-		$dir['url']     = sprintf( '%s%s', $dir['baseurl'], $dir['subdir'] );
+		$dir['path'] = sprintf( '%s%s', $dir['basedir'], $dir['subdir'] );
+		$dir['url']  = sprintf( '%s%s', $dir['baseurl'], $dir['subdir'] );
 
 		return $dir;
 	}
@@ -472,26 +472,14 @@ class WP_User_Media_REST_Controller extends WP_REST_Attachments_Controller {
 			}
 
 		} elseif ( 'mkdir_user_media' === $action ) {
-			$parent     = wp_get_post_parent_id( $user_media );
 			$upload_dir = $this->upload_dir_filter();
+			$dir        = $upload_dir['path'];
 
 			// If the user's root dir is not set yet, create it.
-			if ( ! is_dir( $upload_dir['path'] ) ) {
-				if ( ! wp_mkdir_p( $upload_dir['path'] ) ) {
-					return new WP_Error( 'rest_mkdir_failed', __( 'Writing the user\'s root directory failed.', 'wp-user-media' ), array( 'status' => 400 ) );
-				}
-			}
-
-			if ( ! $parent ) {
-				$relative_path = $upload_dir['subdir'];
-			} else {
-				$relative_path = get_post_meta( $parent, '_wp_user_media_relative_path', true );
-			}
-
-			$dir = $upload_dir['basedir'] . $relative_path;
-
 			if ( ! is_dir( $dir ) ) {
-				return new WP_Error( 'rest_mkdir_no_parent_dir', __( 'No data supplied.', 'wp-user-media' ), array( 'status' => 400 ) );
+				if ( ! wp_mkdir_p( $dir ) ) {
+					return new WP_Error( 'rest_mkdir_failed', __( 'Writing the user\'s parent directory failed.', 'wp-user-media' ), array( 'status' => 400 ) );
+				}
 			}
 
 			$dirname = wp_unique_filename( $dir, $user_media->post_name );
