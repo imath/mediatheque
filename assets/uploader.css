@@ -220,3 +220,17 @@ p.drag-drop-buttons input[type="button"] {
 	border: none;
 }
 
+#wp-user-media-container #trail ul {
+	list-style: none;
+	overflow: hidden;
+	margin-top: 0;
+}
+
+#wp-user-media-container #trail ul li {
+	float: left;
+	margin-right: 0.5em;
+}
+
+#wp-user-media-container #trail ul li img.avatar {
+	vertical-align: top;
+}

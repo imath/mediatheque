@@ -620,6 +620,56 @@ window.wp = window.wp || {};
 		}
 	} );
 
+	wpUserMedia.Views.TrailItem = wpUserMedia.View.extend( {
+		tagName  : 'li',
+		template: wpUserMedia.template( 'wp-user-media-trail' ),
+
+		initialize: function() {
+			if ( this.model.get( 'showLink') ) {
+				this.model.unset( 'showLink', { silent: true } );
+			}
+
+			this.model.on( 'change:showLink', this.rerender, this );
+		},
+
+		rerender: function() {
+			this.render();
+		}
+	} );
+
+	wpUserMedia.Views.Trail = wpUserMedia.View.extend( {
+		tagName  : 'ul',
+		className: 'trail-links',
+
+		events: {
+			'click a' : 'moveUp'
+		},
+
+		initialize: function() {
+			this.collection.on( 'reset', this.resetTrail, this );
+			this.collection.on( 'add', this.addTrailItem, this );
+		},
+
+		resetTrail: function() {
+			// Clean subviews.
+			if ( ! _.isUndefined( this.views._views[''] ) && this.views._views[''].length ) {
+				_.each( this.views._views[''], function( view ) {
+					view.remove();
+				} );
+			}
+		},
+
+		addTrailItem: function( trailItem ) {
+			this.views.add( new wpUserMedia.Views.TrailItem( { model: trailItem } ) );
+		},
+
+		moveUp: function( event ) {
+			event.preventDefault();
+
+			console.log( $( event.currentTarget ).prop( 'class' ) );
+		}
+	} );
+
 	wpUserMedia.Views.Root = wpUserMedia.View.extend( {
 
 		initialize: function() {
@@ -764,7 +814,24 @@ window.wp = window.wp || {};
 				if ( 'users' === model.get( 'id' ) ) {
 					this.views.add( '#users', new wpUserMedia.Views.Users( { collection: o.users } ) );
 					o.users.reset();
+
+					// Remove the trail when switching users.
+					if ( ! _.isUndefined( this.views._views['#trail'] ) && 0 !== this.views._views['#trail'].length ) {
+						_.first( this.views._views['#trail'] ).remove();
+					}
 				} else {
+					// Add the trail view
+					if ( _.isUndefined( this.views._views['#trail'] ) || 0 === this.views._views['#trail'].length ) {
+						this.views.add( '#trail', new wpUserMedia.Views.Trail( {
+							collection: o.trailItems,
+							queryVars: o.queryVars
+						} ) );
+					}
+
+					// Reset the trail collection
+					o.trailItems.reset();
+
+					// Reset the Query vars
 					o.queryVars.clear();
 					o.queryVars.set( {
 						'user_media_context': 'admin',
@@ -776,10 +843,17 @@ window.wp = window.wp || {};
 					if ( o.users.length ) {
 						var author = o.users.findWhere( { current: true } );
 						o.queryVars.set( { 'user_id': author.get( 'id' ) } );
+
+						// Add the User to trail
+						o.trailItems.add( author );
 					} else {
 						o.queryVars.set( { 'user_id': 0 } );
 					}
 
+					// Add the Status
+					o.trailItems.add( model );
+
+					// Add the media view
 					this.views.add( '#media', new wpUserMedia.Views.UserMedias( {
 						collection: o.media,
 						queryVars: o.queryVars
@@ -789,12 +863,29 @@ window.wp = window.wp || {};
 		},
 
 		userMediaQueryChanges( model, changed ) {
+			var o = this.options || {}, dir, parent, status;
+
 			if ( _.isUndefined( changed ) ) {
 				return;
 			}
 
+			dir = o.media.get( changed );
+
+			if ( ! _.isUndefined( dir ) ) {
+
+				if ( 0 === dir.get( 'parent' ) ) {
+					status = o.toolbarItems.findWhere( { current: true } );
+					parent = o.trailItems.get( status.get( 'id' ) );
+					parent.set( { showLink: true } );
+
+				} else {
+					parent = o.trailItems.get( dir.get( 'parent') );
+					parent.set( { showLink: true } );
+				}
+			}
+
 			// Add to trail the current displayed folder.
-			//console.log( this.options.media.get( changed ) );
+			o.trailItems.add( o.media.get( changed ) );
 		}
 	} );
 
@@ -805,6 +896,7 @@ window.wp = window.wp || {};
 			this.userMedia    = new wp.api.collections.UserMedia();
 			this.toolbarItems = new Backbone.Collection();
 			this.queryVars    = new Backbone.Model();
+			this.trailItems   = new Backbone.Collection();
 
 			this.overrides = {
 				url: restUrl,
@@ -820,7 +912,8 @@ window.wp = window.wp || {};
 				media:        this.userMedia,
 				overrides:    this.overrides,
 				toolbarItems: this.toolbarItems,
-				queryVars:    this.queryVars
+				queryVars:    this.queryVars,
+				trailItems:   this.trailItems
 			} ).render();
 		}
 	};

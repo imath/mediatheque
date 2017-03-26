@@ -1,0 +1,21 @@
+<# if ( data.avatar_urls ) { #>
+	<span>
+		<# if ( data.avatar_urls[24] ) { #>
+			<img src="{{data.avatar_urls[24]}}" class="avatar" height="24" width="24"/>
+		<# } else { #>
+			{{data.name}}
+		<# } #>
+	</span>
+<# } else if ( data.position ) { #>
+	<span class="dashicons dashicons-arrow-right"></span><span>
+	<# if ( data.showLink ) { #>
+		<a href="#" class="root-dir" data-id="{{data.id}}">{{data.name}}</a>
+	<# } else { #>
+		{{data.name}}
+	<# } #>
+	</span>
+<# } else if ( data.showLink ) { #>
+	<span class="dashicons dashicons-arrow-right"></span><span><a href="#/name/{{data.slug}}" class="parent-dir" data-id="{{data.id}}">{{{data.title.rendered}}}</a></span>
+<# } else { #>
+	<span class="dashicons dashicons-arrow-right"></span><span>{{{data.title.rendered}}}</span>
+<# } #>

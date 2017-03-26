@@ -369,6 +369,7 @@ location ~* /(?:uploads|files)/wp-user-media/private/.* {
 					<div id="toolbar" class="wp-filter"></div>
 					<div id="forms"></div>
 					<div id="users"></div>
+					<div id="trail"></div>
 					<div id="media"></div>
 				</div>
 			</div>
@@ -377,6 +378,7 @@ location ~* /(?:uploads|files)/wp-user-media/private/.* {
 		wp_user_media_get_template_part( 'toolbar-item', 'wp-user-media-toolbar-item' );
 		wp_user_media_get_template_part( 'user', 'wp-user-media-user' );
 		wp_user_media_get_template_part( 'user-media', 'wp-user-media-media' );
+		wp_user_media_get_template_part( 'user-media-trail', 'wp-user-media-trail' );
 		wp_user_media_get_template_part( 'uploader', 'wp-user-media-uploader' );
 		wp_user_media_get_template_part( 'progress', 'wp-user-media-progress' );
 		wp_user_media_get_template_part( 'dirmaker', 'wp-user-media-dirmaker' );
