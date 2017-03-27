@@ -12,13 +12,14 @@
 				<img src="{{data.media_icon}}" alt="{{data.media_type}}">
 			<# } #>
 
-			<h4><a href="#/name/{{data.slug}}">{{{data.title.rendered}}}</a></h4>
+			<h4>{{{data.title.rendered}}}</h4>
 		<# } #>
 
 	</div>
 	<div class="user-media-actions">
-		<a href="#/name/{{data.slug}}" class="edit"><span class="dashicons dashicons-edit"></span></a>
-		<# if ( data.download ) { #>
+		<# if ( 'dir' === data.media_type ) { #>
+			<a href="#/name/{{data.slug}}" class="edit"><span class="dashicons dashicons-edit"></span></a>
+		<# } else if ( data.download ) { #>
 			<a href="{{data.download}}" class="download"><span class="dashicons dashicons-download"></span></a>
 		<# } #>
 		<a href="{{data.link}}" class="view"><span class="dashicons dashicons-visibility"></span></a>

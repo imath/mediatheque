@@ -341,7 +341,8 @@ window.wp = window.wp || {};
 		className: 'user-media',
 
 		events: {
-			'click .dir .user-media-content' : 'openDir'
+			'dblclick .dir .user-media-content'    : 'openDir',
+			'click .dir .user-media-actions a.edit' : 'openDir'
 		},
 
 		initialize: function() {
@@ -389,7 +390,7 @@ window.wp = window.wp || {};
 		openDir: function( event ) {
 			event.preventDefault();
 
-			var parent = $( event.currentTarget ).parent( '.dir' ).data( 'id' ),
+			var parent = $( event.currentTarget ).closest( '.dir' ).data( 'id' ),
 			    o = this.options || {};
 
 			if ( ! parent ) {
