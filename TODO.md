@@ -12,6 +12,6 @@
 [x] Use the wp-pointer to guide the user in finishing the plugin's setup (default links vs pretty links, where are the options, where is the main admin)
 [] Make sure an admin can upload a file in another user's folder.
 [x] Use a Backbone Model to store query vars (eg: user ID, parent directory ID etc..)
-[] Add a breadcrumb to navigate into parent directories when inside a directory.
+[x] Add a breadcrumb to navigate into parent directories when inside a directory.
 [] Add a check to make sure the destination folder is within /wp-content/uploads.
 [] Make sure to use copy and unlink because rename breaks streams.
