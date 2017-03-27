@@ -345,9 +345,15 @@ window.wp = window.wp || {};
 		},
 
 		initialize: function() {
+			var o = this.options || {};
+
 			wpUserMedia.Views.Users.prototype.initialize.apply( this, arguments );
 
+			// Init the view with default Query Vars.
 			this.queryUserMedia();
+
+			// Listen to Query Vars changes
+			this.listenTo( o.queryVars, 'change:parent', this.getChildren );
 		},
 
 		queryUserMedia: function( options ) {
@@ -390,7 +396,16 @@ window.wp = window.wp || {};
 				return;
 			}
 
-			this.queryUserMedia( { 'parent': parent } );
+			// Ask the listener to get dir's children
+			o.queryVars.set( { parent: parent } );
+		},
+
+		getChildren: function( model, changed ) {
+			if ( _.isUndefined( changed ) ) {
+				return;
+			}
+
+			this.queryUserMedia();
 		}
 	} );
 
@@ -620,7 +635,7 @@ window.wp = window.wp || {};
 		}
 	} );
 
-	wpUserMedia.Views.TrailItem = wpUserMedia.View.extend( {
+	wpUserMedia.Views.trailItem = wpUserMedia.View.extend( {
 		tagName  : 'li',
 		template: wpUserMedia.template( 'wp-user-media-trail' ),
 
@@ -629,7 +644,11 @@ window.wp = window.wp || {};
 				this.model.unset( 'showLink', { silent: true } );
 			}
 
+			// Update the trailItem link
 			this.model.on( 'change:showLink', this.rerender, this );
+
+			// Remove the trailItem view
+			this.model.on( 'remove', this.remove, this );
 		},
 
 		rerender: function() {
@@ -660,13 +679,27 @@ window.wp = window.wp || {};
 		},
 
 		addTrailItem: function( trailItem ) {
-			this.views.add( new wpUserMedia.Views.TrailItem( { model: trailItem } ) );
+			this.views.add( new wpUserMedia.Views.trailItem( { model: trailItem } ) );
 		},
 
 		moveUp: function( event ) {
+			var o = this.options || {}, action;
+
 			event.preventDefault();
 
-			console.log( $( event.currentTarget ).prop( 'class' ) );
+			action = $( event.currentTarget ).prop( 'class' );
+
+			if ( 'root-dir' === action ) {
+				o.queryVars.set(
+					{ parent: 0 },
+					{ 'move' : action }
+				);
+			} else if ( 'parent-dir' === action ) {
+				o.queryVars.set(
+					{ parent: $( event.currentTarget ).data( 'id' ) },
+					{ 'move' : action }
+				);
+			}
 		}
 	} );
 
@@ -684,7 +717,7 @@ window.wp = window.wp || {};
 			o.toolbarItems.on( 'change:active', this.displayForms, this );
 			o.toolbarItems.on( 'change:current', this.manageLists, this );
 
-			this.listenTo( o.queryVars, 'change:parent', this.userMediaQueryChanges );
+			this.listenTo( o.queryVars, 'change:parent', this.updateTrail );
 		},
 
 		/**
@@ -862,7 +895,7 @@ window.wp = window.wp || {};
 			}
 		},
 
-		userMediaQueryChanges( model, changed ) {
+		updateTrail: function( model, changed, options ) {
 			var o = this.options || {}, dir, parent, status;
 
 			if ( _.isUndefined( changed ) ) {
@@ -871,6 +904,7 @@ window.wp = window.wp || {};
 
 			dir = o.media.get( changed );
 
+			// Move down into the dirs tree
 			if ( ! _.isUndefined( dir ) ) {
 
 				if ( 0 === dir.get( 'parent' ) ) {
@@ -879,13 +913,33 @@ window.wp = window.wp || {};
 					parent.set( { showLink: true } );
 
 				} else {
-					parent = o.trailItems.get( dir.get( 'parent') );
+					parent = o.trailItems.get( dir.get( 'parent' ) );
 					parent.set( { showLink: true } );
 				}
-			}
 
-			// Add to trail the current displayed folder.
-			o.trailItems.add( o.media.get( changed ) );
+				// Add to trail the current displayed folder.
+				o.trailItems.add( o.media.get( changed ) );
+
+			// Move up into the dirs tree
+			} else if ( options.move ) {
+				if ( 'root-dir' === options.move ) {
+					status = o.toolbarItems.findWhere( { current: true } );
+					parent = o.trailItems.get( status.get( 'id' ) );
+					parent.set( { showLink: false } );
+				} else {
+					parent = o.trailItems.get( changed );
+					parent.set( { showLink: false } );
+				}
+
+				var remove = o.trailItems.where( { 'media_type': 'dir' } );
+
+				// Remove from trail the children.
+				_.each( remove, function( trailItem ) {
+					if ( 'root-dir' === options.move || trailItem.get( 'id' ) > changed ) {
+						o.trailItems.remove( trailItem );
+					}
+				} );
+			}
 		}
 	} );
 
