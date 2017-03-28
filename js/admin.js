@@ -285,6 +285,10 @@ window.wp = window.wp || {};
 		className:  'user-media',
 		template: wpUserMedia.template( 'wp-user-media-media' ),
 
+		events: {
+			'click .delete' : 'deleteUserMedia'
+		},
+
 		initialize: function() {
 			if ( this.model.get( 'uploading' ) ) {
 				// Show Upload progress
@@ -333,6 +337,19 @@ window.wp = window.wp || {};
 
 			this.setMediaUrls();
 			this.render();
+		},
+
+		deleteUserMedia: function( event ) {
+			event.preventDefault();
+
+			// Let's make sure the DELETE verb won't be blocked by the server.
+			Backbone.emulateHTTP = true;
+
+			// Destroy the model.
+			this.model.destroy();
+
+			// Remove the view.
+			this.remove();
 		}
 	} );
 

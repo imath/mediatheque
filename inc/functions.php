@@ -825,3 +825,138 @@ function wp_user_media_prepend_user_media( $content = '' ) {
 	return $content;
 }
 
+/**
+ * Delete a directory of User Media.
+ *
+ * @since 1.0.0
+ *
+ * @param  int|WP_Post         $dir  Required. The User Media Directory ID or Object.
+ * @return array|false|WP_Post       False on failure.
+ */
+function wp_user_media_delete_dir( $dir = null ) {
+	if ( empty( $dir ) ) {
+		return false;
+	}
+
+	$dir = get_post( $dir );
+
+	if ( empty( $dir->post_type ) || 'user_media' !== $dir->post_type ) {
+		return false;
+	}
+
+	$uploadpath = wp_user_media_get_upload_dir();
+	$dirpath    = get_post_meta( $dir->ID, '_wp_user_media_relative_path', true );
+	$dirpath    = trailingslashit( $uploadpath['basedir'] ) . $dirpath;
+
+	if ( ! is_dir( $dirpath ) ) {
+		return false;
+	}
+
+	$children = get_children( array(
+		'post_type' => 'user_media',
+		'post_parent' => $dir->ID,
+	) );
+
+	/**
+	 * Fires before a directory of User Media is deleted.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param WP_Post $dir      The User Media Directory Object.
+	 * @param array   $children The list of included User Media.
+	 */
+	do_action( 'wp_user_media_delete_dir', $dir, $children );
+
+	// Empty the directory's content.
+	if ( ! empty( $children ) ) {
+		foreach ( $children as $child ) {
+			wp_user_media_delete_media( $child );
+		}
+	}
+
+	// Remove the empty directory
+	@ rmdir( $dirpath );
+
+	$dir = wp_delete_post( $dir->ID, true );
+
+	/**
+	 * Fires after a directory of User Media is deleted.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param WP_Post $dir The User Media Directory Object.
+	 */
+	do_action( 'wp_user_media_deleted_dir', $dir );
+
+	return $dir;
+}
+
+/**
+ * Delete a User Media.
+ *
+ * @since 1.0.0
+ *
+ * @param  int|WP_Post         $media  Required. The User Media ID or Object.
+ * @return array|false|WP_Post         False on failure.
+ */
+function wp_user_media_delete_media( $media = null ) {
+	if ( empty( $media ) ) {
+		return false;
+	}
+
+	$user_media = get_post( $media );
+
+	if ( empty( $user_media->post_type ) || 'user_media' !== $user_media->post_type ) {
+		return false;
+	}
+
+	$user_media_type = wp_get_object_terms( $user_media->ID, 'user_media_types',  array( 'fields' => 'id=>slug' ) );
+	$user_media_type = reset( $user_media_type );
+
+	if ( 'wp-user-media-directory' === $user_media_type ) {
+		return wp_user_media_delete_dir( $user_media );
+	}
+
+	$meta = wp_get_attachment_metadata( $user_media->ID );
+	$file = get_attached_file( $user_media->ID );
+
+	if ( is_multisite() ) {
+		delete_transient( 'dirsize_cache' );
+	}
+
+	/**
+	 * Fires before a User Media is deleted.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param WP_Post $user_media The User Media Object.
+	 */
+	do_action( 'wp_user_media_delete_media', $user_media );
+
+	$uploadpath = wp_user_media_get_upload_dir();
+
+	// Remove intermediate and backup images if there are any.
+	if ( isset( $meta['sizes'] ) && is_array( $meta['sizes'] ) ) {
+		foreach ( $meta['sizes'] as $size => $sizeinfo ) {
+			$intermediate_file = str_replace( basename( $file ), $sizeinfo['file'], $file );
+			/** This filter is documented in wp-includes/functions.php */
+			$intermediate_file = apply_filters( 'wp_delete_file', $intermediate_file );
+			@ unlink( path_join( $uploadpath['basedir'], $intermediate_file ) );
+		}
+	}
+
+	wp_delete_file( $file );
+
+	$user_media = wp_delete_post( $user_media->ID, true );
+
+	/**
+	 * Fires after a User Media is deleted.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param WP_Post $value The User Media Object.
+	 */
+	do_action( 'wp_user_media_deleted_media', $user_media );
+
+	return $user_media;
+}

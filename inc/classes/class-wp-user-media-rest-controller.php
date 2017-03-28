@@ -507,4 +507,48 @@ class WP_User_Media_REST_Controller extends WP_REST_Attachments_Controller {
 
 		return $response;
 	}
+
+	/**
+	 * Deletes a User Media or a Directory of User Media.
+	 *
+	 * @since 1.0.0
+	 * @access public
+	 *
+	 * @param WP_REST_Request $request Full details about the request.
+	 * @return WP_REST_Response|WP_Error Response object on success, or WP_Error object on failure.
+	 */
+	public function delete_item( $request ) {
+		$user_media = $this->get_post( $request['id'] );
+		if ( is_wp_error( $user_media ) ) {
+			return $user_media;
+		}
+
+		if ( ! $this->check_delete_permission( $user_media ) ) {
+			return new WP_Error( 'rest_user_cannot_delete_post', __( 'Sorry, you are not allowed to delete this user media.', 'wp-user-media' ), array( 'status' => rest_authorization_required_code() ) );
+		}
+
+		$request->set_param( 'context', 'edit' );
+
+		$previous = $this->prepare_item_for_response( $user_media, $request );
+		$result = wp_user_media_delete_media( $user_media );
+		$response = new WP_REST_Response();
+		$response->set_data( array( 'deleted' => true, 'previous' => $previous->get_data() ) );
+
+		if ( ! $result ) {
+			return new WP_Error( 'rest_cannot_delete', __( 'The user media cannot be deleted.', 'wp-user-media' ), array( 'status' => 500 ) );
+		}
+
+		/**
+		 * Fires immediately after a User Media is deleted via the REST API.
+		 *
+		 * @since 1.0.0
+		 *
+		 * @param object           $user_media The deleted User Media.
+		 * @param WP_REST_Response $response   The response data.
+		 * @param WP_REST_Request  $request    The request sent to the API.
+		 */
+		do_action( 'rest_delete_user_media', $user_media, $response, $request );
+
+		return $response;
+	}
 }

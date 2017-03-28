@@ -1,7 +1,8 @@
 #Todo list
 
-[] When deleting a User Media Post type, if it's not a folder, the corresponding file should be deleted.
-[] When deleting a folder or moving files, make sure filesys is also edited.
+[x] When deleting a User Media Post type, if it's not a folder, the corresponding file should be deleted.
+[x] When deleting a folder, make sure filesys is also edited.
+[] The Disk usage should be updated when a file is deleted.
 [] Add a shortcode to load the UI anywhere.
 [x] Make sure the create_item() method can handle folders.
 [] Make sure to switch_to_blog() before saving the User Media metadata.
