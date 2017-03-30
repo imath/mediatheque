@@ -20,6 +20,7 @@ class WP_User_Media_REST_Controller extends WP_REST_Attachments_Controller {
 	public $user_media_type_ids   = array();
 	public $user_media_parent     = 0;
 	public $user_media_parent_dir = '';
+	public $user_media_guid       = '';
 
 	/**
 	 * Temporarly Adds specific User Media metas to the registered post metas.
@@ -292,6 +293,10 @@ class WP_User_Media_REST_Controller extends WP_REST_Attachments_Controller {
 		$prepared_user_media->post_status = $this->user_media_status;
 		$prepared_user_media->post_parent = $this->user_media_parent;
 
+		if ( $this->user_media_guid ) {
+			$prepared_user_media->guid = $this->user_media_guid;
+		}
+
 		return $prepared_user_media;
 	}
 
@@ -449,7 +454,7 @@ class WP_User_Media_REST_Controller extends WP_REST_Attachments_Controller {
 		$user_media = get_post( $id );
 
 		/**
-		 * Fires after a single User Media is created or updated via the REST API.
+		 * Fires after a single User Media is created via the REST API.
 		 *
 		 * @since 1.0.0
 		 *
@@ -552,6 +557,14 @@ class WP_User_Media_REST_Controller extends WP_REST_Attachments_Controller {
 		return $response;
 	}
 
+	public function force_guid( $guid = '' ) {
+		if ( ! empty( $this->user_media_guid ) ) {
+			$guid = $this->user_media_guid;
+		}
+
+		return $guid;
+	}
+
 	/**
 	 * Updates a single User Media.
 	 *
@@ -562,6 +575,85 @@ class WP_User_Media_REST_Controller extends WP_REST_Attachments_Controller {
 	 * @return WP_Error|WP_REST_Response Response object on success, WP_Error object on failure.
 	 */
 	public function update_item( $request ) {
-		var_dump( $request->get_param( 'post_parent' ) );
+		$id = (int) $request->get_param( 'id' );
+
+		if ( empty( $id ) || 'user_media' !== get_post_type( $id ) ) {
+			return new WP_Error( 'rest_invalid_param', __( 'Invalid type.', 'wp-user-media' ), array( 'status' => 400 ) );
+		}
+
+		$this->user_media_status = $request->get_param( 'status' );
+		$parent                  = $request->get_param( 'post_parent' );
+		$uploadpath              = wp_user_media_get_upload_dir();
+
+		if ( '' !== $parent ) {
+			$this->user_media_parent = (int) $parent;
+		}
+
+		if ( $this->user_media_parent !== (int) $request->get_param( 'parent' ) ) {
+			// Include admin functions to get access to wp_generate_attachment_metadata().
+			require_once ABSPATH . 'wp-admin/includes/admin.php';
+
+			$file = wp_user_media_move( $id, $this->user_media_parent );
+
+			if ( ! $file ) {
+				return new WP_Error( 'rest_mv_failed', __( 'Moving the User Media failed.', 'wp-user-media' ), array( 'status' => 400 ) );
+			}
+
+			update_attached_file( $id, $file );
+			wp_update_attachment_metadata( $id, wp_generate_attachment_metadata( $id, $file ) );
+			$this->user_media_guid = trailingslashit( $uploadpath['baseurl'] ) . get_post_meta( $id, '_wp_attached_file', true );
+		}
+
+		/**
+		 * Force the Guid to be the new one as WordPress is not
+		 * taking account the guid parameter of the request in
+		 * case of an update.
+		 */
+		add_filter( 'post_guid', array( $this, 'force_guid' ) );
+
+		$response = WP_REST_Posts_Controller::update_item( $request );
+
+		/**
+		 * Stop using the force Luke!
+		 */
+		remove_filter( 'post_guid', array( $this, 'force_guid' ) );
+
+		if ( is_wp_error( $response ) ) {
+			return $response;
+		}
+
+		$response = rest_ensure_response( $response );
+		$data = $response->get_data();
+
+		if ( isset( $request['alt_text'] ) ) {
+			update_post_meta( $data['id'], '_wp_attachment_image_alt', $request['alt_text'] );
+		}
+
+		$user_media = get_post( $id );
+
+		/**
+		 * Fires after a single User Media is updated via the REST API.
+		 *
+		 * @since 1.0.0
+		 *
+		 * @param WP_Post         $user_media Inserted or updated User media
+		 *                                    object.
+		 * @param WP_REST_Request $request    The request sent to the API.
+		 * @param bool            $creating   True when creating a User Media/Dir, false when updating.
+		 * @param string          $action     The action being performed.
+		 */
+		do_action( 'rest_update_user_media', $data, $request, false, '' );
+
+		$fields_update = $this->update_additional_fields_for_object( $user_media, $request );
+
+		if ( is_wp_error( $fields_update ) ) {
+			return $fields_update;
+		}
+
+		$request->set_param( 'context', 'edit' );
+		$response = $this->prepare_item_for_response( $user_media, $request );
+		$response = rest_ensure_response( $response );
+
+		return $response;
 	}
 }

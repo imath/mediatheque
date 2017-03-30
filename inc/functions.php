@@ -960,3 +960,52 @@ function wp_user_media_delete_media( $media = null ) {
 
 	return $user_media;
 }
+
+function wp_user_media_move( $media = null, $parent = null ) {
+	if ( empty( $media ) || is_null( $parent ) ) {
+		return false;
+	}
+
+	$user_media = get_post( $media );
+
+	if ( empty( $user_media->post_type ) || 'user_media' !== $user_media->post_type ) {
+		return false;
+	}
+
+	if ( 0 === $parent ) {
+		$path = '/';
+	} else {
+		$path = '/' . get_post_meta( $parent, '_wp_user_media_relative_path', true );
+	}
+
+	if ( ! $path ) {
+		return false;
+	}
+
+	$meta       = wp_get_attachment_metadata( $user_media->ID );
+	$file       = get_attached_file( $user_media->ID );
+	$uploadpath = wp_user_media_get_upload_dir();
+
+	$newdir     = $uploadpath['basedir'] . $path;
+	$filename   = wp_unique_filename( $newdir, basename( $file ) );
+	$new_file   = trailingslashit( $newdir ) . $filename;
+
+	$moved = @ copy( $file, $new_file );
+
+	if ( false === $moved ) {
+		return false;
+	}
+
+	unlink( $file );
+
+	if ( isset( $meta['sizes'] ) && is_array( $meta['sizes'] ) ) {
+		foreach ( $meta['sizes'] as $size => $sizeinfo ) {
+			$intermediate_file = str_replace( basename( $file ), $sizeinfo['file'], $file );
+			/** This filter is documented in wp-includes/functions.php */
+			$intermediate_file = apply_filters( 'wp_delete_file', $intermediate_file );
+			@ unlink( path_join( $uploadpath['basedir'], $intermediate_file ) );
+		}
+	}
+
+	return $new_file;
+}
