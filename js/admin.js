@@ -299,12 +299,21 @@ window.wp = window.wp || {};
 
 			// The dir background is specific.
 			} else if ( 'dir' === this.model.get( 'media_type' ) ) {
-				this.el.className += ' dir';
-				$( this.el ).attr( 'data-id', this.model.get( 'id' ) );
+				this.el.className += ' dir droppable';
+				this.$el.bind( 'dragover', _.bind( this.dragoverDir, this ) );
+				this.$el.bind( 'dragenter', _.bind( this.dragoverDir, this ) );
+				this.$el.bind( 'drop', _.bind( this.moveInDir, this ) );
 
 			// Set additionnal urls
 			} else {
+				this.$el.prop( 'draggable', true );
 				this.setMediaUrls();
+
+				this.model.on( 'remove', this.remove, this );
+			}
+
+			if ( this.model.get( 'id' ) ) {
+				this.$el.attr( 'data-id', this.model.get( 'id' ) );
 			}
 		},
 
@@ -350,6 +359,30 @@ window.wp = window.wp || {};
 
 			// Remove the view.
 			this.remove();
+		},
+
+		dragoverDir: function( event ) {
+			event.preventDefault();
+
+			return false;
+		},
+
+		moveInDir: function( event ) {
+			var e = event, modelId;
+
+			if ( e.originalEvent ) {
+				e = e.originalEvent;
+			}
+
+			modelId = e.dataTransfer.getData( 'modelID' );
+			if ( modelId ) {
+				var model = this.model.collection.get( modelId );
+				model.save( {
+					'post_parent': this.model.get( 'id' )
+				} );
+
+				this.model.collection.remove( model );
+			}
 		}
 	} );
 
@@ -359,7 +392,8 @@ window.wp = window.wp || {};
 
 		events: {
 			'dblclick .dir .user-media-content'    : 'openDir',
-			'click .dir .user-media-actions a.edit' : 'openDir'
+			'click .dir .user-media-actions a.edit' : 'openDir',
+			'dragstart [draggable=true]' : 'setDragData'
 		},
 
 		initialize: function() {
@@ -424,6 +458,16 @@ window.wp = window.wp || {};
 			}
 
 			this.queryUserMedia();
+		},
+
+		setDragData: function( event ) {
+			var e = event;
+
+			if ( e.originalEvent ) {
+				e = e.originalEvent;
+			}
+
+			e.dataTransfer.setData( 'modelID', $( event.currentTarget ).data( 'id' ) );
 		}
 	} );
 

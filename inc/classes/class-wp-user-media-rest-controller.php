@@ -551,4 +551,17 @@ class WP_User_Media_REST_Controller extends WP_REST_Attachments_Controller {
 
 		return $response;
 	}
+
+	/**
+	 * Updates a single User Media.
+	 *
+	 * @since 1.0.0
+	 * @access public
+	 *
+	 * @param WP_REST_Request $request Full details about the request.
+	 * @return WP_Error|WP_REST_Response Response object on success, WP_Error object on failure.
+	 */
+	public function update_item( $request ) {
+		var_dump( $request->get_param( 'post_parent' ) );
+	}
 }
