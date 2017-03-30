@@ -155,6 +155,7 @@ p.drag-drop-buttons input[type="button"] {
 	box-shadow: 0 1px 1px rgba(0,0,0,0.04);
 	text-align: center;
 	margin: 0 0.5em 1.5em 0.5em;
+	box-sizing: border-box;
 }
 
 #wp-user-media-container #media ul li.user-media:not( .dir ) {
@@ -233,4 +234,19 @@ p.drag-drop-buttons input[type="button"] {
 
 #wp-user-media-container #trail ul li img.avatar {
 	vertical-align: top;
+}
+
+[draggable] {
+	-moz-user-select: none;
+	-khtml-user-select: none;
+	-webkit-user-select: none;
+	user-select: none;
+	/* Required to make elements draggable in old WebKit */
+	-khtml-user-drag: element;
+	-webkit-user-drag: element;
+	cursor:move;
+}
+
+#wp-user-media-container #media ul li.drag-over {
+	border: 2px dashed #0073aa;
 }

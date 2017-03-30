@@ -300,9 +300,10 @@ window.wp = window.wp || {};
 			// The dir background is specific.
 			} else if ( 'dir' === this.model.get( 'media_type' ) ) {
 				this.el.className += ' dir droppable';
-				this.$el.bind( 'dragover', _.bind( this.dragoverDir, this ) );
+				this.$el.bind( 'dragover',  _.bind( this.dragoverDir, this ) );
 				this.$el.bind( 'dragenter', _.bind( this.dragoverDir, this ) );
-				this.$el.bind( 'drop', _.bind( this.moveInDir, this ) );
+				this.$el.bind( 'dragleave', _.bind( this.dragleaveDir, this ) );
+				this.$el.bind( 'drop',      _.bind( this.moveInDir, this ) );
 
 			// Set additionnal urls
 			} else {
@@ -364,6 +365,20 @@ window.wp = window.wp || {};
 		dragoverDir: function( event ) {
 			event.preventDefault();
 
+			if ( ! this.$el.hasClass( 'drag-over' ) ) {
+				this.$el.addClass( 'drag-over' );
+			}
+
+			return false;
+		},
+
+		dragleaveDir: function( event ) {
+			event.preventDefault();
+
+			if ( this.$el.hasClass( 'drag-over' ) ) {
+				this.$el.removeClass( 'drag-over' );
+			}
+
 			return false;
 		},
 
@@ -374,9 +389,17 @@ window.wp = window.wp || {};
 				e = e.originalEvent;
 			}
 
+			if ( this.$el.hasClass( 'drag-over' ) ) {
+				this.$el.removeClass( 'drag-over' );
+			}
+
 			modelId = e.dataTransfer.getData( 'modelID' );
 			if ( modelId ) {
 				var model = this.model.collection.get( modelId );
+
+				// Let's make sure the PUT verb won't be blocked by the server.
+				Backbone.emulateHTTP = true;
+
 				model.save( {
 					'post_parent': this.model.get( 'id' )
 				} );
