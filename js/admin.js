@@ -10,9 +10,17 @@ window.wp = window.wp || {};
 		wpUserMedia.Collections = wpUserMedia.Collections || {};
 		wpUserMedia.Views       = wpUserMedia.Views || {};
 
-	// Create a very generic Model for files
-	wpUserMedia.Models.File = Backbone.Model.extend( {
-		file: {}
+	// {@extends wp.api.WPApiBaseModel}
+	wpUserMedia.Models.File = wp.api.WPApiBaseModel.extend( {
+		file: {},
+
+		save: function( attrs, options ) {
+			return Backbone.Model.prototype.save.call( this, attrs, options );
+		},
+
+		destroy: function( options ) {
+			return Backbone.Model.prototype.destroy.call( this, options );
+		}
 	} );
 
 	wpUserMedia.Uploader = function( options ) {
@@ -300,25 +308,23 @@ window.wp = window.wp || {};
 			// The dir background is specific.
 			} else if ( 'dir' === this.model.get( 'media_type' ) ) {
 				this.el.className += ' dir droppable';
-				this.$el.bind( 'dragover',  _.bind( this.dragoverDir, this ) );
-				this.$el.bind( 'dragenter', _.bind( this.dragoverDir, this ) );
-				this.$el.bind( 'dragleave', _.bind( this.dragleaveDir, this ) );
-				this.$el.bind( 'drop',      _.bind( this.moveInDir, this ) );
-
-			// Set additionnal urls
-			} else {
-				this.$el.prop( 'draggable', true );
-				this.setMediaUrls();
-
-				this.model.on( 'remove', this.remove, this );
-			}
-
-			if ( this.model.get( 'id' ) ) {
 				this.$el.attr( 'data-id', this.model.get( 'id' ) );
+				this.$el.bind( 'dragover',  _.bind( this.dragoverDir, this  ) );
+				this.$el.bind( 'dragenter', _.bind( this.dragoverDir, this  ) );
+				this.$el.bind( 'dragleave', _.bind( this.dragleaveDir, this ) );
+				this.$el.bind( 'drop',      _.bind( this.moveInDir, this    ) );
+
+			// Set additionnal properties
+			} else {
+				this.setMediaProps();
 			}
 		},
 
-		setMediaUrls: function() {
+		setMediaProps: function() {
+			this.$el.prop( 'draggable', true );
+			this.$el.attr( 'data-id', this.model.get( 'id' ) );
+			this.model.on( 'remove', this.remove, this );
+
 			if ( 'image' === this.model.get( 'media_type' ) && this.model.get( 'guid' ) ) {
 				var bgUrl = this.model.get( 'guid' ).rendered,
 				    mediaDetails = this.model.get( 'media_details' ), fileName;
@@ -332,6 +338,11 @@ window.wp = window.wp || {};
 			}
 
 			this.model.set( { download: this.model.get( 'link' ) + wpUserMediaSettings.common.downloadSlug + '/' }, { silent: true } );
+
+			// Files need their root Url to be set as the Rest Endpoint.
+			if ( true === this.model.previous( 'uploading' ) ) {
+				_.extend( this.model, { urlRoot: wpUserMedia.App.overrides.url } );
+			}
 		},
 
 		progress: function( file ) {
@@ -345,7 +356,7 @@ window.wp = window.wp || {};
 				file.unset( attribute, { silent: true } );
 			} );
 
-			this.setMediaUrls();
+			this.setMediaProps();
 			this.render();
 		},
 
