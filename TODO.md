@@ -2,7 +2,7 @@
 
 [x] When deleting a User Media Post type, if it's not a folder, the corresponding file should be deleted.
 [x] When deleting a folder, make sure filesys is also edited.
-[] The Disk usage should be updated when a file is deleted.
+[x] The Disk usage should be updated when a file is deleted.
 [] Add a shortcode to load the UI anywhere.
 [x] Make sure the create_item() method can handle folders.
 [] Make sure to switch_to_blog() before saving the User Media metadata.
@@ -15,4 +15,4 @@
 [x] Use a Backbone Model to store query vars (eg: user ID, parent directory ID etc..)
 [x] Add a breadcrumb to navigate into parent directories when inside a directory.
 [] Add a check to make sure the destination folder is within /wp-content/uploads.
-[] Make sure to use copy and unlink because rename breaks streams.
+[x] Make sure to use copy and unlink because rename breaks streams.

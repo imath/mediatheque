@@ -930,8 +930,9 @@ function wp_user_media_delete_media( $media = null ) {
 	 * @since 1.0.0
 	 *
 	 * @param WP_Post $user_media The User Media Object.
+	 * @param string  $file       The file absolute path.
 	 */
-	do_action( 'wp_user_media_delete_media', $user_media );
+	do_action( 'wp_user_media_delete_media', $user_media, $file );
 
 	$uploadpath = wp_user_media_get_upload_dir();
 

@@ -16,11 +16,12 @@ defined( 'ABSPATH' ) || exit;
  * @since  1.0.0
  */
 class WP_User_Media_REST_Controller extends WP_REST_Attachments_Controller {
-	public $user_media_status     = 'publish';
-	public $user_media_type_ids   = array();
-	public $user_media_parent     = 0;
-	public $user_media_parent_dir = '';
-	public $user_media_guid       = '';
+	public $user_media_status        = 'publish';
+	public $user_media_type_ids      = array();
+	public $user_media_parent        = 0;
+	public $user_media_parent_dir    = '';
+	public $user_media_guid          = '';
+	public $user_media_deleted_space = 0;
 
 	/**
 	 * Temporarly Adds specific User Media metas to the registered post metas.
@@ -514,6 +515,29 @@ class WP_User_Media_REST_Controller extends WP_REST_Attachments_Controller {
 	}
 
 	/**
+	 * Count the deleted space in bytes when a media or a directory of media
+	 * is deleted.
+	 *
+	 * It avoids updating multiple times the same user meta.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param WP_Post $media The User Media Object.
+	 * @param string  $file  The absolute path to the file.
+	 */
+	public function count_deleted_space( $media = null, $file = '' ) {
+		$deleted_space = 0;
+
+		if ( empty( $file ) || ! file_exists( $file ) ) {
+			return $deleted_space;
+		} else {
+			$deleted_space = filesize( $file );
+		}
+
+		$this->user_media_deleted_space += $deleted_space;
+	}
+
+	/**
 	 * Deletes a User Media or a Directory of User Media.
 	 *
 	 * @since 1.0.0
@@ -535,7 +559,20 @@ class WP_User_Media_REST_Controller extends WP_REST_Attachments_Controller {
 		$request->set_param( 'context', 'edit' );
 
 		$previous = $this->prepare_item_for_response( $user_media, $request );
+
+		// Reset the deleted space.
+		$this->user_media_deleted_space = 0;
+
+		add_action( 'wp_user_media_delete_media', array( $this, 'count_deleted_space' ), 10, 2 );
+
 		$result = wp_user_media_delete_media( $user_media );
+
+		remove_action( 'wp_user_media_delete_media', array( $this, 'count_deleted_space' ), 10, 2 );
+
+		if ( $this->user_media_deleted_space ) {
+			wp_user_meta_disk_usage_update( $user_media->post_author, $this->user_media_deleted_space, true );
+		}
+
 		$response = new WP_REST_Response();
 		$response->set_data( array( 'deleted' => true, 'previous' => $previous->get_data() ) );
 
