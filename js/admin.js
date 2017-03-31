@@ -18,7 +18,12 @@ window.wp = window.wp || {};
 			return Backbone.Model.prototype.save.call( this, attrs, options );
 		},
 
-		destroy: function( options ) {
+		destroy: function( options, attrs, model ) {
+			if ( _.isUndefined( this.urlRoot ) ) {
+				this.clear();
+				return false;
+			}
+
 			return Backbone.Model.prototype.destroy.call( this, options );
 		}
 	} );
@@ -173,16 +178,26 @@ window.wp = window.wp || {};
 			var message = pluploadL10n.default_error,
 				key;
 
+			// Try to find the User Media errors
+			if ( ! _.isUndefined( pluploadError.response ) ) {
+				pluploadError.response = JSON.parse( pluploadError.response );
+
+				if ( ! _.isUndefined( pluploadError.response.message ) ) {
+					message = pluploadError.response.message;
+				}
+
 			// Check for plupload errors.
-			for ( key in wp.Uploader.errorMap ) {
-				if ( pluploadError.code === plupload[ key ] ) {
-					message = wp.Uploader.errorMap[ key ];
+			} else {
+				for ( key in wp.Uploader.errorMap ) {
+					if ( pluploadError.code === plupload[ key ] ) {
+						message = wp.Uploader.errorMap[ key ];
 
-					if ( _.isFunction( message ) ) {
-						message = message( pluploadError.file, pluploadError );
+						if ( _.isFunction( message ) ) {
+							message = message( pluploadError.file, pluploadError );
+						}
+
+						break;
 					}
-
-					break;
 				}
 			}
 
@@ -330,6 +345,9 @@ window.wp = window.wp || {};
 				// Replace the uploaded file with the User Media model.
 				this.model.on( 'change:guid', this.update, this );
 
+				// Remove Progress View on Upload error
+				this.model.on( 'change:id', this.removeError, this );
+
 			// The dir background is specific.
 			} else if ( 'dir' === this.model.get( 'media_type' ) ) {
 				this.el.className += ' dir droppable';
@@ -441,6 +459,12 @@ window.wp = window.wp || {};
 				} );
 
 				this.model.collection.remove( model );
+			}
+		},
+
+		removeError: function( model, changed ) {
+			if ( _.isUndefined( changed ) ) {
+				this.remove();
 			}
 		}
 	} );
@@ -674,7 +698,30 @@ window.wp = window.wp || {};
 		},
 
 		uploadError: function( error ) {
-			console.log( error );
+			var o = this.options || {}, file, errorData,
+			    feedback = new Backbone.Model( {
+			    	dismissible: true,
+			    	type: 'notice-error'
+			    } );
+
+			file = error.get( 'file' );
+			errorData = error.get( 'data' );
+
+			if ( error.get( 'feedback' ) ) {
+				feedback.set( { message: error.get( 'feedback' ) } );
+			} else {
+				feedback.set( { message: errorData.message } );
+			}
+
+			if ( _.isObject( o.mediaView ) ) {
+				var model = o.mediaView.collection.get( file.id );
+				o.mediaView.collection.remove( file.id );
+
+				// The message should be preprended with the File name.
+				o.mediaView.views.add( new wpUserMedia.Views.Feedback( { model: feedback } ), { at: 0 } );
+			} else {
+				this.views.add( '#wp-user-media-upload-status', new wpUserMedia.Views.Feedback( { model: feedback } ) );
+			}
 		},
 
 		addProgressView: function( file ) {
