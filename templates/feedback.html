@@ -1,3 +1,8 @@
 <p class="message {{data.type}}">
 	{{data.message}}
 </p>
+<# if ( data.dismissible ) { #>
+	<button type="button" class="notice-dismiss">
+		<span class="screen-reader-text">{{data.dismissibleText}}</span>
+	</button>
+<# } #>

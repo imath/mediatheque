@@ -231,10 +231,24 @@ window.wp = window.wp || {};
 		className: 'notice',
 		template: wpUserMedia.template( 'wp-user-media-feedback' ),
 
+		events: {
+			'click .notice-dismiss' : 'removeSelf'
+		},
+
 		initialize: function() {
+			_.extend( this.model.attributes, _.pick( wpUserMediaSettings.common, 'dismissibleText' ) );
+
 			if ( this.model.get( 'type' ) ) {
 				this.el.className += ' ' + this.model.get( 'type' );
 			}
+
+			if ( this.model.get( 'dismissible' ) ) {
+				this.el.className += ' is-dismissible';
+			}
+		},
+
+		removeSelf: function() {
+			this.remove();
 		}
 	} );
 

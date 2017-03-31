@@ -348,9 +348,10 @@ location ~* /(?:uploads|files)/wp-user-media/private/.* {
 				'saveBtn' => __( 'Create', 'wp-user-media' ),
 			),
 			'common' => array(
-				'downloadSlug' => wp_user_media_get_download_rewrite_slug(),
-				'closeBtn'     => __( 'Close', 'wp-user-media' ),
-				'noUserMedia'  => __( 'No User Media were found for the request.', 'wp-user-media' ),
+				'downloadSlug'    => wp_user_media_get_download_rewrite_slug(),
+				'closeBtn'        => __( 'Close', 'wp-user-media' ),
+				'noUserMedia'     => __( 'No User Media were found for the request.', 'wp-user-media' ),
+				'dismissibleText' => __( 'Dismiss', 'wp-user-media' ),
 			),
 		) );
 
