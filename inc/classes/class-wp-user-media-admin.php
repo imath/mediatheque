@@ -350,6 +350,7 @@ location ~* /(?:uploads|files)/wp-user-media/private/.* {
 			'common' => array(
 				'downloadSlug' => wp_user_media_get_download_rewrite_slug(),
 				'closeBtn'     => __( 'Close', 'wp-user-media' ),
+				'noUserMedia'  => __( 'No User Media were found for the request.', 'wp-user-media' ),
 			),
 		) );
 
@@ -376,6 +377,7 @@ location ~* /(?:uploads|files)/wp-user-media/private/.* {
 		', esc_html( $this->title ) );
 
 		wp_user_media_get_template_part( 'toolbar-item', 'wp-user-media-toolbar-item' );
+		wp_user_media_get_template_part( 'feedback', 'wp-user-media-feedback' );
 		wp_user_media_get_template_part( 'user', 'wp-user-media-user' );
 		wp_user_media_get_template_part( 'user-media', 'wp-user-media-media' );
 		wp_user_media_get_template_part( 'user-media-trail', 'wp-user-media-trail' );

@@ -227,6 +227,17 @@ window.wp = window.wp || {};
 		template: wpUserMedia.template( 'wp-user-media-user' )
 	} );
 
+	wpUserMedia.Views.Feedback = wpUserMedia.Views.User.extend( {
+		className: 'notice',
+		template: wpUserMedia.template( 'wp-user-media-feedback' ),
+
+		initialize: function() {
+			if ( this.model.get( 'type' ) ) {
+				this.el.className += ' ' + this.model.get( 'type' );
+			}
+		}
+	} );
+
 	wpUserMedia.Views.Users = wpUserMedia.View.extend( {
 		tagName:   'ul',
 		className: 'users',
@@ -458,12 +469,51 @@ window.wp = window.wp || {};
 
 			this.collection.reset();
 			this.collection.fetch( {
-				data : o.queryVars.attributes
+				data : o.queryVars.attributes,
+				success : _.bind( this.doFeedback, this ),
+				error   : _.bind( this.doFeedback, this )
 			} );
+		},
+
+		removeFeedback: function() {
+			if ( ! _.isUndefined( this.views._views[''] ) && this.views._views[''].length ) {
+				_.each( this.views._views[''], function( view ) {
+					if ( view.$el.hasClass( 'notice' ) ) {
+						view.remove();
+					}
+				} );
+			}
+		},
+
+		doFeedback: function( model, request ) {
+			var feedback = new Backbone.Model();
+
+			if ( model.length ) {
+				return;
+			}
+
+			if ( _.isUndefined( request.responseJSON ) ) {
+				feedback.set( {
+					message: wpUserMediaSettings.common.noUserMedia,
+					type:    'notice-warning'
+				} );
+			} else if ( ! _.isUndefined( request.responseJSON.message ) ) {
+				feedback.set( {
+					message: request.responseJSON.message,
+					type:    'notice-error'
+				} );
+			} else {
+				return;
+			}
+
+			this.views.add( new wpUserMedia.Views.Feedback( { model: feedback } ), { at: 0 } );
 		},
 
 		addItemView: function( userMedia ) {
 			var position = userMedia.get( 'at' );
+
+			// Remove all feedbacks.
+			this.removeFeedback();
 
 			if ( _.isUndefined( position ) ) {
 				this.views.add( new wpUserMedia.Views.UserMedia( { model: userMedia } ) );
