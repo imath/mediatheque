@@ -400,9 +400,46 @@ window.wp = window.wp || {};
 			this.handleDrop( e.dataTransfer.getData( 'modelId' ) );
 		},
 
-		// Extend it
+		/**
+		 * Update the User Media Parent dir
+		 *
+		 * @param  {integer} id The User Media ID.
+		 */
 		handleDrop: function( id ) {
-			return id;
+			if ( _.isUndefined( id ) ) {
+				return;
+			}
+
+			var model = this.options.ghost.get( id ), parent = this.model.get( 'id' );
+
+			if ( _.isNaN( parent ) ) {
+				parent = 0;
+			}
+
+			$( '#trail ul' ).first().addClass( 'loading' );
+			$( '#media ul' ).first().addClass( 'loading' );
+
+			// Let's make sure the PUT verb won't be blocked by the server.
+			Backbone.emulateHTTP = true;
+
+			model.save( {
+				'post_parent': this.model.get( 'id' )
+			}, {
+				success: _.bind( this.userMediaMoved, this )
+			} );
+		},
+
+		/**
+		 * Wait untill the model is successfully saved before
+		 * removing it from the ghost collection.
+		 *
+		 * @param  {Backbone.Model} model The User Media object.
+		 */
+		userMediaMoved: function( model ) {
+			$( '#trail ul' ).first().removeClass( 'loading' );
+			$( '#media ul' ).first().removeClass( 'loading' );
+
+			this.options.ghost.remove( model );
 		}
 	} );
 
@@ -439,7 +476,6 @@ window.wp = window.wp || {};
 		setMediaProps: function() {
 			this.$el.prop( 'draggable', true );
 			this.$el.attr( 'data-id', this.model.get( 'id' ) );
-			this.model.on( 'change:parent', this.parentEdited, this );
 
 			if ( 'image' === this.model.get( 'media_type' ) && this.model.get( 'guid' ) ) {
 				var bgUrl = this.model.get( 'guid' ).rendered,
@@ -482,45 +518,21 @@ window.wp = window.wp || {};
 			// Let's make sure the DELETE verb won't be blocked by the server.
 			Backbone.emulateHTTP = true;
 
+			$( '#trail ul' ).first().addClass( 'loading' );
+			$( '#media ul' ).first().addClass( 'loading' );
+
 			// Destroy the model.
-			this.model.destroy();
+			this.model.destroy( {
+				wait: true,
+				success: _.bind( this.userMediaDeleted, this )
+			} );
+		},
+
+		userMediaDeleted: function() {
+			$( '#trail ul' ).first().removeClass( 'loading' );
+			$( '#media ul' ).first().removeClass( 'loading' );
 
 			// Remove the view.
-			this.remove();
-		},
-
-		handleDrop: function( id ) {
-			if ( _.isUndefined( id ) ) {
-				return;
-			}
-
-			var model = this.options.ghost.get( id );
-
-			// Let's make sure the PUT verb won't be blocked by the server.
-			Backbone.emulateHTTP = true;
-
-			model.save( {
-				'post_parent': this.model.get( 'id' )
-			} );
-
-			this.options.ghost.remove( model );
-		},
-
-		/**
-		 * There's a problem when coming back to the public view
-		 * Moved items stay in list.
-		 *
-		 * @param  {[type]} model   [description]
-		 * @param  {[type]} changed [description]
-		 * @return {[type]}         [description]
-		 */
-		parentEdited: function( model, changed ) {
-			var previousParent = model.previous( 'parent' );
-
-			if ( _.isUndefined( previousParent ) || previousParent === changed ) {
-				return;
-			}
-
 			this.remove();
 		}
 	} );
@@ -545,6 +557,30 @@ window.wp = window.wp || {};
 
 			// Listen to Query Vars changes
 			this.listenTo( o.queryVars, 'change:parent', this.getChildren );
+
+			// Listen to User Media removed from the ghost Collection
+			this.listenTo( o.ghost, 'remove', this.requery );
+		},
+
+		/**
+		 * When a User Media is moved into a dir, we need
+		 * to requery to avoid Pagination errors.
+		 */
+		requery: function() {
+			var o = this.options || {};
+
+			if ( _.isUndefined( this.views._views[''] ) || ! this.views._views[''].length ) {
+				return;
+			}
+
+			this.perPage = this.views._views[''].length - 1;
+			this.collection.state.totalObjects -= 1;
+
+			if ( o.queryVars.get( 'page' ) ) {
+				o.queryVars.unset( 'page', { silent: true } );
+			}
+
+			this.queryUserMedia();
 		},
 
 		queryUserMedia: function( options ) {
@@ -552,6 +588,13 @@ window.wp = window.wp || {};
 
 			if ( _.isObject( options ) ) {
 				o.queryVars.set( options );
+			}
+
+			if ( this.perPage ) {
+				o.queryVars.set( { 'per_page': this.perPage }, { silent: true } );
+				delete this.perPage;
+			} else if ( o.queryVars.get( 'per_page' ) ) {
+				o.queryVars.unset( 'per_page', { silent: true } );
 			}
 
 			// Clean subviews.
@@ -579,10 +622,10 @@ window.wp = window.wp || {};
 			}
 		},
 
-		doFeedback: function( model, request ) {
+		doFeedback: function( collection, request ) {
 			var feedback = new Backbone.Model();
 
-			if ( model.length ) {
+			if ( collection.length ) {
 				return;
 			}
 
@@ -922,28 +965,6 @@ window.wp = window.wp || {};
 			}
 
 			this.render();
-		},
-
-		// Move a User Media in a parent folder
-		handleDrop: function( id ) {
-			if ( _.isUndefined( id ) ) {
-				return;
-			}
-
-			var model = this.options.ghost.get( id ), parent = this.model.get( 'id' );
-
-			if ( _.isNaN( parent ) ) {
-				parent = 0;
-			}
-
-			// Let's make sure the PUT verb won't be blocked by the server.
-			Backbone.emulateHTTP = true;
-
-			model.save( {
-				'post_parent': this.model.get( 'id' )
-			} );
-
-			this.options.ghost.remove( model );
 		}
 	} );
 

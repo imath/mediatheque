@@ -250,6 +250,12 @@ p.drag-drop-buttons input[type="button"] {
 	cursor:move;
 }
 
+#wp-user-media-container #media ul.loading,
+#wp-user-media-container #trail ul.loading {
+ 	-webkit-filter: grayscale(1);
+	filter: grayscale(1);
+}
+
 #wp-user-media-container #media ul li.drag-over,
 #wp-user-media-container #trail ul li.drag-over {
 	border: 0.2em dashed #0073aa;
