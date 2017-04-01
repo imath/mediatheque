@@ -21,6 +21,7 @@ window.wp = window.wp || {};
 		destroy: function( options, attrs, model ) {
 			if ( _.isUndefined( this.urlRoot ) ) {
 				this.clear();
+				this.trigger( 'destroy', this, this.collection, options );
 				return false;
 			}
 
@@ -276,11 +277,19 @@ window.wp = window.wp || {};
 		},
 
 		initialize: function() {
-			this.collection.on( 'add', this.addItemView, this );
+			this.collection.on( 'add', this.prepareNewView, this );
 
 			this.isRequestingMore = false;
 
 			$( document ).on( 'scroll', _.bind( this.scroll, this ) );
+		},
+
+		prepareNewView: function( model ) {
+			var o = this.options || {};
+
+			o.ghost.add( model );
+
+			this.addItemView( model );
 		},
 
 		addItemView: function( user ) {
@@ -318,7 +327,7 @@ window.wp = window.wp || {};
 				this.isRequestingMore = true;
 				this.collection.more( {
 					success : _.bind( this.resetRequestingMore, this ),
-					error   : _.bind( this.resetRequestingMore, this )
+					error   : _.bind( this.resetRequestingMore, this ),
 				} );
 			}
 		},
@@ -345,8 +354,7 @@ window.wp = window.wp || {};
 				// Replace the uploaded file with the User Media model.
 				this.model.on( 'change:guid', this.update, this );
 
-				// Remove Progress View on Upload error
-				this.model.on( 'change:id', this.removeError, this );
+				this.model.on( 'destroy', this.remove, this );
 
 			// The dir background is specific.
 			} else if ( 'dir' === this.model.get( 'media_type' ) ) {
@@ -366,7 +374,7 @@ window.wp = window.wp || {};
 		setMediaProps: function() {
 			this.$el.prop( 'draggable', true );
 			this.$el.attr( 'data-id', this.model.get( 'id' ) );
-			this.model.on( 'remove', this.remove, this );
+			this.model.on( 'change:parent', this.parentEdited, this );
 
 			if ( 'image' === this.model.get( 'media_type' ) && this.model.get( 'guid' ) ) {
 				var bgUrl = this.model.get( 'guid' ).rendered,
@@ -447,9 +455,9 @@ window.wp = window.wp || {};
 				this.$el.removeClass( 'drag-over' );
 			}
 
-			modelId = e.dataTransfer.getData( 'modelID' );
+			modelId = e.dataTransfer.getData( 'modelId' );
 			if ( modelId ) {
-				var model = this.model.collection.get( modelId );
+				var model = this.options.ghost.get( modelId );
 
 				// Let's make sure the PUT verb won't be blocked by the server.
 				Backbone.emulateHTTP = true;
@@ -458,14 +466,18 @@ window.wp = window.wp || {};
 					'post_parent': this.model.get( 'id' )
 				} );
 
-				this.model.collection.remove( model );
+				this.options.ghost.remove( model );
 			}
 		},
 
-		removeError: function( model, changed ) {
-			if ( _.isUndefined( changed ) ) {
-				this.remove();
+		parentEdited: function( model, changed ) {
+			var previousParent = model.previous( 'parent' );
+
+			if ( _.isUndefined( previousParent ) || previousParent === changed ) {
+				return;
 			}
+
+			this.remove();
 		}
 	} );
 
@@ -548,15 +560,15 @@ window.wp = window.wp || {};
 		},
 
 		addItemView: function( userMedia ) {
-			var position = userMedia.get( 'at' );
+			var o = this.options || {}, position = userMedia.get( 'at' );
 
 			// Remove all feedbacks.
 			this.removeFeedback();
 
 			if ( _.isUndefined( position ) ) {
-				this.views.add( new wpUserMedia.Views.UserMedia( { model: userMedia } ) );
+				this.views.add( new wpUserMedia.Views.UserMedia( { model: userMedia, ghost: o.ghost } ) );
 			} else {
-				this.views.add( new wpUserMedia.Views.UserMedia( { model: userMedia } ), { at: position } );
+				this.views.add( new wpUserMedia.Views.UserMedia( { model: userMedia, ghost: o.ghost } ), { at: position } );
 			}
 		},
 
@@ -589,7 +601,7 @@ window.wp = window.wp || {};
 				e = e.originalEvent;
 			}
 
-			e.dataTransfer.setData( 'modelID', $( event.currentTarget ).data( 'id' ) );
+			e.dataTransfer.setData( 'modelId', $( event.currentTarget ).data( 'id' ) );
 		}
 	} );
 
@@ -652,13 +664,11 @@ window.wp = window.wp || {};
 
 			var dir = new wp.api.models.UserMedia( dirData );
 			dir.save( {
-					action: 'mkdir_user_media'
-				},
-				{
-					success: _.bind( this.mkdirSuccess, this ),
-					error: _.bind( this.mkdirError, this )
-				}
-			);
+				action: 'mkdir_user_media'
+			}, {
+				success: _.bind( this.mkdirSuccess, this ),
+				error: _.bind( this.mkdirError, this )
+			} );
 		},
 
 		mkdirSuccess: function( model ) {
@@ -915,7 +925,9 @@ window.wp = window.wp || {};
 		initialize: function() {
 			var o = this.options || {};
 
-			this.views.add( '#users', new wpUserMedia.Views.Users( { collection: o.users } ) );
+			this.ghost = new Backbone.Collection();
+
+			this.views.add( '#users', new wpUserMedia.Views.Users( { collection: o.users, ghost: this.ghost } ) );
 
 			this.listenTo( o.users, 'reset', this.queryUsers );
 			o.users.on( 'change:current', this.setToolbar, this );
@@ -1052,7 +1064,7 @@ window.wp = window.wp || {};
 				}
 			} else {
 				if ( 'users' === model.get( 'id' ) ) {
-					this.views.add( '#users', new wpUserMedia.Views.Users( { collection: o.users } ) );
+					this.views.add( '#users', new wpUserMedia.Views.Users( { collection: o.users, ghost: this.ghost } ) );
 					o.users.reset();
 
 					// Remove the trail when switching users.
@@ -1096,7 +1108,8 @@ window.wp = window.wp || {};
 					// Add the media view
 					this.views.add( '#media', new wpUserMedia.Views.UserMedias( {
 						collection: o.media,
-						queryVars: o.queryVars
+						ghost:      this.ghost,
+						queryVars:  o.queryVars
 					} ) );
 				}
 			}
@@ -1109,7 +1122,7 @@ window.wp = window.wp || {};
 				return;
 			}
 
-			dir = o.media.get( changed );
+			dir = this.ghost.get( changed );
 
 			// Move down into the dirs tree
 			if ( ! _.isUndefined( dir ) ) {
@@ -1125,7 +1138,7 @@ window.wp = window.wp || {};
 				}
 
 				// Add to trail the current displayed folder.
-				o.trailItems.add( o.media.get( changed ) );
+				o.trailItems.add( this.ghost.get( changed ) );
 
 			// Move up into the dirs tree
 			} else if ( options.move ) {

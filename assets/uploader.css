@@ -7,6 +7,7 @@
 	padding-top: 0;
 	margin-top: 0;
 	border: 4px dashed #b4b9be;
+	margin-bottom: 1em;
 }
 
 #drag-drop-area.drag-over {
@@ -248,5 +249,6 @@ p.drag-drop-buttons input[type="button"] {
 }
 
 #wp-user-media-container #media ul li.drag-over {
-	border: 2px dashed #0073aa;
+	border: 0.2em dashed #0073aa;
+	margin-bottom: 1.1em;
 }
