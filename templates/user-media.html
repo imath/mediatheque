@@ -9,7 +9,9 @@
 
 		<# if ( 'image' !== data.media_type ) { #>
 			<# if ( data.media_icon ) { #>
-				<img src="{{data.media_icon}}" alt="{{data.media_type}}">
+				<div class="bg-img" style="background-image:url( {{{data.media_icon}}} );">
+					<span class="screen-reader-text">{{data.media_type}}</span>
+				</div>
 			<# } #>
 
 			<h4>{{{data.title.rendered}}}</h4>

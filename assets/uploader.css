@@ -198,13 +198,15 @@ p.drag-drop-buttons input[type="button"] {
 	width: 100%;
 }
 
-#wp-user-media-container #media ul li.user-media div.user-media-content img {
+#wp-user-media-container #media ul li.user-media div.user-media-content div.bg-img {
 	position: absolute;
 	bottom: 20px;
 	top: 0;
 	left: 0;
 	right: 0;
 	margin: auto;
+	width: 48px;
+	height: 64px;
 }
 
 #wp-user-media-container #media ul li.user-media div.user-media-actions {
@@ -248,7 +250,16 @@ p.drag-drop-buttons input[type="button"] {
 	cursor:move;
 }
 
-#wp-user-media-container #media ul li.drag-over {
+#wp-user-media-container #media ul li.drag-over,
+#wp-user-media-container #trail ul li.drag-over {
 	border: 0.2em dashed #0073aa;
+}
+
+#wp-user-media-container #media ul li.drag-over {
 	margin-bottom: 1.1em;
+}
+
+#wp-user-media-container #trail ul li.drag-over {
+	display: block;
+	width: 250px;
 }

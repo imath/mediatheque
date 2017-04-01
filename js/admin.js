@@ -337,7 +337,76 @@ window.wp = window.wp || {};
 		}
 	} );
 
-	wpUserMedia.Views.UserMedia = wpUserMedia.View.extend( {
+	wpUserMedia.Views.Droppable = wpUserMedia.View.extend( {
+		initialize: function() {
+			this.$el.attr( 'data-id',   this.model.get( 'id' ) );
+			this.$el.bind( 'dragover',  _.bind( this.dragOver, this  ) );
+			this.$el.bind( 'dragenter', _.bind( this.dragOver, this  ) );
+			this.$el.bind( 'dragleave', _.bind( this.dragLeave, this ) );
+			this.$el.bind( 'drop',      _.bind( this.dropIn, this    ) );
+
+			this.isDroppable = true;
+		},
+
+		dragOver: function( event ) {
+			var e = event;
+
+			e.preventDefault();
+
+			if ( e.originalEvent ) {
+				e = e.originalEvent;
+			}
+
+			if ( 'modelid' !== _.first( e.dataTransfer.types ).toLowerCase() || ! this.isDroppable ) {
+				return false;
+			}
+
+			if ( ! this.$el.hasClass( 'drag-over' ) ) {
+				this.$el.addClass( 'drag-over' );
+			}
+
+			return false;
+		},
+
+		dragLeave: function( event ) {
+			event.preventDefault();
+
+			if ( ! this.isDroppable ) {
+				return false;
+			}
+
+			if ( this.$el.hasClass( 'drag-over' ) ) {
+				this.$el.removeClass( 'drag-over' );
+			}
+
+			return false;
+		},
+
+		dropIn: function( event ) {
+			var e = event;
+
+			if ( e.originalEvent ) {
+				e = e.originalEvent;
+			}
+
+			if ( ! this.isDroppable ) {
+				return false;
+			}
+
+			if ( this.$el.hasClass( 'drag-over' ) ) {
+				this.$el.removeClass( 'drag-over' );
+			}
+
+			this.handleDrop( e.dataTransfer.getData( 'modelId' ) );
+		},
+
+		// Extend it
+		handleDrop: function( id ) {
+			return id;
+		}
+	} );
+
+	wpUserMedia.Views.UserMedia = wpUserMedia.Views.Droppable.extend( {
 		tagName:    'li',
 		className:  'user-media',
 		template: wpUserMedia.template( 'wp-user-media-media' ),
@@ -359,11 +428,7 @@ window.wp = window.wp || {};
 			// The dir background is specific.
 			} else if ( 'dir' === this.model.get( 'media_type' ) ) {
 				this.el.className += ' dir droppable';
-				this.$el.attr( 'data-id', this.model.get( 'id' ) );
-				this.$el.bind( 'dragover',  _.bind( this.dragoverDir, this  ) );
-				this.$el.bind( 'dragenter', _.bind( this.dragoverDir, this  ) );
-				this.$el.bind( 'dragleave', _.bind( this.dragleaveDir, this ) );
-				this.$el.bind( 'drop',      _.bind( this.moveInDir, this    ) );
+				wpUserMedia.Views.Droppable.prototype.initialize.apply( this, arguments );
 
 			// Set additionnal properties
 			} else {
@@ -424,62 +489,31 @@ window.wp = window.wp || {};
 			this.remove();
 		},
 
-		dragoverDir: function( event ) {
-			var e = event;
-
-			e.preventDefault();
-
-			if ( e.originalEvent ) {
-				e = e.originalEvent;
-			}
-
-			if ( 'modelid' !== _.first( e.dataTransfer.types ).toLowerCase() ) {
+		handleDrop: function( id ) {
+			if ( _.isUndefined( id ) ) {
 				return;
 			}
 
-			if ( ! this.$el.hasClass( 'drag-over' ) ) {
-				this.$el.addClass( 'drag-over' );
-			}
+			var model = this.options.ghost.get( id );
 
-			return false;
+			// Let's make sure the PUT verb won't be blocked by the server.
+			Backbone.emulateHTTP = true;
+
+			model.save( {
+				'post_parent': this.model.get( 'id' )
+			} );
+
+			this.options.ghost.remove( model );
 		},
 
-		dragleaveDir: function( event ) {
-			event.preventDefault();
-
-			if ( this.$el.hasClass( 'drag-over' ) ) {
-				this.$el.removeClass( 'drag-over' );
-			}
-
-			return false;
-		},
-
-		moveInDir: function( event ) {
-			var e = event, modelId;
-
-			if ( e.originalEvent ) {
-				e = e.originalEvent;
-			}
-
-			if ( this.$el.hasClass( 'drag-over' ) ) {
-				this.$el.removeClass( 'drag-over' );
-			}
-
-			modelId = e.dataTransfer.getData( 'modelId' );
-			if ( modelId ) {
-				var model = this.options.ghost.get( modelId );
-
-				// Let's make sure the PUT verb won't be blocked by the server.
-				Backbone.emulateHTTP = true;
-
-				model.save( {
-					'post_parent': this.model.get( 'id' )
-				} );
-
-				this.options.ghost.remove( model );
-			}
-		},
-
+		/**
+		 * There's a problem when coming back to the public view
+		 * Moved items stay in list.
+		 *
+		 * @param  {[type]} model   [description]
+		 * @param  {[type]} changed [description]
+		 * @return {[type]}         [description]
+		 */
 		parentEdited: function( model, changed ) {
 			var previousParent = model.previous( 'parent' );
 
@@ -862,11 +896,15 @@ window.wp = window.wp || {};
 		}
 	} );
 
-	wpUserMedia.Views.trailItem = wpUserMedia.View.extend( {
+	wpUserMedia.Views.trailItem = wpUserMedia.Views.Droppable.extend( {
 		tagName  : 'li',
 		template: wpUserMedia.template( 'wp-user-media-trail' ),
 
 		initialize: function() {
+			wpUserMedia.Views.Droppable.prototype.initialize.apply( this, arguments );
+
+			this.isDroppable = false;
+
 			if ( this.model.get( 'showLink') ) {
 				this.model.unset( 'showLink', { silent: true } );
 			}
@@ -878,8 +916,34 @@ window.wp = window.wp || {};
 			this.model.on( 'remove', this.remove, this );
 		},
 
-		rerender: function() {
+		rerender: function( model, changed ) {
+			if ( true === changed ) {
+				this.isDroppable = true;
+			}
+
 			this.render();
+		},
+
+		// Move a User Media in a parent folder
+		handleDrop: function( id ) {
+			if ( _.isUndefined( id ) ) {
+				return;
+			}
+
+			var model = this.options.ghost.get( id ), parent = this.model.get( 'id' );
+
+			if ( _.isNaN( parent ) ) {
+				parent = 0;
+			}
+
+			// Let's make sure the PUT verb won't be blocked by the server.
+			Backbone.emulateHTTP = true;
+
+			model.save( {
+				'post_parent': this.model.get( 'id' )
+			} );
+
+			this.options.ghost.remove( model );
 		}
 	} );
 
@@ -906,7 +970,7 @@ window.wp = window.wp || {};
 		},
 
 		addTrailItem: function( trailItem ) {
-			this.views.add( new wpUserMedia.Views.trailItem( { model: trailItem } ) );
+			this.views.add( new wpUserMedia.Views.trailItem( { model: trailItem, ghost: this.options.ghost } ) );
 		},
 
 		moveUp: function( event ) {
@@ -1086,6 +1150,7 @@ window.wp = window.wp || {};
 					if ( _.isUndefined( this.views._views['#trail'] ) || 0 === this.views._views['#trail'].length ) {
 						this.views.add( '#trail', new wpUserMedia.Views.Trail( {
 							collection: o.trailItems,
+							ghost:     this.ghost,
 							queryVars: o.queryVars
 						} ) );
 					}
@@ -1135,7 +1200,7 @@ window.wp = window.wp || {};
 			dir = this.ghost.get( changed );
 
 			// Move down into the dirs tree
-			if ( ! _.isUndefined( dir ) ) {
+			if ( ! _.isUndefined( dir ) && ! options.move ) {
 
 				if ( 0 === dir.get( 'parent' ) ) {
 					status = o.toolbarItems.findWhere( { current: true } );

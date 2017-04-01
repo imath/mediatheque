@@ -16,3 +16,4 @@
 [x] Add a breadcrumb to navigate into parent directories when inside a directory.
 [] Add a check to make sure the destination folder is within /wp-content/uploads.
 [x] Make sure to use copy and unlink because rename breaks streams.
+[] Fix the problem when coming back to the public view (moving User Media)
