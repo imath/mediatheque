@@ -425,7 +425,17 @@ window.wp = window.wp || {};
 		},
 
 		dragoverDir: function( event ) {
-			event.preventDefault();
+			var e = event;
+
+			e.preventDefault();
+
+			if ( e.originalEvent ) {
+				e = e.originalEvent;
+			}
+
+			if ( 'modelid' !== _.first( e.dataTransfer.types ).toLowerCase() ) {
+				return;
+			}
 
 			if ( ! this.$el.hasClass( 'drag-over' ) ) {
 				this.$el.addClass( 'drag-over' );
