@@ -369,7 +369,7 @@ window.wp = window.wp || {};
 				e = e.originalEvent;
 			}
 
-			if ( 'modelid' !== _.first( e.dataTransfer.types ).toLowerCase() || ! this.isDroppable ) {
+			if ( -1 === _.indexOf( e.dataTransfer.types, 'modelid' ) || ! this.isDroppable ) {
 				return false;
 			}
 
