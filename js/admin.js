@@ -311,6 +311,15 @@ window.wp = window.wp || {};
 			} );
 		},
 
+		/**
+		 * Edit the more query by extending this method.
+		 *
+		 * @return {object} Additionnal Query Parameters for the more query if needed.
+		 */
+		getScrollData: function() {
+			return {};
+		},
+
 		scroll: function() {
 			var listOffset = $( this.el ).offset(), el = document.body,
 			    scrollTop = $( document ).scrollTop(), sensibility = 20;
@@ -319,15 +328,18 @@ window.wp = window.wp || {};
 				sensibility += $( '#wpadminbar' ).height();
 			}
 
-			if ( ! this.collection.hasMore() || this.isRequestingMore ) {
+			if ( ! this.collection.hasMore() || this.isRequestingMore || this.$el.hasClass( 'loading' ) ) {
 				return;
 			}
 
 			if ( scrollTop + el.clientHeight + sensibility > this.el.clientHeight + listOffset.top ) {
+				var data = this.getScrollData();
 				this.isRequestingMore = true;
+
 				this.collection.more( {
+					data    : data,
 					success : _.bind( this.resetRequestingMore, this ),
-					error   : _.bind( this.resetRequestingMore, this ),
+					error   : _.bind( this.resetRequestingMore, this )
 				} );
 			}
 		},
@@ -528,12 +540,12 @@ window.wp = window.wp || {};
 			} );
 		},
 
-		userMediaDeleted: function() {
+		userMediaDeleted: function( model ) {
 			$( '#trail ul' ).first().removeClass( 'loading' );
 			$( '#media ul' ).first().removeClass( 'loading' );
 
-			// Remove the view.
-			this.remove();
+			// Remove the model.
+			this.options.ghost.remove( model );
 		}
 	} );
 
@@ -559,28 +571,63 @@ window.wp = window.wp || {};
 			this.listenTo( o.queryVars, 'change:parent', this.getChildren );
 
 			// Listen to User Media removed from the ghost Collection
-			this.listenTo( o.ghost, 'remove', this.requery );
+			this.listenTo( o.ghost, 'remove', this.adjustMore );
 		},
 
 		/**
-		 * When a User Media is moved into a dir, we need
-		 * to requery to avoid Pagination errors.
+		 * When a User Media is moved into a dir, we need to remove its view
+		 * and make sure to exclude displayed User Media from the more Query.
+		 *
+		 * @param  {Backbone.Model} model The User Media Object
 		 */
-		requery: function() {
-			var o = this.options || {};
+		adjustMore: function( model ) {
+			var o = this.options || {}, modelId = model.get( 'id' );
 
-			if ( _.isUndefined( this.views._views[''] ) || ! this.views._views[''].length ) {
-				return;
+			this.excludeDisplayed = []
+
+			// Remove the moved User Media from the list.
+			if ( ! _.isUndefined( this.views._views[''] ) && this.views._views[''].length && modelId ) {
+				_.each( this.views._views[''], function( view ) {
+					if ( modelId === view.model.get( 'id' ) ) {
+						view.remove();
+					} else {
+						this.excludeDisplayed.push( view.model.get( 'id' ) );
+					}
+				}, this );
 			}
 
-			this.perPage = this.views._views[''].length - 1;
+			// Clean up the main collection if the Model is still in.
+			if ( this.collection.get( modelId ) ) {
+				this.collection.remove( modelId );
+			}
+
+			// Update the total available User Media for the query
 			this.collection.state.totalObjects -= 1;
 
-			if ( o.queryVars.get( 'page' ) ) {
-				o.queryVars.unset( 'page', { silent: true } );
+			// If All the User Media are displayed, no need to get more on scroll.
+			if ( this.views._views[''].length >= this.collection.state.totalObjects ) {
+				delete this.excludeDisplayed;
+			}
+		},
+
+		/**
+		 * Exclude Displayed User Media and reset page for the more Query if needed
+		 *
+		 * @return {object} Query Parameters.
+		 */
+		getScrollData: function() {
+			var data = {};
+
+			if ( _.isArray( this.excludeDisplayed ) ) {
+				_.extend( data, {
+					exclude: this.excludeDisplayed.join( ',' ),
+					page   : this.collection.state.currentPage
+				} );
+
+				delete this.excludeDisplayed;
 			}
 
-			this.queryUserMedia();
+			return data;
 		},
 
 		queryUserMedia: function( options ) {
@@ -588,13 +635,6 @@ window.wp = window.wp || {};
 
 			if ( _.isObject( options ) ) {
 				o.queryVars.set( options );
-			}
-
-			if ( this.perPage ) {
-				o.queryVars.set( { 'per_page': this.perPage }, { silent: true } );
-				delete this.perPage;
-			} else if ( o.queryVars.get( 'per_page' ) ) {
-				o.queryVars.unset( 'per_page', { silent: true } );
 			}
 
 			// Clean subviews.
@@ -683,6 +723,11 @@ window.wp = window.wp || {};
 
 		setDragData: function( event ) {
 			var e = event;
+
+			if ( this.$el.closest( 'ul' ).hasClass( 'loading' ) ) {
+				event.preventDefault();
+				return false;
+			}
 
 			if ( e.originalEvent ) {
 				e = e.originalEvent;
