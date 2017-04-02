@@ -110,6 +110,21 @@ class WP_User_Media_REST_Controller extends WP_REST_Attachments_Controller {
 			'default'           => array(),
 		);
 
+		$params['orderby'] = array(
+			'description'        => __( 'Sort collection by object attribute.', 'wp-user-media' ),
+			'type'               => 'string',
+			'default'            => 'modified',
+			'enum'               => array(
+				'modified',
+				'date',
+				'relevance',
+				'id',
+				'include',
+				'title',
+				'slug',
+			),
+		);
+
 		return $params;
 	}
 
@@ -667,6 +682,14 @@ class WP_User_Media_REST_Controller extends WP_REST_Attachments_Controller {
 		}
 
 		$user_media = get_post( $id );
+
+		// Maybe Update parent directory modified date
+		if ( ! empty( $this->user_media_parent ) ) {
+			wp_update_post( array(
+				'ID'            => $this->user_media_parent,
+				'post_modified' => current_time( 'mysql' ),
+			) );
+		}
 
 		/**
 		 * Fires after a single User Media is updated via the REST API.

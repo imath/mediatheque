@@ -17,5 +17,5 @@
 [] Add a check to make sure the destination folder is within /wp-content/uploads.
 [x] Make sure to use copy and unlink because rename breaks streams.
 [x] Fix the problem when coming back to the public view (moving User Media)
-[] When a User Media is moved inside a Directory the Modified Date of the Directory should be updated.
-[] Make sure User Media are listed by modified date DESC.
+[x] When a User Media is moved inside a Directory the Modified Date of the Directory should be updated.
+[x] Make sure User Media are listed by modified date DESC.
