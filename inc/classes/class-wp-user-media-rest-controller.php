@@ -22,6 +22,7 @@ class WP_User_Media_REST_Controller extends WP_REST_Attachments_Controller {
 	public $user_media_parent_dir    = '';
 	public $user_media_guid          = '';
 	public $user_media_deleted_space = 0;
+	public $user_id                  = 0;
 
 	/**
 	 * Temporarly Adds specific User Media metas to the registered post metas.
@@ -202,13 +203,18 @@ class WP_User_Media_REST_Controller extends WP_REST_Attachments_Controller {
 	 * @return array The Uploads dir data.
 	 */
 	public function upload_dir_filter() {
-		$dir = wp_user_media_get_upload_dir();
+		$dir     = wp_user_media_get_upload_dir();
+		$user_id = $this->user_id;
+
+		if ( ! $user_id ) {
+			$user_id = get_current_user_id();
+		}
 
 		if ( $this->user_media_parent_dir ) {
 			$dir['subdir'] = '/' . $this->user_media_parent_dir;
 		} else {
 			// Should check the request for a user ID and fall back to current user ID.
-			$dir['subdir'] .= sprintf( '/%1$s/%2$s', $this->user_media_status, get_current_user_id() );
+			$dir['subdir'] .= sprintf( '/%1$s/%2$s', $this->user_media_status, $user_id );
 		}
 
 		$dir['path'] = sprintf( '%s%s', $dir['basedir'], $dir['subdir'] );
@@ -313,6 +319,10 @@ class WP_User_Media_REST_Controller extends WP_REST_Attachments_Controller {
 			$prepared_user_media->guid = $this->user_media_guid;
 		}
 
+		if ( $this->user_id ) {
+			$prepared_user_media->post_author = $this->user_id;
+		}
+
 		return $prepared_user_media;
 	}
 
@@ -383,6 +393,13 @@ class WP_User_Media_REST_Controller extends WP_REST_Attachments_Controller {
 				$this->user_media_parent     = $post_parent->ID;
 				$this->user_media_parent_dir = get_post_meta( $this->user_media_parent, '_wp_user_media_relative_path', true );
 			}
+		}
+
+		$user_id = $request->get_param( 'user_id' );
+		if ( $user_id ) {
+			$this->user_id = (int) $user_id;
+		} else {
+			$this->user_id = (int) get_current_user_id();
 		}
 
 		// Add a file

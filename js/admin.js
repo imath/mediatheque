@@ -1176,6 +1176,10 @@ window.wp = window.wp || {};
 					params.post_parent = o.queryVars.get( 'parent' );
 				}
 
+				if ( o.queryVars.get( 'user_id' ) ) {
+					params.user_id = o.queryVars.get( 'user_id' );
+				}
+
 				if ( 'upload' === model.get( 'id' ) ) {
 					this.views.add( '#forms', new wpUserMedia.Views.Uploader( {
 						overrides: o.overrides,

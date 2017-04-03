@@ -11,7 +11,7 @@
 [x] Improve the way Views are added to the screen in admin.js
 [x] Add a message about how to configure the private folder with nginx: [@see](http://nicknotfound.com/2009/01/12/iphone-website-with-nginx/)
 [x] Use the wp-pointer to guide the user in finishing the plugin's setup (default links vs pretty links, where are the options, where is the main admin)
-[] Make sure an admin can upload a file in another user's folder.
+[x] Make sure an admin can upload a file in another user's folder.
 [x] Use a Backbone Model to store query vars (eg: user ID, parent directory ID etc..)
 [x] Add a breadcrumb to navigate into parent directories when inside a directory.
 [] Add a check to make sure the destination folder is within /wp-content/uploads.
@@ -19,3 +19,4 @@
 [x] Fix the problem when coming back to the public view (moving User Media)
 [x] When a User Media is moved inside a Directory the Modified Date of the Directory should be updated.
 [x] Make sure User Media are listed by modified date DESC.
+[] Work on capabilities making sure cap is publish for others when current user id is not author id
