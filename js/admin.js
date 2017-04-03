@@ -621,7 +621,7 @@ window.wp = window.wp || {};
 			if ( _.isArray( this.excludeDisplayed ) ) {
 				_.extend( data, {
 					exclude: this.excludeDisplayed.join( ',' ),
-					page   : this.collection.state.currentPage
+					page   : 1
 				} );
 
 				delete this.excludeDisplayed;
