@@ -1010,3 +1010,41 @@ function wp_user_media_move( $media = null, $parent = null ) {
 
 	return $new_file;
 }
+
+function medialibrary_button( $args = array() ) {
+	static $instance = 0;
+	$instance++;
+
+	$r = wp_parse_args( $args, array(
+		'editor_id'           => 'content',
+		'editor_btn_classes'  => array( 'mediabrary-insert' ),
+		'editor_btn_text'     => __( 'Add Media', 'wp-user-media' ),
+		'editor_btn_dashicon' => 'dashicons-format-image',
+	) );
+
+	$post = get_post();
+	if ( ! $post && ! empty( $GLOBALS['post_ID'] ) ) {
+		$post = $GLOBALS['post_ID'];
+	}
+
+	wp_enqueue_media( array(
+		'post' => $post
+	) );
+
+	$img = '';
+	$output = '<a href="#"%s class="%s" data-editor="%s">%s</a>';
+
+	if ( false !== $r['editor_btn_dashicon'] ) {
+		$img = '<span class="dashicons ' . $r['editor_btn_dashicon']  . '"></span> ';
+		$output = '<button type="button"%s class="button %s" data-editor="%s">%s</button>';
+	}
+
+	$id_attribute = $instance === 1 ? ' id="insert-mediabrary-item"' : '';
+
+	printf( $output,
+		$id_attribute,
+		join( ' ', array_map( 'sanitize_html_class', $r['editor_btn_classes'] ) ),
+		esc_attr( $r['editor_id'] ),
+		$img . $r['editor_btn_text']
+	);
+}

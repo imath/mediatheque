@@ -92,4 +92,92 @@ window.wp = window.wp || {};
 		}
 	} );
 
+	/**
+	 * wpUserMedia.media.personalAvatar
+	 * @namespace
+	 */
+	wpUserMedia.media.personalAvatar = {
+
+		set: function( id ) {
+			$( '#' + this.activeEditor ).val( id );
+		},
+
+		remove: function() {
+			$( '#' + this.activeEditor ).val( -1 );
+		},
+
+		/**
+		 * The Personal Avatar workflow
+		 *
+		 * @returns {wp.media.view.MediaFrame.Select} A media workflow.
+		 */
+		frame: function( editor ) {
+			if ( this._frame ) {
+				wp.media.frame = this._frame;
+				return this._frame;
+			}
+
+			this._frame = wpUserMedia.media( {
+				state: 'user-media',
+				states: [ new wpUserMedia.media.controller.UserMedia() ]
+			} );
+
+			this.activeEditor = editor || 'peronal_avatar';
+
+			this._frame.on( 'toolbar:create:main-user-media', function( toolbar ) {
+				this.createSelectToolbar( toolbar, {
+					text: 'Insert Avatar'
+				});
+
+			}, this._frame );
+
+			this._frame.on( 'content:render:user-media', function() {
+				var selection = this.state( 'user-media' ).get( 'selection' ),
+					view = new wpUserMedia.media.view.mainUserMedia({
+						controller: this,
+						model:      this.state()
+					} ).render();
+
+				this.content.set( view );
+
+			}, this._frame );
+
+			this._frame.state( 'user-media' ).on( 'select', this.select );
+			return this._frame;
+		},
+
+		/**
+		 * 'select' callback for Personal Avatar workflow, triggered when
+		 *  the 'Insert Avatar' button is clicked in the media modal.
+		 */
+		select: function() {
+			var selection = 'avatar';
+
+			wpUserMedia.media.personalAvatar.set( selection ? selection : -1 );
+		},
+
+		/**
+		 * Open the content media manager to the 'User Media' tab when
+		 * the Personal Avatar is clicked.
+		 */
+		init: function() {
+			$( '.user-profile-picture td p.description' ).after( $( '#personal-avatar-editor' ) );
+
+			$( '#personal-avatar-editor' ).on( 'click', '.mediabrary-insert', function( event ) {
+				event.preventDefault();
+				// Stop propagation to prevent thickbox from activating.
+				event.stopPropagation();
+
+				var editor = $( event.currentTarget ).data( 'editor' );
+				wpUserMedia.media.personalAvatar.frame( editor ).open();
+
+			} ).on( 'click', '.mediabrary-remove', function() {
+				wpUserMedia.media.personalAvatar.remove();
+				return false;
+			} );
+		}
+	};
+
+	$( wpUserMedia.media.personalAvatar.init );
+
 } )( wp, jQuery );

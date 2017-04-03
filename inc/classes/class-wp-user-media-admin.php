@@ -78,6 +78,9 @@ class WP_User_Media_Admin {
 		add_action( 'admin_enqueue_scripts',                       array( $this, 'inline_scripts'          ) );
 		add_action( 'admin_head',                                  array( $this, 'admin_head'              ) );
 		add_action( 'admin_head-settings_page_user-media-options', array( $this, 'settings_menu_highlight' ) );
+
+		/** User Profile ****************************************************/
+		add_action( 'profile_personal_options', array( $this, 'personal_avatar' ), 10, 1 );
 	}
 
 	/**
@@ -385,5 +388,21 @@ location ~* /(?:uploads|files)/wp-user-media/private/.* {
 		wp_user_media_get_template_part( 'uploader', 'wp-user-media-uploader' );
 		wp_user_media_get_template_part( 'progress', 'wp-user-media-progress' );
 		wp_user_media_get_template_part( 'dirmaker', 'wp-user-media-dirmaker' );
+	}
+
+	public function personal_avatar( $user = null ) {
+		?>
+		<div id="personal-avatar-editor">
+			<input type="hidden" id="personal_avatar" name="personal_avatar">
+
+			<?php medialibrary_button( array(
+				'editor_id'           => 'personal_avatar',
+				'editor_btn_classes'  => array( 'mediabrary-insert' ),
+				'editor_btn_text'     => __( 'Select Avatar', 'wp-user-media' ),
+				'editor_btn_dashicon' => false,
+			) ); ?>
+
+		</div>
+		<?php
 	}
 }
