@@ -2,11 +2,12 @@
 
 // Make sure the wp object exists.
 window.wp = window.wp || {};
+window.wpUserMedia = window.wpUserMedia || _.extend( {}, _.pick( window.wp, 'Backbone', 'template' ) );
 
 ( function( exports, $ ) {
 
-	var wpUserMedia      = wpUserMedia || _.extend( {}, _.pick( exports, 'Backbone', 'template', 'media' ) );
-		wpUserMedia.post = wpUserMedia.media.view.MediaFrame.Post;
+	_.extend( wpUserMedia, _.pick( window.wp, 'media' ) );
+	wpUserMedia.post = wpUserMedia.media.view.MediaFrame.Post;
 
 	wpUserMedia.media.controller.UserMedia = wp.media.controller.State.extend( {
 		defaults: {
@@ -40,8 +41,27 @@ window.wp = window.wp || {};
 
 	wpUserMedia.media.view.mainUserMedia = wpUserMedia.media.View.extend( {
 		className: 'user-media-content',
-		id:        'wp-user-media-container',
-		template : wpUserMedia.template( 'user-media-main' )
+		template : wpUserMedia.template( 'user-media-main' ),
+
+		initialize: function() {
+			this.on( 'ready', this.loadApp, this );
+		},
+
+		loadApp: function() {
+			var app = wpUserMedia.App;
+
+			if ( _.isUndefined( this.views._views[''] ) || ! this.views._views[''].length ) {
+				this.views.add( new wpUserMedia.Views.Root( {
+					el:           $( '#wp-user-media-container' ),
+					users:        app.users,
+					media:        app.userMedia,
+					overrides:    app.overrides,
+					toolbarItems: app.toolbarItems,
+					queryVars:    app.queryVars,
+					trailItems:   app.trailItems
+				} ) );
+			}
+		}
 	} );
 
 	wp.media.view.MediaFrame.Post = wpUserMedia.post.extend( {
@@ -180,5 +200,34 @@ window.wp = window.wp || {};
 	};
 
 	$( wpUserMedia.media.personalAvatar.init );
+
+	wpUserMedia.App = {
+		init: function( restUrl ) {
+			this.views        = new Backbone.Collection();
+			this.users        = new wp.api.collections.Users();
+			this.userMedia    = new wp.api.collections.UserMedia();
+			this.toolbarItems = new Backbone.Collection();
+			this.queryVars    = new Backbone.Model();
+			this.trailItems   = new Backbone.Collection();
+
+			this.overrides = {
+				url: restUrl,
+				'file_data_name': 'wp_user_media_upload',
+				headers: {
+					'X-WP-Nonce' : wpApiSettings.nonce
+				}
+			};
+		}
+	};
+
+	wp.api.loadPromise.done( function( api ) {
+		var restUrl;
+
+		if ( api.get( 'apiRoot' ) && api.get( 'versionString' ) ) {
+			restUrl = api.get( 'apiRoot' ) + api.get( 'versionString' ) + 'user-media';
+		}
+
+		wpUserMedia.App.init( restUrl );
+	} );
 
 } )( wp, jQuery );

@@ -101,13 +101,18 @@ class WP_User_Media_Admin {
 	public function scripts() {
 
 		// Media Editor script
-		wp_enqueue_script(
+		/*wp_enqueue_script(
 			'wp-user-media',
 			sprintf( '%1$sscript%2$s.js', wp_user_media_js_url(), wp_user_media_min_suffix() ),
 			array( 'media-editor', 'wp-backbone', 'underscore' ),
 			wp_user_media_version(),
 			true
-		);
+		);*/
+
+		wp_enqueue_script( 'wp-user-media-editor' );
+		wp_user_media_localize_script();
+
+		wp_enqueue_style( 'wp-user-media-uploader' );
 	}
 
 	/**
@@ -235,11 +240,13 @@ class WP_User_Media_Admin {
 	 * @since  1.0.0
 	 */
 	public function template( $editor = true ) {
-		$base_layout = '<div id="toolbar" class="wp-filter"></div>
+		$base_layout = '<div id="wp-user-media-container">
+			<div id="toolbar" class="wp-filter"></div>
 			<div id="forms"></div>
 			<div id="users"></div>
 			<div id="trail"></div>
-			<div id="media"></div>';
+			<div id="media"></div>
+		</div>';
 
 		if ( true === $editor ) {
 			printf( '<script type="text/html" id="tmpl-user-media-main">%s</script>', $base_layout );
@@ -338,7 +345,7 @@ location ~* /(?:uploads|files)/wp-user-media/private/.* {
 	 * @since 1.0.0
 	 */
 	public function media_grid() {
-		wp_enqueue_script(
+		/*wp_enqueue_script(
 			'wp-user-media-admin',
 			sprintf( '%1$sadmin%2$s.js', wp_user_media_js_url(), wp_user_media_min_suffix() ),
 			array( 'wp-api', 'wp-backbone', 'wp-plupload' ),
@@ -381,16 +388,19 @@ location ~* /(?:uploads|files)/wp-user-media/private/.* {
 			sprintf( '%1$suploader%2$s.css', wp_user_media_assets_url(), wp_user_media_min_suffix() ),
 			array(),
 			wp_user_media_version()
-		);
+		);*/
+
+		wp_enqueue_script( 'wp-user-media-manage' );
+		wp_user_media_localize_script();
+
+		wp_enqueue_style( 'wp-user-media-uploader' );
 
 		wp_plupload_default_settings();
 
 		printf( '
 			<div class="wrap">
 				<h1 id="wp-user-media-title">%1$s</h1>
-				<div id="wp-user-media-container">
-					%2$s
-				</div>
+				%2$s
 			</div>
 		', esc_html( $this->title ), $this->template( false ) );
 

@@ -516,6 +516,74 @@ function wp_user_media_get_post_statuses( $status = '' ) {
 	return $wp_user_media->statuses[ $status ];
 }
 
+function wp_user_media_localize_script( $handle = 'wp-user-media-views' ) {
+	wp_localize_script( $handle, 'wpUserMediaSettings', array(
+		'params' => array(
+			'container' => 'wp-user-media-ui',
+			'browser'   => 'wp-user-media-browse',
+			'dropzone'  => 'drag-drop-area',
+			'dropHelp'  => __( 'Drop files anywhere to upload', 'wp-user-media' ),
+			'dropOr'    => __( 'or', 'wp-user-media' ),
+			'btnBrowse' => __( 'Select files', 'wp-user-media' ),
+		),
+		'toolbarItems' => array_merge( array(
+				'users'    => __( 'Browse Users', 'wp-user-media' )
+			),
+			wp_list_pluck( wp_user_media_get_post_statuses( 'all' ), 'label', 'name' ),
+			array(
+				'upload'    => __( 'Upload file(s)', 'wp-user-media' ),
+				'directory' => __( 'Add a directory', 'wp-user-media' ),
+			)
+		),
+		'dirmaker' => array(
+			'label'   => __( 'Name of your directory', 'wp-user-media' ),
+			'saveBtn' => __( 'Create', 'wp-user-media' ),
+		),
+		'common' => array(
+			'downloadSlug'    => wp_user_media_get_download_rewrite_slug(),
+			'closeBtn'        => __( 'Close', 'wp-user-media' ),
+			'noUserMedia'     => __( 'No User Media were found for the request.', 'wp-user-media' ),
+			'dismissibleText' => __( 'Dismiss', 'wp-user-media' ),
+		),
+	) );
+}
+
+function wp_user_media_register_scripts() {
+	$url = wp_user_media_js_url();
+	$min = wp_user_media_min_suffix();
+	$v   = wp_user_media_version();
+
+	$scripts = array(
+		'wp-user-media-uploader' => array(
+			'location' => sprintf( '%1$suploader%2$s.js', $url, $min ),
+			'deps'     => array( 'wp-api', 'wp-backbone', 'wp-plupload' ),
+		),
+		'wp-user-media-views' => array(
+			'location' => sprintf( '%1$sviews%2$s.js', $url, $min ),
+			'deps'     => array( 'wp-api', 'wp-backbone', 'underscore' ),
+		),
+		'wp-user-media-editor' => array(
+			'location' => sprintf( '%1$sscript%2$s.js', $url, $min ),
+			'deps'     => array( 'media-editor', 'wp-user-media-uploader', 'wp-user-media-views' ),
+		),
+		'wp-user-media-manage' => array(
+			'location' => sprintf( '%1$smanage%2$s.js', $url, $min ),
+			'deps'     => array( 'wp-user-media-uploader', 'wp-user-media-views' ),
+		),
+	);
+
+	foreach ( $scripts as $handle => $script ) {
+		wp_register_script( $handle, $script['location'], $script['deps'], $v, true );
+	}
+
+	wp_register_style(
+		'wp-user-media-uploader',
+		sprintf( '%1$suploader%2$s.css', wp_user_media_assets_url(), $min ),
+		array(),
+		$v
+	);
+}
+
 /**
  * Register the post type and the taxonomy used by User Media.
  *
@@ -622,6 +690,10 @@ function wp_user_media_register_objects() {
 	/** Uploads dir **********************************************************/
 
 	wp_user_media_register_upload_dir();
+
+	/** Scripts & Css *******************************************************/
+
+	wp_user_media_register_scripts();
 }
 
 /**
