@@ -973,8 +973,10 @@ function wp_user_media_move( $media = null, $parent = null ) {
 		return false;
 	}
 
+	$uploadpath = wp_user_media_get_upload_dir();
+
 	if ( 0 === $parent ) {
-		$path = '/';
+		$path = sprintf( '%1$s/%2$s/%3$s', $uploadpath['subdir'], get_post_status( $user_media ), $user_media->post_author );
 	} else {
 		$path = '/' . get_post_meta( $parent, '_wp_user_media_relative_path', true );
 	}
@@ -985,7 +987,6 @@ function wp_user_media_move( $media = null, $parent = null ) {
 
 	$meta       = wp_get_attachment_metadata( $user_media->ID );
 	$file       = get_attached_file( $user_media->ID );
-	$uploadpath = wp_user_media_get_upload_dir();
 
 	$newdir     = $uploadpath['basedir'] . $path;
 	$filename   = wp_unique_filename( $newdir, basename( $file ) );
