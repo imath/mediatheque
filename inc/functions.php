@@ -1021,6 +1021,7 @@ function medialibrary_button( $args = array() ) {
 		'editor_btn_classes'  => array( 'mediabrary-insert' ),
 		'editor_btn_text'     => __( 'Add Media', 'wp-user-media' ),
 		'editor_btn_dashicon' => 'dashicons-format-image',
+		'echo'                => true,
 	) );
 
 	$post = get_post();
@@ -1042,7 +1043,16 @@ function medialibrary_button( $args = array() ) {
 
 	$id_attribute = $instance === 1 ? ' id="insert-mediabrary-item"' : '';
 
-	printf( $output,
+	if ( true === $r['echo' ] ) {
+		printf( $output,
+			$id_attribute,
+			join( ' ', array_map( 'sanitize_html_class', $r['editor_btn_classes'] ) ),
+			esc_attr( $r['editor_id'] ),
+			$img . $r['editor_btn_text']
+		);
+	}
+
+	return sprintf( $output,
 		$id_attribute,
 		join( ' ', array_map( 'sanitize_html_class', $r['editor_btn_classes'] ) ),
 		esc_attr( $r['editor_id'] ),

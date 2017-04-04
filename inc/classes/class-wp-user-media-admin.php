@@ -70,8 +70,8 @@ class WP_User_Media_Admin {
 
 		/** Media Editor ******************************************************/
 
-		add_action( 'wp_enqueue_media',      array( $this, 'scripts'   ) );
-		add_action( 'print_media_templates', array( $this, 'templates' ) );
+		add_action( 'wp_enqueue_media',      array( $this, 'scripts'  )        );
+		add_action( 'print_media_templates', array( $this, 'template' ), 10, 0 );
 
 		/** Settings *********************************************************/
 
@@ -218,17 +218,35 @@ class WP_User_Media_Admin {
 		}
 	}
 
+	public function get_template_parts() {
+		wp_user_media_get_template_part( 'toolbar-item', 'wp-user-media-toolbar-item' );
+		wp_user_media_get_template_part( 'feedback', 'wp-user-media-feedback' );
+		wp_user_media_get_template_part( 'user', 'wp-user-media-user' );
+		wp_user_media_get_template_part( 'user-media', 'wp-user-media-media' );
+		wp_user_media_get_template_part( 'user-media-trail', 'wp-user-media-trail' );
+		wp_user_media_get_template_part( 'uploader', 'wp-user-media-uploader' );
+		wp_user_media_get_template_part( 'progress', 'wp-user-media-progress' );
+		wp_user_media_get_template_part( 'dirmaker', 'wp-user-media-dirmaker' );
+	}
+
 	/**
 	 * Print Media Editor's templates
 	 *
 	 * @since  1.0.0
 	 */
-	public function templates() {
-		?>
-		<script type="text/html" id="tmpl-user-media-main">
-			<h2><?php esc_html_e( 'Hello World!', 'wp-user-media' ); ?></h2>
-		</script>
-		<?php
+	public function template( $editor = true ) {
+		$base_layout = '<div id="toolbar" class="wp-filter"></div>
+			<div id="forms"></div>
+			<div id="users"></div>
+			<div id="trail"></div>
+			<div id="media"></div>';
+
+		if ( true === $editor ) {
+			printf( '<script type="text/html" id="tmpl-user-media-main">%s</script>', $base_layout );
+			$this->get_template_parts();
+		}
+
+		return $base_layout;
 	}
 
 	/**
@@ -369,38 +387,40 @@ location ~* /(?:uploads|files)/wp-user-media/private/.* {
 
 		printf( '
 			<div class="wrap">
-				<h1 id="wp-user-media-title">%s</h1>
+				<h1 id="wp-user-media-title">%1$s</h1>
 				<div id="wp-user-media-container">
-					<div id="toolbar" class="wp-filter"></div>
-					<div id="forms"></div>
-					<div id="users"></div>
-					<div id="trail"></div>
-					<div id="media"></div>
+					%2$s
 				</div>
 			</div>
-		', esc_html( $this->title ) );
+		', esc_html( $this->title ), $this->template( false ) );
 
-		wp_user_media_get_template_part( 'toolbar-item', 'wp-user-media-toolbar-item' );
-		wp_user_media_get_template_part( 'feedback', 'wp-user-media-feedback' );
-		wp_user_media_get_template_part( 'user', 'wp-user-media-user' );
-		wp_user_media_get_template_part( 'user-media', 'wp-user-media-media' );
-		wp_user_media_get_template_part( 'user-media-trail', 'wp-user-media-trail' );
-		wp_user_media_get_template_part( 'uploader', 'wp-user-media-uploader' );
-		wp_user_media_get_template_part( 'progress', 'wp-user-media-progress' );
-		wp_user_media_get_template_part( 'dirmaker', 'wp-user-media-dirmaker' );
+		$this->get_template_parts();
 	}
 
+	/**
+	 * Output a button on User's dashboard profile to select one of his User Media
+	 * and set it as his personal avatar.
+	 *
+	 * @since  1.0.0
+	 *
+	 * @param  WP_User $user The current User object.
+	 * @return string        HTML Output.
+	 */
 	public function personal_avatar( $user = null ) {
 		?>
 		<div id="personal-avatar-editor">
 			<input type="hidden" id="personal_avatar" name="personal_avatar">
 
-			<?php medialibrary_button( array(
-				'editor_id'           => 'personal_avatar',
-				'editor_btn_classes'  => array( 'mediabrary-insert' ),
-				'editor_btn_text'     => __( 'Select Avatar', 'wp-user-media' ),
-				'editor_btn_dashicon' => false,
-			) ); ?>
+			<p class="description"><?php printf(
+				__( 'You can also select an image from your %s to use as your avatar.', 'wp-user-media' ),
+				medialibrary_button( array(
+					'editor_id'           => 'personal_avatar',
+					'editor_btn_classes'  => array( 'mediabrary-insert' ),
+					'editor_btn_text'     => __( 'MediaBrary', 'wp-user-media' ),
+					'editor_btn_dashicon' => false,
+					'echo'                => false,
+				) )
+			); ?></p>
 
 		</div>
 		<?php

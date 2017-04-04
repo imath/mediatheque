@@ -40,6 +40,7 @@ window.wp = window.wp || {};
 
 	wpUserMedia.media.view.mainUserMedia = wpUserMedia.media.View.extend( {
 		className: 'user-media-content',
+		id:        'wp-user-media-container',
 		template : wpUserMedia.template( 'user-media-main' )
 	} );
 
