@@ -171,6 +171,8 @@ class WP_User_Media_REST_Controller extends WP_REST_Attachments_Controller {
 			} else {
 				$prepared_args['author'] = get_current_user_id();
 			}
+		} else {
+			$prepared_args['author'] = get_current_user_id();
 		}
 
 		return $prepared_args;

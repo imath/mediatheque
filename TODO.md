@@ -20,3 +20,5 @@
 [x] When a User Media is moved inside a Directory the Modified Date of the Directory should be updated.
 [x] Make sure User Media are listed by modified date DESC.
 [] Work on capabilities making sure cap is publish for others when current user id is not author id
+[] Change "ghost" for "selection" ?
+[] Find way to avoid the wpUploader to listen to drag and drop inside the WP Media Editor.

@@ -851,16 +851,23 @@ window.wpUserMedia = window.wpUserMedia || _.extend( {}, _.pick( window.wp, 'Bac
 
 			this.ghost = new Backbone.Collection();
 
-			this.views.add( '#users', new wpUserMedia.Views.Users( { collection: o.users, ghost: this.ghost } ) );
+			this.listenTo( o.toolbarItems, 'change:active', this.displayForms );
+			this.listenTo( o.toolbarItems, 'change:current', this.manageLists );
+			this.listenTo( o.queryVars,    'change:parent',  this.updateTrail );
 
-			this.listenTo( o.users, 'reset', this.queryUsers );
-			o.users.on( 'change:current', this.setToolbar, this );
-			o.users.reset();
+			// Using the App into the WordPress Editor
+			if ( 'wp-editor' === o.context ) {
+				o.users = [];
+				this.setToolbar();
 
-			o.toolbarItems.on( 'change:active', this.displayForms, this );
-			o.toolbarItems.on( 'change:current', this.manageLists, this );
+			// Using the App elsewhere.
+			} else {
+				this.views.set( '#users', new wpUserMedia.Views.Users( { collection: o.users, ghost: this.ghost } ) );
 
-			this.listenTo( o.queryVars, 'change:parent', this.updateTrail );
+				this.listenTo( o.users, 'reset', this.queryUsers );
+				o.users.on( 'change:current', this.setToolbar, this );
+				o.users.reset();
+			}
 		},
 
 		/**
@@ -897,7 +904,7 @@ window.wpUserMedia = window.wpUserMedia || _.extend( {}, _.pick( window.wp, 'Bac
 		 * Adjust the Toolbar according to the current user's capabilities.
 		 */
 		setToolbar: function( model, changed ) {
-			var o = this.options || {};
+			var o = this.options || {}, currentStatus, form;
 
 			if ( ! _.isUndefined( changed ) && false === changed ) {
 				return;
@@ -909,8 +916,21 @@ window.wpUserMedia = window.wpUserMedia || _.extend( {}, _.pick( window.wp, 'Bac
 
 				this.displayToolbar();
 
-				// Set the Public view as current one.
-				o.toolbarItems.get( 'publish' ).set( { current: true } );
+				// Display the current status
+				currentStatus = o.toolbarItems.findWhere( { current: true } );
+				if ( ! _.isUndefined( currentStatus ) ) {
+					this.manageLists( currentStatus, true );
+
+				// Set the Public status as current one.
+				} else {
+					o.toolbarItems.get( 'publish' ).set( { current: true } );
+				}
+
+				// Make sure forms are not considered active on query changes
+				form = o.toolbarItems.findWhere( { active: true } );
+				if ( form ) {
+					o.toolbarItems.get( form ).set( { active: false }, { silent: true } );
+				}
 
 			// The User is an admin and has selected a user.
 			} else {
@@ -984,63 +1004,70 @@ window.wpUserMedia = window.wpUserMedia || _.extend( {}, _.pick( window.wp, 'Bac
 		manageLists: function( model, changed ) {
 			var o = this.options || {};
 
-			if ( false === changed ) {
-				if ( 'users' !== model.get( 'id' ) ) {
+			if ( 'users' === model.get( 'id' ) ) {
+				// First remove any media views
+				if( ! _.isUndefined( this.views._views['#media'] ) && 0 !== this.views._views['#media'].length ) {
 					_.first( this.views._views['#media'] ).remove();
-				} else {
+				}
+
+				// Remove the users view if it's not the current toolbar item
+				if ( false === changed && ! _.isUndefined( this.views._views['#users'] ) && 0 !== this.views._views['#users'].length ) {
 					_.first( this.views._views['#users'] ).remove();
 				}
-			} else {
-				if ( 'users' === model.get( 'id' ) ) {
-					this.views.add( '#users', new wpUserMedia.Views.Users( { collection: o.users, ghost: this.ghost } ) );
+
+				if ( true === changed ) {
+					this.views.set( '#users', new wpUserMedia.Views.Users( { collection: o.users, ghost: this.ghost } ) );
 					o.users.reset();
 
 					// Remove the trail when switching users.
 					if ( ! _.isUndefined( this.views._views['#trail'] ) && 0 !== this.views._views['#trail'].length ) {
 						_.first( this.views._views['#trail'] ).remove();
 					}
-				} else {
-					// Add the trail view
-					if ( _.isUndefined( this.views._views['#trail'] ) || 0 === this.views._views['#trail'].length ) {
-						this.views.add( '#trail', new wpUserMedia.Views.Trail( {
-							collection: o.trailItems,
-							ghost:     this.ghost,
-							queryVars: o.queryVars
-						} ) );
-					}
+				}
 
-					// Reset the trail collection
-					o.trailItems.reset();
+			// In all other cases manage statuses
+			} else if ( true === changed ) {
 
-					// Reset the Query vars
-					o.queryVars.clear();
-					o.queryVars.set( {
-						'user_media_context': 'admin',
-						'post_status': model.get( 'id' ),
-						'parent'     : 0
-					} );
-
-					// Set the User ID.
-					if ( o.users.length ) {
-						var author = o.users.findWhere( { current: true } );
-						o.queryVars.set( { 'user_id': author.get( 'id' ) } );
-
-						// Add the User to trail
-						o.trailItems.add( author );
-					} else {
-						o.queryVars.set( { 'user_id': 0 } );
-					}
-
-					// Add the Status
-					o.trailItems.add( model );
-
-					// Add the media view
-					this.views.add( '#media', new wpUserMedia.Views.UserMedias( {
-						collection: o.media,
-						ghost:      this.ghost,
-						queryVars:  o.queryVars
+				// Add the trail view
+				if ( _.isUndefined( this.views._views['#trail'] ) || 0 === this.views._views['#trail'].length ) {
+					this.views.add( '#trail', new wpUserMedia.Views.Trail( {
+						collection: o.trailItems,
+						ghost:     this.ghost,
+						queryVars: o.queryVars
 					} ) );
 				}
+
+				// Reset the trail collection
+				o.trailItems.reset();
+
+				// Reset the Query vars
+				o.queryVars.clear();
+				o.queryVars.set( {
+					'user_media_context': ! _.isUndefined( o.context ) ? o.context : 'admin',
+					'post_status': model.get( 'id' ),
+					'parent'     : 0
+				}, { silent: true } );
+
+				// Set the User ID.
+				if ( o.users.length ) {
+					var author = o.users.findWhere( { current: true } );
+					o.queryVars.set( { 'user_id': author.get( 'id' ) }, { silent: true } );
+
+					// Add the User to trail
+					o.trailItems.add( author );
+				} else {
+					o.queryVars.set( { 'user_id': 0 }, { silent: true } );
+				}
+
+				// Add the Status
+				o.trailItems.add( model );
+
+				// Add the media view
+				this.views.set( '#media', new wpUserMedia.Views.UserMedias( {
+					collection: o.media,
+					ghost:      this.ghost,
+					queryVars:  o.queryVars
+				} ) );
 			}
 		},
 

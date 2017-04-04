@@ -17,6 +17,22 @@ window.wpUserMedia = window.wpUserMedia || _.extend( {}, _.pick( window.wp, 'Bac
 			menu:     'default',
 			toolbar:  'main-user-media',
 			priority: 220
+		},
+
+		// This is not enough files are uploaded twice
+		activate: function() {
+			// Temporarly hide the window-wide wpUploader
+			$( '.media-frame-uploader' ).css( {
+				display: 'none'
+			} );
+		},
+
+		// This is not enough files are uploaded twice
+		deactivate: function() {
+			// Restore the window-wide wpUploader
+			$( '.media-frame-uploader' ).css( {
+				display: 'block'
+			} );
 		}
 	} );
 
@@ -53,12 +69,12 @@ window.wpUserMedia = window.wpUserMedia || _.extend( {}, _.pick( window.wp, 'Bac
 			if ( _.isUndefined( this.views._views[''] ) || ! this.views._views[''].length ) {
 				this.views.add( new wpUserMedia.Views.Root( {
 					el:           $( '#wp-user-media-container' ),
-					users:        app.users,
 					media:        app.userMedia,
 					overrides:    app.overrides,
 					toolbarItems: app.toolbarItems,
 					queryVars:    app.queryVars,
-					trailItems:   app.trailItems
+					trailItems:   app.trailItems,
+					context:      'wp-editor'
 				} ) );
 			}
 		}
@@ -104,10 +120,10 @@ window.wpUserMedia = window.wpUserMedia || _.extend( {}, _.pick( window.wp, 'Bac
 		},
 
 		userMediaContent: function() {
-			var view = new wpUserMedia.media.view.mainUserMedia({
+			var view = new wpUserMedia.media.view.mainUserMedia( {
 				controller: this,
 				model:      this.state()
-			}).render();
+			} ).render();
 
 			this.content.set( view );
 		}
@@ -204,7 +220,6 @@ window.wpUserMedia = window.wpUserMedia || _.extend( {}, _.pick( window.wp, 'Bac
 	wpUserMedia.App = {
 		init: function( restUrl ) {
 			this.views        = new Backbone.Collection();
-			this.users        = new wp.api.collections.Users();
 			this.userMedia    = new wp.api.collections.UserMedia();
 			this.toolbarItems = new Backbone.Collection();
 			this.queryVars    = new Backbone.Model();
