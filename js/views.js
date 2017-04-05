@@ -64,8 +64,13 @@ window.wpUserMedia = window.wpUserMedia || _.extend( {}, _.pick( window.wp, 'Bac
 			this.collection.on( 'add', this.prepareNewView, this );
 
 			this.isRequestingMore = false;
+			this.scrollingElement = $( document );
 
-			$( document ).on( 'scroll', _.bind( this.scroll, this ) );
+			if ( $( '.media-frame-content' ).length ) {
+				this.scrollingElement = $( '.media-frame-content' );
+			}
+
+			this.scrollingElement.on( 'scroll', _.bind( this.scroll, this ) );
 		},
 
 		prepareNewView: function( model ) {
@@ -105,14 +110,14 @@ window.wpUserMedia = window.wpUserMedia || _.extend( {}, _.pick( window.wp, 'Bac
 		},
 
 		scroll: function() {
-			var listOffset = $( this.el ).offset(), el = document.body,
+			var listOffset = this.$el.offset(), el = document.body,
 			    scrollTop = $( document ).scrollTop(), sensibility = 20;
 
 			if ( $( '#wpadminbar' ).length ) {
 				sensibility += $( '#wpadminbar' ).height();
 			}
 
-			if ( ! this.collection.hasMore() || this.isRequestingMore || this.$el.hasClass( 'loading' ) ) {
+			if ( ! this.$el.is( ':visible' ) || ! this.collection.hasMore() || this.isRequestingMore || this.$el.hasClass( 'loading' ) ) {
 				return;
 			}
 
