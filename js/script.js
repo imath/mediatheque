@@ -25,8 +25,10 @@ window.wpUserMedia = window.wpUserMedia || _.extend( {}, _.pick( window.wp, 'Bac
 				display: 'none'
 			} );
 
-			this.dropElement = this.frame.uploader.uploader.uploader.getOption( 'drop_element' );
-			this.frame.uploader.uploader.uploader.setOption( 'drop_element', '' );
+			if ( ! _.isUndefined( this.frame.uploader.uploader ) ) {
+				this.dropElement = this.frame.uploader.uploader.uploader.getOption( 'drop_element' );
+				this.frame.uploader.uploader.uploader.setOption( 'drop_element', '' );
+			}
 		},
 
 		// Restore the window-wide wpUploader
@@ -35,7 +37,9 @@ window.wpUserMedia = window.wpUserMedia || _.extend( {}, _.pick( window.wp, 'Bac
 				display: 'block'
 			} );
 
-			this.frame.uploader.uploader.uploader.setOption( 'drop_element', this.dropElement );
+			if ( ! _.isUndefined( this.frame.uploader.uploader ) ) {
+				this.frame.uploader.uploader.uploader.setOption( 'drop_element', this.dropElement );
+			}
 		}
 	} );
 
@@ -180,6 +184,14 @@ window.wpUserMedia = window.wpUserMedia || _.extend( {}, _.pick( window.wp, 'Bac
 
 				this.content.set( view );
 
+			}, this._frame );
+
+			this._frame.on( 'uploader:ready', function() {
+				$( '.media-frame-uploader' ).css( {
+					display: 'none'
+				} );
+
+				this.uploader.uploader.uploader.setOption( 'drop_element', '' );
 			}, this._frame );
 
 			this._frame.state( 'user-media' ).on( 'select', this.select );
