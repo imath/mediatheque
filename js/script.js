@@ -19,20 +19,23 @@ window.wpUserMedia = window.wpUserMedia || _.extend( {}, _.pick( window.wp, 'Bac
 			priority: 220
 		},
 
-		// This is not enough files are uploaded twice
+		// Temporarly disable the window-wide wpUploader
 		activate: function() {
-			// Temporarly hide the window-wide wpUploader
 			$( '.media-frame-uploader' ).css( {
 				display: 'none'
 			} );
+
+			this.dropElement = this.frame.uploader.uploader.uploader.getOption( 'drop_element' );
+			this.frame.uploader.uploader.uploader.setOption( 'drop_element', '' );
 		},
 
-		// This is not enough files are uploaded twice
+		// Restore the window-wide wpUploader
 		deactivate: function() {
-			// Restore the window-wide wpUploader
 			$( '.media-frame-uploader' ).css( {
 				display: 'block'
 			} );
+
+			this.frame.uploader.uploader.uploader.setOption( 'drop_element', this.dropElement );
 		}
 	} );
 
