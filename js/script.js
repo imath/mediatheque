@@ -187,6 +187,10 @@ window.wpUserMedia = window.wpUserMedia || _.extend( {}, _.pick( window.wp, 'Bac
 			}, this._frame );
 
 			this._frame.on( 'uploader:ready', function() {
+				if ( ! this.uploader.uploader.uploader.getOption( 'drop_element' ) ) {
+					return;
+				}
+
 				$( '.media-frame-uploader' ).css( {
 					display: 'none'
 				} );
