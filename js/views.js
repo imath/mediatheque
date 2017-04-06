@@ -380,6 +380,7 @@ window.wpUserMedia = window.wpUserMedia || _.extend( {}, _.pick( window.wp, 'Bac
 
 			// Listen to User Media removed from the ghost Collection
 			this.listenTo( o.ghost, 'remove', this.adjustMore );
+			this.listenTo( o.ghost, 'change:selected', this.setSelection );
 		},
 
 		/**
@@ -553,6 +554,22 @@ window.wpUserMedia = window.wpUserMedia || _.extend( {}, _.pick( window.wp, 'Bac
 				} else {
 					$( media ).removeClass( 'selected' );
 				}
+			}
+		},
+
+		setSelection: function( model, selected ) {
+			var userMediaSelection = this.options.selection;
+
+			if ( true !== selected && ! userMediaSelection.get( model ) ) {
+				return false;
+			}
+
+			if ( userMediaSelection.length ) {
+				userMediaSelection.reset();
+			}
+
+			if ( true === selected ) {
+				userMediaSelection.add( model );
 			}
 		},
 
@@ -1125,7 +1142,8 @@ window.wpUserMedia = window.wpUserMedia || _.extend( {}, _.pick( window.wp, 'Bac
 				this.views.set( '#media', new wpUserMedia.Views.UserMedias( {
 					collection: o.media,
 					ghost:      this.ghost,
-					queryVars:  o.queryVars
+					queryVars:  o.queryVars,
+					selection:  o.selection
 				} ) );
 			}
 		},

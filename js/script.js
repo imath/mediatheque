@@ -19,6 +19,10 @@ window.wpUserMedia = window.wpUserMedia || _.extend( {}, _.pick( window.wp, 'Bac
 			priority: 220
 		},
 
+		initialize: function() {
+			this.set( 'userMediaSelection', new Backbone.Collection() );
+		},
+
 		// Temporarly disable the window-wide wpUploader
 		activate: function() {
 			$( '.media-frame-uploader' ).css( {
@@ -50,11 +54,16 @@ window.wpUserMedia = window.wpUserMedia || _.extend( {}, _.pick( window.wp, 'Bac
 				requires: false
 			} );
 
+			this.userMediaSelection = this.controller.state().get( 'userMediaSelection' );
+			this.userMediaSelection.on( 'add remove reset', this.refresh, this );
+
 			// Call 'initialize' directly on the parent class.
 			wpUserMedia.media.view.Toolbar.Select.prototype.initialize.apply( this, arguments );
 		},
 
 		refresh: function() {
+			this.get( 'select' ).model.set( 'disabled', ! this.userMediaSelection.length );
+
 			/**
 			 * call 'refresh' directly on the parent class
 			 */
@@ -81,7 +90,8 @@ window.wpUserMedia = window.wpUserMedia || _.extend( {}, _.pick( window.wp, 'Bac
 					toolbarItems: app.toolbarItems,
 					queryVars:    app.queryVars,
 					trailItems:   app.trailItems,
-					context:      'wp-editor'
+					context:      'wp-editor',
+					selection:    this.controller.state().get( 'userMediaSelection' )
 				} ) );
 			}
 		}
@@ -142,12 +152,12 @@ window.wpUserMedia = window.wpUserMedia || _.extend( {}, _.pick( window.wp, 'Bac
 	 */
 	wpUserMedia.media.personalAvatar = {
 
-		set: function( id ) {
-			$( '#' + this.activeEditor ).val( id );
+		set: function( model ) {
+			$( '.user-profile-picture' ).find( 'img' ).first().prop( 'src', model.get( 'background') );
 		},
 
 		remove: function() {
-			$( '#' + this.activeEditor ).val( -1 );
+			this.get( 'userMediaSelection' ).reset();
 		},
 
 		/**
@@ -169,10 +179,10 @@ window.wpUserMedia = window.wpUserMedia || _.extend( {}, _.pick( window.wp, 'Bac
 			this.activeEditor = editor || 'peronal_avatar';
 
 			this._frame.on( 'toolbar:create:main-user-media', function( toolbar ) {
-				this.createSelectToolbar( toolbar, {
-					text: 'Set Avatar'
+				toolbar.view = new wpUserMedia.media.view.Toolbar.UserMedia( {
+					controller: this,
+					text:       'Set Avatar'
 				} );
-
 			}, this._frame );
 
 			this._frame.on( 'content:render:user-media', function() {
@@ -207,12 +217,18 @@ window.wpUserMedia = window.wpUserMedia || _.extend( {}, _.pick( window.wp, 'Bac
 		 *  the 'Insert Avatar' button is clicked in the media modal.
 		 */
 		select: function() {
-			var selection = 0;
+			var selection = this.get( 'userMediaSelection' ),
+			    model, me;
 
-			var me = new wp.api.models.UsersMe( { meta: { 'personal_avatar': selection } } );
+			if ( ! selection.length ) {
+				return false;
+			}
+
+			model = _.first( selection.models );
+			me    = new wp.api.models.UsersMe( { meta: { 'personal_avatar': model.get( 'id' ) } } );
 			me.save();
 
-			wpUserMedia.media.personalAvatar.set( selection ? selection : -1 );
+			wpUserMedia.media.personalAvatar.set( model );
 		},
 
 		/**
