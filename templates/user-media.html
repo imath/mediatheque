@@ -18,13 +18,16 @@
 		<# } #>
 
 	</div>
-	<div class="user-media-actions">
-		<# if ( 'dir' === data.media_type ) { #>
-			<a href="#/name/{{data.slug}}" class="edit"><span class="dashicons dashicons-edit"></span></a>
-		<# } else if ( data.download ) { #>
-			<a href="{{data.download}}" class="download"><span class="dashicons dashicons-download"></span></a>
-		<# } #>
-		<a href="{{data.link}}" class="view"><span class="dashicons dashicons-visibility"></span></a>
-		<a href="#/delete/{{data.slug}}" class="delete"><span class="dashicons dashicons-trash"></span></a>
-	</div>
+
+	<# if ( 'wp-editor' !== data.context ) { #>
+		<div class="user-media-actions">
+			<# if ( 'dir' === data.media_type ) { #>
+				<a href="#/name/{{data.slug}}" class="edit"><span class="dashicons dashicons-edit"></span></a>
+			<# } else if ( data.download ) { #>
+				<a href="{{data.download}}" class="download"><span class="dashicons dashicons-download"></span></a>
+			<# } #>
+			<a href="{{data.link}}" class="view"><span class="dashicons dashicons-visibility"></span></a>
+			<a href="#/delete/{{data.slug}}" class="delete"><span class="dashicons dashicons-trash"></span></a>
+		</div>
+	<# } #>
 <# } #>

@@ -299,3 +299,7 @@ p.drag-drop-buttons input[type="button"] {
 	background-repeat: no-repeat;
 	background-position: center center;
 }
+
+.media-frame-content #wp-user-media-container #media ul li.user-media div.user-media-content {
+	min-height: 200px;
+}

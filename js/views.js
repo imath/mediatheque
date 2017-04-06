@@ -254,6 +254,8 @@ window.wpUserMedia = window.wpUserMedia || _.extend( {}, _.pick( window.wp, 'Bac
 		},
 
 		initialize: function() {
+			var o = this.options || {};
+
 			if ( this.model.get( 'uploading' ) ) {
 				// Show Upload progress
 				this.model.on( 'change:percent', this.progress, this );
@@ -266,16 +268,32 @@ window.wpUserMedia = window.wpUserMedia || _.extend( {}, _.pick( window.wp, 'Bac
 			// The dir background is specific.
 			} else if ( 'dir' === this.model.get( 'media_type' ) ) {
 				this.el.className += ' dir droppable';
-				wpUserMedia.Views.Droppable.prototype.initialize.apply( this, arguments );
+
+				if ( 'wp-editor' !== o.context ) {
+					wpUserMedia.Views.Droppable.prototype.initialize.apply( this, arguments );
+				} else {
+					this.$el.attr( 'data-id',   this.model.get( 'id' ) );
+					this.model.set( { context: o.context }, { silent: true } );
+				}
 
 			// Set additionnal properties
 			} else {
-				this.setMediaProps();
+				this.setMediaProps( o.context );
+			}
+
+			if ( 'wp-editor' === o.context ) {
+				this.model.on( 'change:selected', this.toggleSelected, this );
 			}
 		},
 
-		setMediaProps: function() {
-			this.$el.prop( 'draggable', true );
+		setMediaProps: function( context ) {
+
+			if ( 'wp-editor' !== context ) {
+				this.$el.prop( 'draggable', true );
+			} else {
+				this.el.className += ' selectable';
+			}
+
 			this.$el.attr( 'data-id', this.model.get( 'id' ) );
 
 			if ( 'image' === this.model.get( 'media_type' ) && this.model.get( 'guid' ) ) {
@@ -290,7 +308,10 @@ window.wpUserMedia = window.wpUserMedia || _.extend( {}, _.pick( window.wp, 'Bac
 				this.model.set( { background: bgUrl }, { silent: true } );
 			}
 
-			this.model.set( { download: this.model.get( 'link' ) + wpUserMediaSettings.common.downloadSlug + '/' }, { silent: true } );
+			this.model.set( {
+				download: this.model.get( 'link' ) + wpUserMediaSettings.common.downloadSlug + '/',
+				context : context
+			}, { silent: true } );
 
 			// Files need their root Url to be set as the Rest Endpoint.
 			if ( true === this.model.previous( 'uploading' ) ) {
@@ -335,6 +356,14 @@ window.wpUserMedia = window.wpUserMedia || _.extend( {}, _.pick( window.wp, 'Bac
 
 			// Remove the model.
 			this.options.ghost.remove( model );
+		},
+
+		toggleSelected: function( model, selected ) {
+			if ( true === selected ) {
+				this.$el.addClass( 'selected' );
+			} else {
+				this.$el.removeClass( 'selected' );
+			}
 		}
 	} );
 
@@ -343,9 +372,10 @@ window.wpUserMedia = window.wpUserMedia || _.extend( {}, _.pick( window.wp, 'Bac
 		className: 'user-media',
 
 		events: {
-			'dblclick .dir .user-media-content'    : 'openDir',
+			'click .dir .user-media-content'        : 'openDir',
 			'click .dir .user-media-actions a.edit' : 'openDir',
-			'dragstart [draggable=true]' : 'setDragData'
+			'click .selectable'                     : 'selectMedia',
+			'dragstart [draggable=true]'            : 'setDragData'
 		},
 
 		initialize: function() {
@@ -476,15 +506,16 @@ window.wpUserMedia = window.wpUserMedia || _.extend( {}, _.pick( window.wp, 'Bac
 		},
 
 		addItemView: function( userMedia ) {
-			var o = this.options || {}, position = userMedia.get( 'at' );
+			var o = this.options || {}, position = userMedia.get( 'at' ),
+			    context = o.queryVars.get( 'user_media_context' );
 
 			// Remove all feedbacks.
 			this.removeFeedback();
 
 			if ( _.isUndefined( position ) ) {
-				this.views.add( new wpUserMedia.Views.UserMedia( { model: userMedia, ghost: o.ghost } ) );
+				this.views.add( new wpUserMedia.Views.UserMedia( { model: userMedia, ghost: o.ghost, context: context } ) );
 			} else {
-				this.views.add( new wpUserMedia.Views.UserMedia( { model: userMedia, ghost: o.ghost } ), { at: position } );
+				this.views.add( new wpUserMedia.Views.UserMedia( { model: userMedia, ghost: o.ghost, context: context } ), { at: position } );
 			}
 		},
 
@@ -500,6 +531,25 @@ window.wpUserMedia = window.wpUserMedia || _.extend( {}, _.pick( window.wp, 'Bac
 
 			// Ask the listener to get dir's children
 			o.queryVars.set( { parent: parent } );
+		},
+
+		selectMedia: function( event ) {
+			var o = this.options;
+
+			event.preventDefault();
+
+			var id = $( event.currentTarget ).data( 'id' );
+
+			if ( id ) {
+				_.each( o.ghost.models, function( model ) {
+					console.log( model );
+					if ( id === model.get( 'id' ) ) {
+						model.set( { selected: true } );
+					} else {
+						model.set( { selected: false } );
+					}
+				} );
+			}
 		},
 
 		getChildren: function( model, changed ) {

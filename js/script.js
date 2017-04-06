@@ -203,7 +203,10 @@ window.wpUserMedia = window.wpUserMedia || _.extend( {}, _.pick( window.wp, 'Bac
 		 *  the 'Insert Avatar' button is clicked in the media modal.
 		 */
 		select: function() {
-			var selection = 'avatar';
+			var selection = 0;
+
+			var me = new wp.api.models.UsersMe( { meta: { 'personal_avatar': selection } } );
+			me.save();
 
 			wpUserMedia.media.personalAvatar.set( selection ? selection : -1 );
 		},

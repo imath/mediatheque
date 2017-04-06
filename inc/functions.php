@@ -261,7 +261,7 @@ function wp_user_media_map_meta_caps( $caps = array(), $cap = '', $user_id = 0, 
 }
 
 /**
- * Sanitize the disk usage user meta.
+ * Sanitize the disk usage or personal avatar id user meta.
  *
  * @since 1.0.0
  *
@@ -269,12 +269,20 @@ function wp_user_media_map_meta_caps( $caps = array(), $cap = '', $user_id = 0, 
  * @param  string $meta_key The user meta key.
  * @return int    $value    The sanitized disk usage user meta.
  */
-function wp_user_meta_disk_usage_sanitize_value( $value = '', $meta_key = '' ) {
-	if ( '_wp_user_meta_disk_usage' === $meta_key ) {
+function wp_user_media_meta_sanitize_value( $value = '', $meta_key = '' ) {
+	if ( '_wp_user_meta_disk_usage' === $meta_key || '_wp_user_media_personal_avatar_id' === $meta_key ) {
 		$value = (int) $value;
 	}
 
 	return $value;
+}
+
+function wp_user_media_meta_auth_personal_avatar( $auth = false, $meta_key = '', $object_id = 0, $user_id = 0 ) {
+	if ( '_wp_user_media_personal_avatar_id' !== $meta_key ) {
+		return $auth;
+	}
+
+	return ! empty( $object_id ) && ( (int) $object_id === (int) $user_id || is_super_admin() );
 }
 
 /**
@@ -676,13 +684,28 @@ function wp_user_media_register_objects() {
 		'user',
 		'_wp_user_meta_disk_usage',
 		array(
-			'sanitize_callback' => 'wp_user_meta_disk_usage_sanitize_value',
+			'sanitize_callback' => 'wp_user_media_meta_sanitize_value',
 			'type'              => 'integer',
 			'description'       => 'The disk usage of the user in KB.',
 			'single'            => true,
 			'show_in_rest'      => array(
 				'name'             => 'disk_usage',
 				'prepare_callback' => 'wp_user_meta_disk_usage_prepare',
+			)
+		)
+	);
+
+	register_meta(
+		'user',
+		'_wp_user_media_personal_avatar_id',
+		array(
+			'sanitize_callback' => 'wp_user_media_meta_sanitize_value',
+			'auth_callback'     => 'wp_user_media_meta_auth_personal_avatar',
+			'type'              => 'integer',
+			'description'       => 'The User Media ID to use as an avatar.',
+			'single'            => true,
+			'show_in_rest'      => array(
+				'name' => 'personal_avatar',
 			)
 		)
 	);
