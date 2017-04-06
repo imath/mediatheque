@@ -278,7 +278,7 @@ window.wpUserMedia = window.wpUserMedia || _.extend( {}, _.pick( window.wp, 'Bac
 
 			// Set additionnal properties
 			} else {
-				this.setMediaProps( o.context );
+				this.setMediaProps();
 			}
 
 			if ( 'wp-editor' === o.context ) {
@@ -286,9 +286,10 @@ window.wpUserMedia = window.wpUserMedia || _.extend( {}, _.pick( window.wp, 'Bac
 			}
 		},
 
-		setMediaProps: function( context ) {
+		setMediaProps: function() {
+			var o = this.options || {};
 
-			if ( 'wp-editor' !== context ) {
+			if ( 'wp-editor' !== o.context ) {
 				this.$el.prop( 'draggable', true );
 			} else {
 				this.el.className += ' selectable';
@@ -310,7 +311,7 @@ window.wpUserMedia = window.wpUserMedia || _.extend( {}, _.pick( window.wp, 'Bac
 
 			this.model.set( {
 				download: this.model.get( 'link' ) + wpUserMediaSettings.common.downloadSlug + '/',
-				context : context
+				context : o.context
 			}, { silent: true } );
 
 			// Files need their root Url to be set as the Rest Endpoint.
