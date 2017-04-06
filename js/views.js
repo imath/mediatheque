@@ -280,10 +280,6 @@ window.wpUserMedia = window.wpUserMedia || _.extend( {}, _.pick( window.wp, 'Bac
 			} else {
 				this.setMediaProps();
 			}
-
-			if ( 'wp-editor' === o.context ) {
-				this.model.on( 'change:selected', this.toggleSelected, this );
-			}
 		},
 
 		setMediaProps: function() {
@@ -357,14 +353,6 @@ window.wpUserMedia = window.wpUserMedia || _.extend( {}, _.pick( window.wp, 'Bac
 
 			// Remove the model.
 			this.options.ghost.remove( model );
-		},
-
-		toggleSelected: function( model, selected ) {
-			if ( true === selected ) {
-				this.$el.addClass( 'selected' );
-			} else {
-				this.$el.removeClass( 'selected' );
-			}
 		}
 	} );
 
@@ -539,17 +527,32 @@ window.wpUserMedia = window.wpUserMedia || _.extend( {}, _.pick( window.wp, 'Bac
 
 			event.preventDefault();
 
-			var id = $( event.currentTarget ).data( 'id' );
+			var media = event.currentTarget, id = $( media ).data( 'id' ),
+			    self  = this, current;
 
 			if ( id ) {
 				_.each( o.ghost.models, function( model ) {
-					console.log( model );
-					if ( id === model.get( 'id' ) ) {
-						model.set( { selected: true } );
-					} else {
+					var selected = true;
+
+					if ( id !== model.get( 'id' ) ) {
 						model.set( { selected: false } );
+						self.$el.find( 'li.user-media' ).removeClass( 'selected' );
+					} else {
+						if ( selected === model.get( 'selected' ) ) {
+							selected = false;
+						}
+
+						model.set( { selected: selected } );
 					}
 				} );
+
+				current = o.ghost.get( id );
+
+				if ( current.get( 'selected' ) ) {
+					$( media ).addClass( 'selected' );
+				} else {
+					$( media ).removeClass( 'selected' );
+				}
 			}
 		},
 

@@ -156,6 +156,8 @@ p.drag-drop-buttons input[type="button"] {
 	box-shadow: 0 1px 1px rgba(0,0,0,0.04);
 	text-align: center;
 	margin: 0 0.5em 1.5em 0.5em;
+	-webkit-box-sizing: border-box;
+	-moz-box-sizing: border-box;
 	box-sizing: border-box;
 }
 
@@ -302,4 +304,15 @@ p.drag-drop-buttons input[type="button"] {
 
 .media-frame-content #wp-user-media-container #media ul li.user-media div.user-media-content {
 	min-height: 200px;
+}
+
+.media-frame-content #wp-user-media-container #media ul li.user-media.selected {
+	border: 8px inset #0073aa;
+	outline: none;
+	max-height: 184px;
+}
+
+.media-frame-content #wp-user-media-container #media ul li.user-media.selected .user-media-content {
+	min-width: 184px;
+	min-height: 184px;
 }

@@ -170,8 +170,8 @@ window.wpUserMedia = window.wpUserMedia || _.extend( {}, _.pick( window.wp, 'Bac
 
 			this._frame.on( 'toolbar:create:main-user-media', function( toolbar ) {
 				this.createSelectToolbar( toolbar, {
-					text: 'Insert Avatar'
-				});
+					text: 'Set Avatar'
+				} );
 
 			}, this._frame );
 
