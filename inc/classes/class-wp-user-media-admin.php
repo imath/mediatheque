@@ -345,51 +345,6 @@ location ~* /(?:uploads|files)/wp-user-media/private/.* {
 	 * @since 1.0.0
 	 */
 	public function media_grid() {
-		/*wp_enqueue_script(
-			'wp-user-media-admin',
-			sprintf( '%1$sadmin%2$s.js', wp_user_media_js_url(), wp_user_media_min_suffix() ),
-			array( 'wp-api', 'wp-backbone', 'wp-plupload' ),
-			wp_user_media_version(),
-			true
-		);
-
-		wp_localize_script( 'wp-user-media-admin', 'wpUserMediaSettings', array(
-			'params' => array(
-				'container' => 'wp-user-media-ui',
-				'browser'   => 'wp-user-media-browse',
-				'dropzone'  => 'drag-drop-area',
-				'dropHelp'  => __( 'Drop files anywhere to upload', 'wp-user-media' ),
-				'dropOr'    => __( 'or', 'wp-user-media' ),
-				'btnBrowse' => __( 'Select files', 'wp-user-media' ),
-			),
-			'toolbarItems' => array_merge( array(
-					'users'    => __( 'Browse Users', 'wp-user-media' )
-				),
-				wp_list_pluck( wp_user_media_get_post_statuses( 'all' ), 'label', 'name' ),
-				array(
-					'upload'    => __( 'Upload file(s)', 'wp-user-media' ),
-					'directory' => __( 'Add a directory', 'wp-user-media' ),
-				)
-			),
-			'dirmaker' => array(
-				'label'   => __( 'Name of your directory', 'wp-user-media' ),
-				'saveBtn' => __( 'Create', 'wp-user-media' ),
-			),
-			'common' => array(
-				'downloadSlug'    => wp_user_media_get_download_rewrite_slug(),
-				'closeBtn'        => __( 'Close', 'wp-user-media' ),
-				'noUserMedia'     => __( 'No User Media were found for the request.', 'wp-user-media' ),
-				'dismissibleText' => __( 'Dismiss', 'wp-user-media' ),
-			),
-		) );
-
-		wp_enqueue_style(
-			'wp-user-media-uploader',
-			sprintf( '%1$suploader%2$s.css', wp_user_media_assets_url(), wp_user_media_min_suffix() ),
-			array(),
-			wp_user_media_version()
-		);*/
-
 		wp_enqueue_script( 'wp-user-media-manage' );
 		wp_user_media_localize_script();
 
@@ -417,19 +372,26 @@ location ~* /(?:uploads|files)/wp-user-media/private/.* {
 	 * @return string        HTML Output.
 	 */
 	public function personal_avatar( $user = null ) {
+		$message = '';
+
+		if ( $user->personal_avatar ) {
+			$message = sprintf(
+				__( 'To delete your personal avatar, you can %s.', 'wp-user-media' ),
+				sprintf( '<a href="#" class="mediabrary-remove">%s</a>', __( 'click here', 'wp-user-media' ) )
+			);
+		}
 		?>
 		<div id="personal-avatar-editor">
-			<input type="hidden" id="personal_avatar" name="personal_avatar">
-
 			<p class="description"><?php printf(
-				__( 'You can also select an image from your %s to use as your avatar.', 'wp-user-media' ),
+				__( 'You can also select an image from your %1$s to use as your avatar. %2$s', 'wp-user-media' ),
 				medialibrary_button( array(
 					'editor_id'           => 'personal_avatar',
 					'editor_btn_classes'  => array( 'mediabrary-insert' ),
-					'editor_btn_text'     => __( 'MediaBrary', 'wp-user-media' ),
+					'editor_btn_text'     => __( 'MediaThèque', 'wp-user-media' ),
 					'editor_btn_dashicon' => false,
 					'echo'                => false,
-				) )
+				) ),
+				'<span id="mediabrary-remove-message">' . $message . '</span>'
 			); ?></p>
 
 		</div>

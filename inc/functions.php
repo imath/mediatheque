@@ -270,7 +270,7 @@ function wp_user_media_map_meta_caps( $caps = array(), $cap = '', $user_id = 0, 
  * @return int    $value    The sanitized disk usage user meta.
  */
 function wp_user_media_meta_sanitize_value( $value = '', $meta_key = '' ) {
-	if ( '_wp_user_meta_disk_usage' === $meta_key || '_wp_user_media_personal_avatar_id' === $meta_key ) {
+	if ( '_wp_user_meta_disk_usage' === $meta_key || 'personal_avatar' === $meta_key ) {
 		$value = (int) $value;
 	}
 
@@ -278,7 +278,7 @@ function wp_user_media_meta_sanitize_value( $value = '', $meta_key = '' ) {
 }
 
 function wp_user_media_meta_auth_personal_avatar( $auth = false, $meta_key = '', $object_id = 0, $user_id = 0 ) {
-	if ( '_wp_user_media_personal_avatar_id' !== $meta_key ) {
+	if ( 'personal_avatar' !== $meta_key ) {
 		return $auth;
 	}
 
@@ -415,6 +415,124 @@ function wp_user_media_rest_user_query( $prepared_args = array(), WP_REST_Reques
 	}
 
 	return $prepared_args;
+}
+
+/**
+ * Make sure the avatar sizes used by WordPress are all in Rest Avatar sizes.
+ *
+ * @since 1.0.0
+ *
+ * @param  array $sizes The avatar sizes.
+ * @return array        The avatar sizes.
+ */
+function wp_user_media_rest_avatar_sizes( $sizes = array() ) {
+	$required = apply_filters( 'wp_user_media_required_avatar_sizes', array( 96, 192 ) );
+	return array_merge( $sizes, $required );
+}
+
+/**
+ * Get a specific (or nearest) intermediate size for a User Media.
+ *
+ * @since 1.0.0
+ *
+ * @param  int     $user_media_id The User Media ID.
+ * @param  array   $size          The width and height in pixels.
+ * @return array                  The User Media intermediate size data.
+ */
+function wp_user_media_image_get_intermediate_size( $user_media_id = 0, $size = array() ) {
+	$user_media = get_post( $user_media_id );
+	$size_data  = array();
+
+	if ( empty( $user_media->post_type ) || 'user_media' !== $user_media->post_type ) {
+		return $size_data;
+	}
+
+	if ( empty( $size ) ) {
+		$size = 'full';
+	}
+
+	$size_data = image_get_intermediate_size( $user_media->ID, $size );
+
+	if ( empty( $size_data['path'] ) ) {
+		return $size_data;
+	}
+
+	$uploads = wp_user_media_get_upload_dir();
+	$size_data['url']  = trailingslashit( $uploads['baseurl'] ) . $size_data['path'];
+	$size_data['path'] = trailingslashit( $uploads['basedir'] ) . $size_data['path'];
+
+	return $size_data;
+}
+
+/**
+ * Get the personal avatar using the User Media ID.
+ *
+ * @since 1.0.0
+ *
+ * @param  int     $user_media_id The User Media ID.
+ * @param  int     $size          The size in pixels for the avatar.
+ * @return string                 The avatar URL.
+ */
+function wp_user_media_get_personal_avatar( $user_media_id = 0, $size = 96 ) {
+	$wp_user_media = wp_user_media();
+
+	if ( ! empty( $wp_user_media->personal_avatars[ $user_media_id ][ $size ] ) ) {
+		$personal_avatar = $wp_user_media->personal_avatars[ $user_media_id ][ $size ];
+	} else {
+		$wp_user_media->personal_avatars[ $user_media_id ][ $size ] = wp_user_media_image_get_intermediate_size( $user_media_id, array( $size, $size ) );
+		$personal_avatar = $wp_user_media->personal_avatars[ $user_media_id ][ $size ];
+	}
+
+	if ( empty( $personal_avatar['url'] ) ) {
+		return false;
+	}
+
+	return $personal_avatar['url'];
+}
+
+/**
+ * Returns the WP User Media Avatar data.
+ *
+ * @since 1.0.0
+ *
+ * @param  array $args        Default data.
+ * @param  mixed $id_or_email A user ID, email, a User, a Post or a Comment object.
+ * @return array              Avatar data.
+ */
+function wp_user_media_get_avatar_data( $args = array(), $id_or_email ) {
+	if ( empty( $id_or_email ) ) {
+		return $args;
+	}
+
+	if ( is_email( $id_or_email ) ) {
+		$user = get_user_by( 'email', $id_or_email );
+	} else if ( is_numeric( $id_or_email ) ) {
+		$user = get_user_by( 'id', (int) $id_or_email );
+	} else if ( is_a( $id_or_email, 'WP_User' ) ) {
+		$user = $id_or_email;
+	} else if ( is_a( $id_or_email, 'WP_Post' ) ) {
+		$user = get_user_by( 'id', (int) $id_or_email->post_author );
+	} else if ( is_a( $id_or_email, 'WP_Comment' ) ) {
+		$user = get_user_by( 'id', (int) $id_or_email->user_id );
+	}
+
+	if ( empty( $user->ID ) ) {
+		return $args;
+	}
+
+	$personal_avatar_id = $user->personal_avatar;
+
+	if ( ! $personal_avatar_id ) {
+		return $args;
+	}
+
+	$personal_avatar_url = wp_user_media_get_personal_avatar( $personal_avatar_id, $args['size'] );
+
+	if ( ! $personal_avatar_url ) {
+		return $args;
+	}
+
+	return array_merge( $args, array( 'url' => $personal_avatar_url ) );
 }
 
 /**
@@ -697,16 +815,14 @@ function wp_user_media_register_objects() {
 
 	register_meta(
 		'user',
-		'_wp_user_media_personal_avatar_id',
+		'personal_avatar',
 		array(
 			'sanitize_callback' => 'wp_user_media_meta_sanitize_value',
 			'auth_callback'     => 'wp_user_media_meta_auth_personal_avatar',
 			'type'              => 'integer',
 			'description'       => 'The User Media ID to use as an avatar.',
 			'single'            => true,
-			'show_in_rest'      => array(
-				'name' => 'personal_avatar',
-			)
+			'show_in_rest'      => true,
 		)
 	);
 
@@ -717,6 +833,12 @@ function wp_user_media_register_objects() {
 	/** Scripts & Css *******************************************************/
 
 	wp_user_media_register_scripts();
+
+	/** Avatar image sizes **************************************************/
+
+	foreach ( (array) rest_get_avatar_sizes() as $size ) {
+		add_image_size( sprintf( 'avatat-%s', $size ), $size, $size, true );
+	}
 }
 
 /**

@@ -78,12 +78,13 @@ final class WP_User_Media {
 		$this->basename  = plugin_basename( $this->file );
 
 		// Path and URL
-		$this->dir        = plugin_dir_path( $this->file );
-		$this->url        = plugin_dir_url ( $this->file );
-		$this->js_url     = trailingslashit( $this->url . 'js' );
-		$this->assets_url = trailingslashit( $this->url . 'assets' );
-		$this->inc_dir    = trailingslashit( $this->dir . 'inc' );
-		$this->templates  = trailingslashit( $this->dir . 'templates' );
+		$this->dir              = plugin_dir_path( $this->file );
+		$this->url              = plugin_dir_url ( $this->file );
+		$this->js_url           = trailingslashit( $this->url . 'js' );
+		$this->assets_url       = trailingslashit( $this->url . 'assets' );
+		$this->inc_dir          = trailingslashit( $this->dir . 'inc' );
+		$this->templates        = trailingslashit( $this->dir . 'templates' );
+		$this->personal_avatars = array();
 	}
 
 	/**
@@ -121,6 +122,10 @@ final class WP_User_Media {
 		// Add a new query parameter to Users rest request
 		add_filter( 'rest_user_collection_params', 'wp_user_media_additionnal_user_rest_param', 10, 1 );
 		add_filter( 'rest_user_query',             'wp_user_media_rest_user_query',             10, 2 );
+		add_filter( 'rest_avatar_sizes',           'wp_user_media_rest_avatar_sizes',           10, 1 );
+
+		// Use the personal avatar url when available.
+		add_filter( 'pre_get_avatar_data', 'wp_user_media_get_avatar_data',  10, 2 );
 
 		// Set the single User Media Templates
 		add_action( 'parse_query',                      'wp_user_media_parse_query'           );

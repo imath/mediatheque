@@ -152,12 +152,38 @@ window.wpUserMedia = window.wpUserMedia || _.extend( {}, _.pick( window.wp, 'Bac
 	 */
 	wpUserMedia.media.personalAvatar = {
 
-		set: function( model ) {
-			$( '.user-profile-picture' ).find( 'img' ).first().prop( 'src', model.get( 'background') );
+		updateAvatar: function( model ) {
+			var personalAvatarId = 0, me;
+
+			if ( _.isObject( model ) ) {
+				personalAvatarId = model.get( 'id' );
+			}
+
+			me    = new wp.api.models.UsersMe();
+			me.save(
+				{ meta: { 'personal_avatar': personalAvatarId } },
+				{ success: _.bind( this.avatarUpdated, this ) }
+			);
 		},
 
-		remove: function() {
-			this.get( 'userMediaSelection' ).reset();
+		avatarUpdated: function( model ) {
+			var prop = {}, avatar_urls = model.get( 'avatar_urls' ) || {};
+
+			if ( ! avatar_urls[96] ) {
+				return;
+			}
+
+			prop = { src: avatar_urls[96] };
+
+			if ( ! avatar_urls[192] ) {
+				prop.srcset = avatar_urls[96];
+			} else {
+				prop.srcset = avatar_urls[192];
+			}
+
+			$( '.user-profile-picture' ).find( 'img' ).first().prop( prop );
+
+			$( '#mediabrary-remove-message' ).remove();
 		},
 
 		/**
@@ -217,18 +243,15 @@ window.wpUserMedia = window.wpUserMedia || _.extend( {}, _.pick( window.wp, 'Bac
 		 *  the 'Insert Avatar' button is clicked in the media modal.
 		 */
 		select: function() {
-			var selection = this.get( 'userMediaSelection' ),
-			    model, me;
+			var selection = this.get( 'userMediaSelection' );
 
 			if ( ! selection.length ) {
 				return false;
 			}
 
 			model = _.first( selection.models );
-			me    = new wp.api.models.UsersMe( { meta: { 'personal_avatar': model.get( 'id' ) } } );
-			me.save();
 
-			wpUserMedia.media.personalAvatar.set( model );
+			wpUserMedia.media.personalAvatar.updateAvatar( model );
 		},
 
 		/**
@@ -247,7 +270,7 @@ window.wpUserMedia = window.wpUserMedia || _.extend( {}, _.pick( window.wp, 'Bac
 				wpUserMedia.media.personalAvatar.frame( editor ).open();
 
 			} ).on( 'click', '.mediabrary-remove', function() {
-				wpUserMedia.media.personalAvatar.remove();
+				wpUserMedia.media.personalAvatar.updateAvatar( 0 );
 				return false;
 			} );
 		}
