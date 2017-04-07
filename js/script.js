@@ -119,6 +119,8 @@ window.wpUserMedia = window.wpUserMedia || _.extend( {}, _.pick( window.wp, 'Bac
 			this.on( 'menu:render:default',            this.menuSeparator,        this );
 			this.on( 'toolbar:create:main-user-media', this.mainUserMediaToolbar, this );
 			this.on( 'content:render:user-media',      this.userMediaContent,     this );
+
+			this.state( 'user-media' ).on( 'select', this.insertUserMedia );
 		},
 
 		menuSeparator: function( view ) {
@@ -143,6 +145,28 @@ window.wpUserMedia = window.wpUserMedia || _.extend( {}, _.pick( window.wp, 'Bac
 			} ).render();
 
 			this.content.set( view );
+		},
+
+		insertUserMedia: function() {
+			var selection = this.get( 'userMediaSelection' ),
+			    userMedia = {};
+
+			if ( ! selection.length ) {
+				return false;
+			}
+
+			model = _.first( selection.models );
+
+			if ( 'image' === model.get( 'media_type' ) ) {
+				_.defaults( userMedia, {
+					title:   model.get( 'title' ).rendered,
+					linkUrl: model.get( 'link' ),
+					align:   'none',
+					url:     model.get( 'background' )
+				} );
+
+				wpUserMedia.media.editor.insert( wpUserMedia.media.string.image( userMedia ) );
+			}
 		}
 	} );
 
