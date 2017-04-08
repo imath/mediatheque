@@ -1276,3 +1276,55 @@ function medialibrary_button( $args = array() ) {
 		$img . $r['editor_btn_text']
 	);
 }
+
+/**
+ * Catch the WP Media Editor id to allow users without the 'upload_files' capability
+ * to use a light version of it.
+ *
+ * @since  1.0.0
+ *
+ * @param  array  $settings  The editor settings.
+ * @param  string $editor_id The editor selector id.
+ * @return array             The editor settings.
+ */
+function wp_user_media_editor_settings( $settings = array(), $editor_id = '' ) {
+	// In this case, the User Media UI is a sidebar item of the WP Media Editor
+	if ( current_user_can( 'upload_files' ) ) {
+		return $settings;
+	}
+
+	// If the user can't use User Media, stop here.
+	if ( ! current_user_can( 'publish_user_uploads' ) || ( isset( $settings['mediatheque_button'] ) && false === $settings['mediatheque_button'] ) ) {
+		return $settings;
+	}
+
+	wp_user_media()->editor_id = $editor_id;
+
+	return $settings;
+}
+
+/**
+ * Add a button to open a light WP Media Editor for users without the 'upload_files' capability.
+ *
+ * @since  1.0.0
+ *
+ * @param  string $editor The editor HTML Output.
+ * @return string $editor The editor HTML Output.
+ */
+function wp_user_media_the_editor( $editor = '' ) {
+	$wp_user_media = wp_user_media();
+
+	if ( empty( $wp_user_media->editor_id ) || ! current_user_can( 'publish_user_uploads' ) ) {
+		return $editor;
+	}
+
+	return sprintf( '<div id="wp-%1$s-media-buttons" class="wp-media-buttons mediatheque-buttons" data-editor="%1$s">%2$s</div>%3$s',
+		esc_attr( $wp_user_media->editor_id ),
+		medialibrary_button( array(
+			'editor_id'           => $wp_user_media->editor_id,
+			'editor_btn_classes'  => array( 'mediatheque-insert' ),
+			'echo'                => false,
+		) ),
+		$editor
+	);
+}

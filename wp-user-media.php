@@ -133,6 +133,10 @@ final class WP_User_Media {
 		add_action( 'wp_user_media_embed_content_meta', 'wp_user_media_embed_download_button' );
 		add_action( 'wp_user_media_embed_content_meta', 'print_embed_sharing_button'          );
 		add_action( 'enqueue_embed_scripts',            'wp_user_media_embed_style'           );
+
+		// Check if we need to add a specific The User Media UI
+		add_filter( 'wp_editor_settings', 'wp_user_media_editor_settings', 10, 2 );
+		add_filter( 'the_editor',         'wp_user_media_the_editor',      10, 1 );
 	}
 
 	/**

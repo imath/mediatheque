@@ -104,19 +104,31 @@ window.wpUserMedia = window.wpUserMedia || _.extend( {}, _.pick( window.wp, 'Bac
 		},
 
 		createStates: function() {
-			// Call 'createStates' directly on the parent class.
-			wpUserMedia.post.prototype.createStates.apply( this, arguments );
+			var priority = 20, options = this.options,
+			    states = [];
 
-			this.states.add(
-				new wpUserMedia.media.controller.UserMedia()
-			);
+			if ( ! options.isUserMediaOnly ) {
+				priority = 220;
+
+				// Call 'createStates' directly on the parent class.
+				wpUserMedia.post.prototype.createStates.apply( this, arguments );
+			} else {
+				states.push( new wp.media.controller.Embed( { metadata: options.metadata } ) )
+			}
+
+			states.unshift( new wpUserMedia.media.controller.UserMedia( { priority: priority } ) );
+
+			this.states.add( states );
 		},
 
 		bindHandlers: function() {
 			// Call 'bindHandlers' directly on the parent class.
 			wpUserMedia.post.prototype.bindHandlers.apply( this, arguments );
 
-			this.on( 'menu:render:default',            this.menuSeparator,        this );
+			if ( ! this.options.isUserMediaOnly ) {
+				this.on( 'menu:render:default', this.menuSeparator, this );
+			}
+
 			this.on( 'toolbar:create:main-user-media', this.mainUserMediaToolbar, this );
 			this.on( 'content:render:user-media',      this.userMediaContent,     this );
 
@@ -139,6 +151,10 @@ window.wpUserMedia = window.wpUserMedia || _.extend( {}, _.pick( window.wp, 'Bac
 		},
 
 		userMediaContent: function() {
+			if ( this.options.isUserMediaOnly && ! _.isUndefined( this.uploader.uploader ) ) {
+				this.uploader.uploader.uploader.setOption( 'drop_element', '' );
+			}
+
 			var view = new wpUserMedia.media.view.mainUserMedia( {
 				controller: this,
 				model:      this.state()
@@ -301,6 +317,48 @@ window.wpUserMedia = window.wpUserMedia || _.extend( {}, _.pick( window.wp, 'Bac
 	};
 
 	$( wpUserMedia.media.personalAvatar.init );
+
+	wpUserMedia.media.mediaTheque = {
+		init: function() {
+
+			if ( $( '.mediatheque-buttons' ).length ) {
+				var editorId = $( '.mediatheque-buttons' ).data( 'editor' );
+				    editorTools = $( '.mediatheque-buttons' ).prev( '#wp-' + editorId + '-editor-tools' ).find( '.wp-editor-tabs' ).first();
+
+				$( editorTools ).before( $( '.mediatheque-buttons:visible' ) );
+
+				$( '.mediatheque-insert .dashicons' ).css( {
+					display:          'inline-block',
+					width:            '18px',
+					height:           '18px',
+					'vertical-align': 'text-bottom',
+					margin:           '0 2px'
+				} );
+			}
+
+			$( document.body )
+				.on( 'click', '.mediatheque-insert', function( event ) {
+					var elem = $( event.currentTarget ),
+						editor = elem.data( 'editor' ),
+						options = {
+							frame:          'post',
+							state:          'user-media',
+							title:           wp.media.view.l10n.addMedia,
+							isUserMediaOnly: true
+						};
+
+					event.preventDefault();
+
+					wp.media.editor.open( editor, options );
+
+					$( '.media-frame-uploader' ).css( {
+						display: 'none'
+					} );
+				} );
+		}
+	};
+
+	$( wpUserMedia.media.mediaTheque.init );
 
 	wpUserMedia.App = {
 		init: function( restUrl ) {
