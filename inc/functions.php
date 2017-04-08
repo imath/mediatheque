@@ -504,9 +504,7 @@ function wp_user_media_get_avatar_data( $args = array(), $id_or_email ) {
 		return $args;
 	}
 
-	if ( is_email( $id_or_email ) ) {
-		$user = get_user_by( 'email', $id_or_email );
-	} else if ( is_numeric( $id_or_email ) ) {
+	if ( is_numeric( $id_or_email ) ) {
 		$user = get_user_by( 'id', (int) $id_or_email );
 	} else if ( is_a( $id_or_email, 'WP_User' ) ) {
 		$user = $id_or_email;
@@ -514,6 +512,8 @@ function wp_user_media_get_avatar_data( $args = array(), $id_or_email ) {
 		$user = get_user_by( 'id', (int) $id_or_email->post_author );
 	} else if ( is_a( $id_or_email, 'WP_Comment' ) ) {
 		$user = get_user_by( 'id', (int) $id_or_email->user_id );
+	} else if ( is_email( $id_or_email ) ) {
+		$user = get_user_by( 'email', $id_or_email );
 	}
 
 	if ( empty( $user->ID ) ) {
