@@ -99,16 +99,6 @@ class WP_User_Media_Admin {
 	 * @since  1.0.0
 	 */
 	public function scripts() {
-
-		// Media Editor script
-		/*wp_enqueue_script(
-			'wp-user-media',
-			sprintf( '%1$sscript%2$s.js', wp_user_media_js_url(), wp_user_media_min_suffix() ),
-			array( 'media-editor', 'wp-backbone', 'underscore' ),
-			wp_user_media_version(),
-			true
-		);*/
-
 		wp_enqueue_script( 'wp-user-media-editor' );
 		wp_user_media_localize_script();
 
@@ -262,22 +252,29 @@ class WP_User_Media_Admin {
 	 * @since 1.0.0
 	 */
 	public function menus() {
+		$menu_title = __( 'Ma MediaThèque', 'wp-user-media' );
+
+		if ( is_super_admin() ) {
+			$menu_title = __( 'MediaThèque Utilisateurs', 'wp-user-media' );
+		}
+
 		// Regular user
 		if ( is_user_logged_in() && ! current_user_can( 'upload_files' ) ) {
 			add_menu_page(
 				$this->title,
-				$this->title,
+				$menu_title,
 				'exist',
 				'user-media',
 				array( $this, 'media_grid' ),
-				'dashicons-admin-media'
+				'dashicons-admin-media',
+				20 // Before comments
 			);
 
 		// Contributors and Up.
 		} else {
 			add_media_page(
 				$this->title,
-				$this->title,
+				$menu_title,
 				'upload_files',
 				'user-media',
 				array( $this, 'media_grid' )
