@@ -1,8 +1,8 @@
 <?php
 /**
- * WP User Media Functions.
+ * MediaThèque Functions.
  *
- * @package WP User Media\inc
+ * @package mediatheque\inc
  *
  * @since 1.0.0
  */
@@ -17,8 +17,8 @@ defined( 'ABSPATH' ) || exit;
  *
  * @return string the plugin's version.
  */
-function wp_user_media_version() {
-	return wp_user_media()->version;
+function mediatheque_version() {
+	return mediatheque()->version;
 }
 
 /**
@@ -28,8 +28,8 @@ function wp_user_media_version() {
  *
  * @return string the plugin's JS Url.
  */
-function wp_user_media_js_url() {
-	return wp_user_media()->js_url;
+function mediatheque_js_url() {
+	return mediatheque()->js_url;
 }
 
 /**
@@ -39,8 +39,8 @@ function wp_user_media_js_url() {
  *
  * @return string the plugin's Assets Url.
  */
-function wp_user_media_assets_url() {
-	return wp_user_media()->assets_url;
+function mediatheque_assets_url() {
+	return mediatheque()->assets_url;
 }
 
 /**
@@ -50,7 +50,7 @@ function wp_user_media_assets_url() {
  *
  * @return string the User Media Post type root slug.
  */
-function wp_user_media_get_root_slug() {
+function mediatheque_get_root_slug() {
 	/**
 	 * Filter here to edit the root slug for the User Media Post type.
 	 *
@@ -58,7 +58,7 @@ function wp_user_media_get_root_slug() {
 	 *
 	 * @param string $value The root slug for the User Media Post type.
 	 */
-	return apply_filters( 'wp_user_media_get_root_slug', 'user-media' );
+	return apply_filters( 'mediatheque_get_root_slug', 'user-media' );
 }
 
 /**
@@ -68,7 +68,7 @@ function wp_user_media_get_root_slug() {
  *
  * @return string The download rewrite tag for the User Media Post type.
  */
-function wp_user_media_get_download_rewrite_tag() {
+function mediatheque_get_download_rewrite_tag() {
 	/**
 	 * Filter here to edit the download action rewrite tag for the User Media Post type.
 	 *
@@ -76,7 +76,7 @@ function wp_user_media_get_download_rewrite_tag() {
 	 *
 	 * @param string $value The download action rewrite tag for the User Media Post type.
 	 */
-	return apply_filters( 'wp_user_media_get_download_rewrite_tag', 'download' );
+	return apply_filters( 'mediatheque_get_download_rewrite_tag', 'download' );
 }
 
 /**
@@ -86,7 +86,7 @@ function wp_user_media_get_download_rewrite_tag() {
  *
  * @return string The download rewrite slug for the User Media Post type.
  */
-function wp_user_media_get_download_rewrite_slug() {
+function mediatheque_get_download_rewrite_slug() {
 	/**
 	 * Filter here to edit the download action rewrite slug for the User Media Post type.
 	 *
@@ -94,7 +94,7 @@ function wp_user_media_get_download_rewrite_slug() {
 	 *
 	 * @param string $value The download action rewrite slug for the User Media Post type.
 	 */
-	return apply_filters( 'wp_user_media_get_download_rewrite_slug', 'download' );
+	return apply_filters( 'mediatheque_get_download_rewrite_slug', 'download' );
 }
 
 /**
@@ -105,9 +105,9 @@ function wp_user_media_get_download_rewrite_slug() {
  * @param  WP_Post|int The User Media object or the ID of the User Media item.
  * @return string      The download url for the User Media Item.
  */
-function wp_user_media_get_download_url( $user_media = null ) {
-	if ( null === $user_media && isset( wp_user_media()->user_media_link ) ) {
-		return wp_user_media()->user_media_link;
+function mediatheque_get_download_url( $user_media = null ) {
+	if ( null === $user_media && isset( mediatheque()->user_media_link ) ) {
+		return mediatheque()->user_media_link;
 	} else {
 		$user_media = get_post( $user_media );
 	}
@@ -118,7 +118,7 @@ function wp_user_media_get_download_url( $user_media = null ) {
 		return $url;
 	}
 
-	return sprintf( '%1$s/%2$s/', trim( get_post_permalink( $user_media ), '/' ), wp_user_media_get_download_rewrite_slug() );
+	return sprintf( '%1$s/%2$s/', trim( get_post_permalink( $user_media ), '/' ), mediatheque_get_download_rewrite_slug() );
 }
 
 /**
@@ -129,8 +129,8 @@ function wp_user_media_get_download_url( $user_media = null ) {
  * @param  string  $link The Attachment Link.
  * @return string        The User Media link.
  */
-function wp_user_media_attachment_link( $link = '' ) {
-	$user_media_link = wp_user_media_get_download_url( null );
+function mediatheque_attachment_link( $link = '' ) {
+	$user_media_link = mediatheque_get_download_url( null );
 
 	if ( '#' !== $user_media_link ) {
 		$link = preg_replace( '/(?<=href=\').+(?=\')/', $user_media_link, $link );
@@ -146,7 +146,7 @@ function wp_user_media_attachment_link( $link = '' ) {
  *
  * @return string the JS minified suffix.
  */
-function wp_user_media_min_suffix() {
+function mediatheque_min_suffix() {
 	$min = '.min';
 
 	if ( defined( 'SCRIPT_DEBUG' ) && true === SCRIPT_DEBUG )  {
@@ -160,7 +160,7 @@ function wp_user_media_min_suffix() {
 	 *
 	 * @param  string $min The minified suffix.
 	 */
-	return apply_filters( 'wp_user_media_min_suffix', $min );
+	return apply_filters( 'mediatheque_min_suffix', $min );
 }
 
 /**
@@ -170,7 +170,7 @@ function wp_user_media_min_suffix() {
  *
  * @return bool True if debug mode is on. False otherwise.
  */
-function wp_user_media_is_debug() {
+function mediatheque_is_debug() {
 	$debug = false;
 
 	if ( defined( 'WP_DEBUG' ) && true === WP_DEBUG && current_user_can( 'manage_options' ) )  {
@@ -184,7 +184,7 @@ function wp_user_media_is_debug() {
 	 *
 	 * @param  bool $debug The minified suffix.
 	 */
-	return apply_filters( 'wp_user_media_is_debug', $debug );
+	return apply_filters( 'mediatheque_is_debug', $debug );
 }
 
 /**
@@ -194,7 +194,7 @@ function wp_user_media_is_debug() {
  *
  * @return array The capabilities for the User media post type.
  */
-function wp_user_media_capabilities() {
+function mediatheque_capabilities() {
 	return array(
 		'edit_post'              => 'edit_user_upload',
 		'read_post'              => 'read_user_upload',
@@ -221,7 +221,7 @@ function wp_user_media_capabilities() {
  *
  * @return array The capabilities for the User media types.
  */
-function wp_user_media_types_capabilities() {
+function mediatheque_types_capabilities() {
 	return array(
 		'manage_terms' => 'manage_upload_types',
 		'edit_terms'   => 'edit_upload_types',
@@ -237,8 +237,8 @@ function wp_user_media_types_capabilities() {
  *
  * @return array All capabilities for User Media Objects.
  */
-function wp_user_media_get_all_caps() {
-	return array_merge( wp_user_media_capabilities(), wp_user_media_types_capabilities() );
+function mediatheque_get_all_caps() {
+	return array_merge( mediatheque_capabilities(), mediatheque_types_capabilities() );
 }
 
 /**
@@ -252,8 +252,8 @@ function wp_user_media_get_all_caps() {
  * @param  mixed  $args    Arguments
  * @return array           Actual capabilities for meta capability
  */
-function wp_user_media_map_meta_caps( $caps = array(), $cap = '', $user_id = 0, $args = array() ) {
-	if ( in_array( $cap, wp_user_media_get_all_caps(), true ) ) {
+function mediatheque_map_meta_caps( $caps = array(), $cap = '', $user_id = 0, $args = array() ) {
+	if ( in_array( $cap, mediatheque_get_all_caps(), true ) ) {
 		$caps = array( 'read' );
 	}
 
@@ -269,15 +269,15 @@ function wp_user_media_map_meta_caps( $caps = array(), $cap = '', $user_id = 0, 
  * @param  string $meta_key The user meta key.
  * @return int    $value    The sanitized disk usage user meta.
  */
-function wp_user_media_meta_sanitize_value( $value = '', $meta_key = '' ) {
-	if ( '_wp_user_meta_disk_usage' === $meta_key || 'personal_avatar' === $meta_key ) {
+function mediatheque_meta_sanitize_value( $value = '', $meta_key = '' ) {
+	if ( '_mediatheque_disk_usage' === $meta_key || 'personal_avatar' === $meta_key ) {
 		$value = (int) $value;
 	}
 
 	return $value;
 }
 
-function wp_user_media_meta_auth_personal_avatar( $auth = false, $meta_key = '', $object_id = 0, $user_id = 0 ) {
+function mediatheque_meta_auth_personal_avatar( $auth = false, $meta_key = '', $object_id = 0, $user_id = 0 ) {
 	if ( 'personal_avatar' !== $meta_key ) {
 		return $auth;
 	}
@@ -295,7 +295,7 @@ function wp_user_media_meta_auth_personal_avatar( $auth = false, $meta_key = '',
  * @param  array           $args    Options for the field.
  * @return string          $value   The prepared value.
  */
-function wp_user_meta_disk_usage_prepare( $value, WP_REST_Request $request, $args ) {
+function mediatheque_disk_usage_prepare( $value, WP_REST_Request $request, $args ) {
 	$unit = ' KB';
 
 	if ( empty( $value ) ) {
@@ -326,7 +326,7 @@ function wp_user_meta_disk_usage_prepare( $value, WP_REST_Request $request, $arg
  * @param  int     $bytes    The number of bytes to add to user's disk usage.
  * @return bool              True on success, false otherwise.
  */
-function wp_user_meta_disk_usage_update( $user_id = 0, $bytes = 0, $remove = false ) {
+function mediatheque_disk_usage_update( $user_id = 0, $bytes = 0, $remove = false ) {
 	if ( empty( $user_id ) || empty( $bytes ) ) {
 		return false;
 	}
@@ -339,7 +339,7 @@ function wp_user_meta_disk_usage_update( $user_id = 0, $bytes = 0, $remove = fal
 	}
 
 	// Get the user's disk usage
-	$disk_usage = (int) get_user_meta( $user_id, '_wp_user_meta_disk_usage', true );
+	$disk_usage = (int) get_user_meta( $user_id, '_mediatheque_disk_usage', true );
 
 	if ( $disk_usage ) {
 		if ( true === $remove ) {
@@ -354,11 +354,11 @@ function wp_user_meta_disk_usage_update( $user_id = 0, $bytes = 0, $remove = fal
 
 	// no negative disk usage!
 	if ( $disk_usage < 0 ) {
-		delete_user_meta( $user_id, '_wp_user_meta_disk_usage' );
+		delete_user_meta( $user_id, '_mediatheque_disk_usage' );
 
 	// Update user's disk usage.
 	} else {
-		update_user_meta( $user_id, '_wp_user_meta_disk_usage', absint( $disk_usage ) );
+		update_user_meta( $user_id, '_mediatheque_disk_usage', absint( $disk_usage ) );
 	}
 
 	return true;
@@ -372,7 +372,7 @@ function wp_user_meta_disk_usage_update( $user_id = 0, $bytes = 0, $remove = fal
  * @param  array $query_params  The query params for the users collection
  * @return array                The query params for the users collection.
  */
-function wp_user_media_additionnal_user_rest_param( $query_params = array() ) {
+function mediatheque_additionnal_user_rest_param( $query_params = array() ) {
 	return array_merge( $query_params, array(
 		'has_disk_usage' => array(
 			'description' => __( 'True to limit the users to the ones who uploaded some files.' ),
@@ -390,7 +390,7 @@ function wp_user_media_additionnal_user_rest_param( $query_params = array() ) {
  * @param  WP_REST_Request $request       Rest request object.
  * @return array           $prepared_args The prepared params for the users collection.
  */
-function wp_user_media_rest_user_query( $prepared_args = array(), WP_REST_Request $request ) {
+function mediatheque_rest_user_query( $prepared_args = array(), WP_REST_Request $request ) {
 	if ( $request->get_param( 'has_disk_usage' ) ) {
 		// Regular users can't browse or edit other users files.
 		if ( ! current_user_can( 'list_users' ) ) {
@@ -400,16 +400,16 @@ function wp_user_media_rest_user_query( $prepared_args = array(), WP_REST_Reques
 		} else {
 			// We are only listing the users who uploaded at least one file.
 			$prepared_args = array_merge( $prepared_args, array(
-				'meta_key'     => '_wp_user_meta_disk_usage',
+				'meta_key'     => '_mediatheque_disk_usage',
 				'meta_compare' => 'EXISTS',
 			) );
 
 			// Make sure the Admin has the meta set to include him in results.
 			$user_id = get_current_user_id();
 
-			$disk_usage = get_user_meta( $user_id, '_wp_user_meta_disk_usage', true );
+			$disk_usage = get_user_meta( $user_id, '_mediatheque_disk_usage', true );
 			if ( ! is_numeric( $disk_usage ) ) {
-				update_user_meta( $user_id, '_wp_user_meta_disk_usage', 0 );
+				update_user_meta( $user_id, '_mediatheque_disk_usage', 0 );
 			}
 		}
 	}
@@ -425,8 +425,8 @@ function wp_user_media_rest_user_query( $prepared_args = array(), WP_REST_Reques
  * @param  array $sizes The avatar sizes.
  * @return array        The avatar sizes.
  */
-function wp_user_media_rest_avatar_sizes( $sizes = array() ) {
-	$required = apply_filters( 'wp_user_media_required_avatar_sizes', array( 96, 192 ) );
+function mediatheque_rest_avatar_sizes( $sizes = array() ) {
+	$required = apply_filters( 'mediatheque_required_avatar_sizes', array( 96, 192 ) );
 	return array_merge( $sizes, $required );
 }
 
@@ -439,7 +439,7 @@ function wp_user_media_rest_avatar_sizes( $sizes = array() ) {
  * @param  array   $size          The width and height in pixels.
  * @return array                  The User Media intermediate size data.
  */
-function wp_user_media_image_get_intermediate_size( $user_media_id = 0, $size = array() ) {
+function mediatheque_image_get_intermediate_size( $user_media_id = 0, $size = array() ) {
 	$user_media = get_post( $user_media_id );
 	$size_data  = array();
 
@@ -457,7 +457,7 @@ function wp_user_media_image_get_intermediate_size( $user_media_id = 0, $size = 
 		return $size_data;
 	}
 
-	$uploads = wp_user_media_get_upload_dir();
+	$uploads = mediatheque_get_upload_dir();
 	$size_data['url']  = trailingslashit( $uploads['baseurl'] ) . $size_data['path'];
 	$size_data['path'] = trailingslashit( $uploads['basedir'] ) . $size_data['path'];
 
@@ -473,14 +473,14 @@ function wp_user_media_image_get_intermediate_size( $user_media_id = 0, $size = 
  * @param  int     $size          The size in pixels for the avatar.
  * @return string                 The avatar URL.
  */
-function wp_user_media_get_personal_avatar( $user_media_id = 0, $size = 96 ) {
-	$wp_user_media = wp_user_media();
+function mediatheque_get_personal_avatar( $user_media_id = 0, $size = 96 ) {
+	$mediatheque = mediatheque();
 
-	if ( ! empty( $wp_user_media->personal_avatars[ $user_media_id ][ $size ] ) ) {
-		$personal_avatar = $wp_user_media->personal_avatars[ $user_media_id ][ $size ];
+	if ( ! empty( $mediatheque->personal_avatars[ $user_media_id ][ $size ] ) ) {
+		$personal_avatar = $mediatheque->personal_avatars[ $user_media_id ][ $size ];
 	} else {
-		$wp_user_media->personal_avatars[ $user_media_id ][ $size ] = wp_user_media_image_get_intermediate_size( $user_media_id, array( $size, $size ) );
-		$personal_avatar = $wp_user_media->personal_avatars[ $user_media_id ][ $size ];
+		$mediatheque->personal_avatars[ $user_media_id ][ $size ] = mediatheque_image_get_intermediate_size( $user_media_id, array( $size, $size ) );
+		$personal_avatar = $mediatheque->personal_avatars[ $user_media_id ][ $size ];
 	}
 
 	if ( empty( $personal_avatar['url'] ) ) {
@@ -491,7 +491,7 @@ function wp_user_media_get_personal_avatar( $user_media_id = 0, $size = 96 ) {
 }
 
 /**
- * Returns the WP User Media Avatar data.
+ * Returns the MediaThèque Avatar data.
  *
  * @since 1.0.0
  *
@@ -499,7 +499,7 @@ function wp_user_media_get_personal_avatar( $user_media_id = 0, $size = 96 ) {
  * @param  mixed $id_or_email A user ID, email, a User, a Post or a Comment object.
  * @return array              Avatar data.
  */
-function wp_user_media_get_avatar_data( $args = array(), $id_or_email ) {
+function mediatheque_get_avatar_data( $args = array(), $id_or_email ) {
 	if ( empty( $id_or_email ) ) {
 		return $args;
 	}
@@ -526,7 +526,7 @@ function wp_user_media_get_avatar_data( $args = array(), $id_or_email ) {
 		return $args;
 	}
 
-	$personal_avatar_url = wp_user_media_get_personal_avatar( $personal_avatar_id, $args['size'] );
+	$personal_avatar_url = mediatheque_get_personal_avatar( $personal_avatar_id, $args['size'] );
 
 	if ( ! $personal_avatar_url ) {
 		return $args;
@@ -542,14 +542,14 @@ function wp_user_media_get_avatar_data( $args = array(), $id_or_email ) {
  *
  * @return array The User Media base Uploads dir data.
  */
-function wp_user_media_get_upload_dir() {
-	$wp_user_media = wp_user_media();
+function mediatheque_get_upload_dir() {
+	$mediatheque = mediatheque();
 
-	if ( ! isset( $wp_user_media->upload_dir ) ) {
-		wp_user_media_register_upload_dir();
+	if ( ! isset( $mediatheque->upload_dir ) ) {
+		mediatheque_register_upload_dir();
 	}
 
-	return $wp_user_media->upload_dir;
+	return $mediatheque->upload_dir;
 }
 
 /**
@@ -560,16 +560,16 @@ function wp_user_media_get_upload_dir() {
  * @param  array  $dir The wp_upload_dir() data.
  * @return array       The User Media base Uploads dir data.
  */
-function wp_user_media_set_upload_base_dir( $dir = array() ) {
+function mediatheque_set_upload_base_dir( $dir = array() ) {
 	if ( empty( $dir['basedir'] ) || empty( $dir['baseurl'] ) ) {
-		_doing_it_wrong( __FUNCTION__, __( 'Missing parameters.', 'wp-user-media' ) );
+		_doing_it_wrong( __FUNCTION__, __( 'Missing parameters.', 'mediatheque' ) );
 		return $dir;
 	}
 
 	return array_merge( $dir, array(
-		'path'   => $dir['basedir'] . '/wp-user-media',
-		'url'    => $dir['baseurl'] . '/wp-user-media',
-		'subdir' => '/wp-user-media',
+		'path'   => $dir['basedir'] . '/mediatheque',
+		'url'    => $dir['baseurl'] . '/mediatheque',
+		'subdir' => '/mediatheque',
 	) );
 }
 
@@ -578,7 +578,7 @@ function wp_user_media_set_upload_base_dir( $dir = array() ) {
  *
  * @since 1.0.0
  */
-function wp_user_media_register_upload_dir() {
+function mediatheque_register_upload_dir() {
 	$needs_switch = false;
 	$network_id   = (int) get_current_network_id();
 
@@ -587,11 +587,11 @@ function wp_user_media_register_upload_dir() {
 		switch_to_blog( $network_id );
 	}
 
-	add_filter( 'upload_dir', 'wp_user_media_set_upload_base_dir', 10, 1 );
+	add_filter( 'upload_dir', 'mediatheque_set_upload_base_dir', 10, 1 );
 
-	wp_user_media()->upload_dir = wp_upload_dir( null, true );
+	mediatheque()->upload_dir = wp_upload_dir( null, true );
 
-	remove_filter( 'upload_dir', 'wp_user_media_set_upload_base_dir', 10, 1 );
+	remove_filter( 'upload_dir', 'mediatheque_set_upload_base_dir', 10, 1 );
 
 	if ( $needs_switch ) {
 		restore_current_blog();
@@ -603,21 +603,21 @@ function wp_user_media_register_upload_dir() {
  *
  * @since  1.0.0
  */
-function wp_user_media_register_post_statuses() {
-	$supported     = (array) apply_filters( 'wp_user_media_supported_post_statuses', array( 'publish', 'private' ) );
-	$wp_user_media = wp_user_media();
-	$wp_user_media->statuses = array();
+function mediatheque_register_post_statuses() {
+	$supported     = (array) apply_filters( 'mediatheque_supported_post_statuses', array( 'publish', 'private' ) );
+	$mediatheque = mediatheque();
+	$mediatheque->statuses = array();
 
 	foreach ( $supported as $status ) {
-		$wp_user_media->statuses[ $status ] = get_post_status_object( $status );
+		$mediatheque->statuses[ $status ] = get_post_status_object( $status );
 
 		// Override the Publish status label
 		if ( 'publish' === $status ) {
-			$wp_user_media->statuses[ $status ]->label = __( 'Public', 'wp-user-media' );
+			$mediatheque->statuses[ $status ]->label = __( 'Public', 'mediatheque' );
 		}
 
-		if ( null === $wp_user_media->statuses[ $status ] ) {
-			unset( $wp_user_media->statuses[ $status ] );
+		if ( null === $mediatheque->statuses[ $status ] ) {
+			unset( $mediatheque->statuses[ $status ] );
 		}
 	}
 }
@@ -630,71 +630,71 @@ function wp_user_media_register_post_statuses() {
  * @param  string       $status Name of the status (or All to get all post statuses).
  * @return object|array         A specific status object or all status objects.
  */
-function wp_user_media_get_post_statuses( $status = '' ) {
-	$wp_user_media = wp_user_media();
+function mediatheque_get_post_statuses( $status = '' ) {
+	$mediatheque = mediatheque();
 
 	if ( 'all' === $status ) {
-		return $wp_user_media->statuses;
-	} elseif ( ! isset( $wp_user_media->statuses[ $status ] ) ) {
+		return $mediatheque->statuses;
+	} elseif ( ! isset( $mediatheque->statuses[ $status ] ) ) {
 		return null;
 	}
 
-	return $wp_user_media->statuses[ $status ];
+	return $mediatheque->statuses[ $status ];
 }
 
-function wp_user_media_localize_script( $handle = 'wp-user-media-views' ) {
-	wp_localize_script( $handle, 'wpUserMediaSettings', array(
+function mediatheque_localize_script( $handle = 'mediatheque-views' ) {
+	wp_localize_script( $handle, 'mediaThequeSettings', array(
 		'params' => array(
-			'container' => 'wp-user-media-ui',
-			'browser'   => 'wp-user-media-browse',
+			'container' => 'mediatheque-ui',
+			'browser'   => 'mediatheque-browse',
 			'dropzone'  => 'drag-drop-area',
-			'dropHelp'  => __( 'Drop files anywhere to upload', 'wp-user-media' ),
-			'dropOr'    => __( 'or', 'wp-user-media' ),
-			'btnBrowse' => __( 'Select files', 'wp-user-media' ),
+			'dropHelp'  => __( 'Drop files anywhere to upload', 'mediatheque' ),
+			'dropOr'    => __( 'or', 'mediatheque' ),
+			'btnBrowse' => __( 'Select files', 'mediatheque' ),
 		),
 		'toolbarItems' => array_merge( array(
-				'users'    => __( 'Browse Users', 'wp-user-media' )
+				'users'    => __( 'Browse Users', 'mediatheque' )
 			),
-			wp_list_pluck( wp_user_media_get_post_statuses( 'all' ), 'label', 'name' ),
+			wp_list_pluck( mediatheque_get_post_statuses( 'all' ), 'label', 'name' ),
 			array(
-				'upload'    => __( 'Upload file(s)', 'wp-user-media' ),
-				'directory' => __( 'Add a directory', 'wp-user-media' ),
+				'upload'    => __( 'Upload file(s)', 'mediatheque' ),
+				'directory' => __( 'Add a directory', 'mediatheque' ),
 			)
 		),
 		'dirmaker' => array(
-			'label'   => __( 'Name of your directory', 'wp-user-media' ),
-			'saveBtn' => __( 'Create', 'wp-user-media' ),
+			'label'   => __( 'Name of your directory', 'mediatheque' ),
+			'saveBtn' => __( 'Create', 'mediatheque' ),
 		),
 		'common' => array(
-			'downloadSlug'    => wp_user_media_get_download_rewrite_slug(),
-			'closeBtn'        => __( 'Close', 'wp-user-media' ),
-			'noUserMedia'     => __( 'No User Media were found for the request.', 'wp-user-media' ),
-			'dismissibleText' => __( 'Dismiss', 'wp-user-media' ),
+			'downloadSlug'    => mediatheque_get_download_rewrite_slug(),
+			'closeBtn'        => __( 'Close', 'mediatheque' ),
+			'noUserMedia'     => __( 'No User Media were found for the request.', 'mediatheque' ),
+			'dismissibleText' => __( 'Dismiss', 'mediatheque' ),
 		),
 	) );
 }
 
-function wp_user_media_register_scripts() {
-	$url = wp_user_media_js_url();
-	$min = wp_user_media_min_suffix();
-	$v   = wp_user_media_version();
+function mediatheque_register_scripts() {
+	$url = mediatheque_js_url();
+	$min = mediatheque_min_suffix();
+	$v   = mediatheque_version();
 
 	$scripts = array(
-		'wp-user-media-uploader' => array(
+		'mediatheque-uploader' => array(
 			'location' => sprintf( '%1$suploader%2$s.js', $url, $min ),
 			'deps'     => array( 'wp-api', 'wp-backbone', 'wp-plupload' ),
 		),
-		'wp-user-media-views' => array(
+		'mediatheque-views' => array(
 			'location' => sprintf( '%1$sviews%2$s.js', $url, $min ),
 			'deps'     => array( 'wp-api', 'wp-backbone', 'underscore' ),
 		),
-		'wp-user-media-editor' => array(
+		'mediatheque-editor' => array(
 			'location' => sprintf( '%1$sscript%2$s.js', $url, $min ),
-			'deps'     => array( 'media-editor', 'wp-user-media-uploader', 'wp-user-media-views' ),
+			'deps'     => array( 'media-editor', 'mediatheque-uploader', 'mediatheque-views' ),
 		),
-		'wp-user-media-manage' => array(
+		'mediatheque-manage' => array(
 			'location' => sprintf( '%1$smanage%2$s.js', $url, $min ),
-			'deps'     => array( 'wp-user-media-uploader', 'wp-user-media-views' ),
+			'deps'     => array( 'mediatheque-uploader', 'mediatheque-views' ),
 		),
 	);
 
@@ -703,8 +703,8 @@ function wp_user_media_register_scripts() {
 	}
 
 	wp_register_style(
-		'wp-user-media-uploader',
-		sprintf( '%1$suploader%2$s.css', wp_user_media_assets_url(), $min ),
+		'mediatheque-uploader',
+		sprintf( '%1$suploader%2$s.css', mediatheque_assets_url(), $min ),
 		array(),
 		$v
 	);
@@ -715,48 +715,48 @@ function wp_user_media_register_scripts() {
  *
  * @since 1.0.0
  */
-function wp_user_media_register_objects() {
+function mediatheque_register_objects() {
 
 	/** Post Type ************************************************************/
 
 	register_post_type( 'user_media', array(
 		'labels'  => array(
-			'name'                  => __( 'User Media',                    'wp-user-media' ),
-			'menu_name'             => _x( 'User Media', 'Plugin submenu',  'wp-user-media' ),
-			'all_items'             => __( 'All User Media files',          'wp-user-media' ),
-			'singular_name'         => __( 'User Media',                    'wp-user-media' ),
-			'add_new'               => __( 'New User Media file',           'wp-user-media' ),
-			'add_new_item'          => __( 'Add new User Media file',       'wp-user-media' ),
-			'edit_item'             => __( 'Edit User Media file',          'wp-user-media' ),
-			'new_item'              => __( 'New User Media',                'wp-user-media' ),
-			'view_item'             => __( 'View User Media',               'wp-user-media' ),
-			'search_items'          => __( 'Search User Media files',       'wp-user-media' ),
-			'not_found'             => __( 'User Media not found',          'wp-user-media' ),
-			'not_found_in_trash'    => __( 'User Media not found in trash', 'wp-user-media' ),
-			'insert_into_item'      => __( 'Add User Media to content',     'wp-user-media' ),
-			'uploaded_to_this_item' => __( 'Attached to this content',      'wp-user-media' ),
-			'filter_items_list'     => __( 'Filter User Media',             'wp-user-media' ),
-			'items_list_navigation' => __( 'User Media navigation',         'wp-user-media' ),
-			'items_list'            => __( 'User Media List',               'wp-user-media' ),
+			'name'                  => __( 'User Media',                    'mediatheque' ),
+			'menu_name'             => _x( 'User Media', 'Plugin submenu',  'mediatheque' ),
+			'all_items'             => __( 'All User Media files',          'mediatheque' ),
+			'singular_name'         => __( 'User Media',                    'mediatheque' ),
+			'add_new'               => __( 'New User Media file',           'mediatheque' ),
+			'add_new_item'          => __( 'Add new User Media file',       'mediatheque' ),
+			'edit_item'             => __( 'Edit User Media file',          'mediatheque' ),
+			'new_item'              => __( 'New User Media',                'mediatheque' ),
+			'view_item'             => __( 'View User Media',               'mediatheque' ),
+			'search_items'          => __( 'Search User Media files',       'mediatheque' ),
+			'not_found'             => __( 'User Media not found',          'mediatheque' ),
+			'not_found_in_trash'    => __( 'User Media not found in trash', 'mediatheque' ),
+			'insert_into_item'      => __( 'Add User Media to content',     'mediatheque' ),
+			'uploaded_to_this_item' => __( 'Attached to this content',      'mediatheque' ),
+			'filter_items_list'     => __( 'Filter User Media',             'mediatheque' ),
+			'items_list_navigation' => __( 'User Media navigation',         'mediatheque' ),
+			'items_list'            => __( 'User Media List',               'mediatheque' ),
 		),
 		'public'                => true,
-		'query_var'             => 'wp_user_media',
+		'query_var'             => 'mediatheque',
 		'rewrite'               => array(
-			'slug'              => wp_user_media_get_root_slug(),
+			'slug'              => mediatheque_get_root_slug(),
 			'with_front'        => false
 		),
 		'has_archive'           => false,
 		'exclude_from_search'   => true,
 		'show_in_nav_menus'     => false,
-		'show_ui'               => wp_user_media_is_debug(),
+		'show_ui'               => mediatheque_is_debug(),
 		'supports'              => array( 'title', 'editor', 'comments' ),
 		'taxonomies'            => array( 'user_media_type' ),
 		'capability_type'       => array( 'user_upload', 'user_uploads' ),
-		'capabilities'          => wp_user_media_capabilities(),
+		'capabilities'          => mediatheque_capabilities(),
 		'delete_with_user'      => true,
 		'can_export'            => true,
 		'show_in_rest'          => true,
-		'rest_controller_class' => 'WP_User_Media_REST_Controller',
+		'rest_controller_class' => 'MediaTheque_REST_Controller',
 		'rest_base'             => 'user-media',
 	) );
 
@@ -767,32 +767,32 @@ function wp_user_media_register_objects() {
 		'hierarchical'          => true,
 		'label'                 => 'User Media Types',
 		'labels'                => array(
-			'name'              => _x( 'Types', 'taxonomy general name', 'wp-user-media' ),
-			'singular_name'     => _x( 'Type', 'taxonomy singular name', 'wp-user-media' ),
+			'name'              => _x( 'Types', 'taxonomy general name', 'mediatheque' ),
+			'singular_name'     => _x( 'Type', 'taxonomy singular name', 'mediatheque' ),
 		),
-		'show_ui'               => wp_user_media_is_debug(),
+		'show_ui'               => mediatheque_is_debug(),
 		'show_admin_column'     => false,
 		'update_count_callback' => '_update_post_term_count',
 		'query_var'             => false,
 		'rewrite'               => false,
-		'capabilities'          => wp_user_media_types_capabilities(),
+		'capabilities'          => mediatheque_types_capabilities(),
 		'show_in_rest'          => true,
 	) );
 
 	/** Post statuses ********************************************************/
 
-	wp_user_media_register_post_statuses();
+	mediatheque_register_post_statuses();
 
 	/** Rewrites *************************************************************/
 
 	add_rewrite_tag(
-		'%' . wp_user_media_get_download_rewrite_tag() . '%',
+		'%' . mediatheque_get_download_rewrite_tag() . '%',
 		'([1]{1,})'
 	);
 
 	add_rewrite_rule(
-		wp_user_media_get_root_slug() . '/([^/]+)/'  . wp_user_media_get_download_rewrite_slug() . '/?$',
-		'index.php?wp_user_media=$matches[1]&' . wp_user_media_get_download_rewrite_tag()  . '=1',
+		mediatheque_get_root_slug() . '/([^/]+)/'  . mediatheque_get_download_rewrite_slug() . '/?$',
+		'index.php?mediatheque=$matches[1]&' . mediatheque_get_download_rewrite_tag()  . '=1',
 		'top'
 	);
 
@@ -800,15 +800,15 @@ function wp_user_media_register_objects() {
 
 	register_meta(
 		'user',
-		'_wp_user_meta_disk_usage',
+		'_mediatheque_disk_usage',
 		array(
-			'sanitize_callback' => 'wp_user_media_meta_sanitize_value',
+			'sanitize_callback' => 'mediatheque_meta_sanitize_value',
 			'type'              => 'integer',
 			'description'       => 'The disk usage of the user in KB.',
 			'single'            => true,
 			'show_in_rest'      => array(
 				'name'             => 'disk_usage',
-				'prepare_callback' => 'wp_user_meta_disk_usage_prepare',
+				'prepare_callback' => 'mediatheque_disk_usage_prepare',
 			)
 		)
 	);
@@ -817,8 +817,8 @@ function wp_user_media_register_objects() {
 		'user',
 		'personal_avatar',
 		array(
-			'sanitize_callback' => 'wp_user_media_meta_sanitize_value',
-			'auth_callback'     => 'wp_user_media_meta_auth_personal_avatar',
+			'sanitize_callback' => 'mediatheque_meta_sanitize_value',
+			'auth_callback'     => 'mediatheque_meta_auth_personal_avatar',
 			'type'              => 'integer',
 			'description'       => 'The User Media ID to use as an avatar.',
 			'single'            => true,
@@ -828,11 +828,11 @@ function wp_user_media_register_objects() {
 
 	/** Uploads dir **********************************************************/
 
-	wp_user_media_register_upload_dir();
+	mediatheque_register_upload_dir();
 
 	/** Scripts & Css *******************************************************/
 
-	wp_user_media_register_scripts();
+	mediatheque_register_scripts();
 
 	/** Avatar image sizes **************************************************/
 
@@ -848,8 +848,8 @@ function wp_user_media_register_objects() {
  *
  * @return string the plugin's templates dir.
  */
-function wp_user_media_templates() {
-	return wp_user_media()->templates;
+function mediatheque_templates() {
+	return mediatheque()->templates;
 }
 
 /**
@@ -860,7 +860,7 @@ function wp_user_media_templates() {
  * @param  string $template  Path to the template. See locate_template().
  * @return string            Path to the template. See locate_template().
  */
-function wp_user_media_embed_template( $template = '' ) {
+function mediatheque_embed_template( $template = '' ) {
 	$object = get_queried_object();
 
 	// Only Apply the template override on Embedded User Media
@@ -875,7 +875,7 @@ function wp_user_media_embed_template( $template = '' ) {
 	 * override it with the plugin's default template.
 	 */
 	if ( 'embed-user_media' !== $filename ) {
-		$template = wp_user_media_templates() . 'embed-user_media.php';
+		$template = mediatheque_templates() . 'embed-user_media.php';
 	}
 
 	return $template;
@@ -886,11 +886,11 @@ function wp_user_media_embed_template( $template = '' ) {
  *
  * @since  1.0.0
  */
-function wp_user_media_embed_excerpt() {
+function mediatheque_embed_excerpt() {
 	$excerpt = apply_filters( 'the_excerpt_embed', get_the_excerpt() );
-	$excerpt = wp_user_media_prepend_user_media( $excerpt );
+	$excerpt = mediatheque_prepend_user_media( $excerpt );
 
-	echo apply_filters( 'wp_user_media_embed_excerpt', $excerpt );
+	echo apply_filters( 'mediatheque_embed_excerpt', $excerpt );
 }
 
 /**
@@ -898,7 +898,7 @@ function wp_user_media_embed_excerpt() {
  *
  * @since 1.0.0
  */
-function wp_user_media_embed_download_button() {
+function mediatheque_embed_download_button() {
 	if ( 'private' === get_post_status() ) {
 		return;
 	}
@@ -910,9 +910,9 @@ function wp_user_media_embed_download_button() {
 				%2$s
 			</a>
 		</div>',
-		esc_url( wp_user_media_get_download_url() ),
+		esc_url( mediatheque_get_download_url() ),
 		sprintf(
-			__( 'Download<span class="screen-reader-text"> %s</span>', 'wp-user-media' ),
+			__( 'Download<span class="screen-reader-text"> %s</span>', 'mediatheque' ),
 			esc_html( get_the_title() )
 		)
 	);
@@ -923,12 +923,12 @@ function wp_user_media_embed_download_button() {
  *
  * @since 1.0.0
  */
-function wp_user_media_embed_style() {
+function mediatheque_embed_style() {
 	wp_enqueue_style(
-		'wp-user-media-embed',
-		sprintf( '%1$sembed%2$s.css', wp_user_media_assets_url(), wp_user_media_min_suffix() ),
+		'mediatheque-embed',
+		sprintf( '%1$sembed%2$s.css', mediatheque_assets_url(), mediatheque_min_suffix() ),
 		array(),
-		wp_user_media_version()
+		mediatheque_version()
 	);
 }
 
@@ -942,7 +942,7 @@ function wp_user_media_embed_style() {
  * @param  bool    $load     Whether to load or return the found template.
  * @return string            The template path.
  */
-function wp_user_media_get_template_part( $template = '', $id = '', $load = true ) {
+function mediatheque_get_template_part( $template = '', $id = '', $load = true ) {
 	if ( empty( $template ) || empty( $id ) ) {
 		return '';
 	}
@@ -950,10 +950,10 @@ function wp_user_media_get_template_part( $template = '', $id = '', $load = true
 	$template = str_replace( '.html', '', $template );
 	$located  = '';
 
-	$template_locations = (array) apply_filters( 'wp_user_media_get_template_part', array(
-		trailingslashit( get_stylesheet_directory() ) . 'wp-user-media/' . $template . '.html',
-		trailingslashit( get_template_directory() ) . 'wp-user-media/' . $template . '.html',
-		wp_user_media_templates() . $template . '.html',
+	$template_locations = (array) apply_filters( 'mediatheque_get_template_part', array(
+		trailingslashit( get_stylesheet_directory() ) . 'mediatheque/' . $template . '.html',
+		trailingslashit( get_template_directory() ) . 'mediatheque/' . $template . '.html',
+		mediatheque_templates() . $template . '.html',
 	) );
 
 	foreach ( $template_locations as $template_location ) {
@@ -985,7 +985,7 @@ function wp_user_media_get_template_part( $template = '', $id = '', $load = true
  *
  * @param  WP_Query $query The WordPress Main Query
  */
-function wp_user_media_parse_query( WP_Query $query ) {
+function mediatheque_parse_query( WP_Query $query ) {
 	$bail = false;
 
 	if ( ! $query->is_main_query() || true === $query->get( 'suppress_filters' ) ) {
@@ -1000,12 +1000,12 @@ function wp_user_media_parse_query( WP_Query $query ) {
 		return;
 	}
 
-	if ( 'user_media' !== $query->get( 'post_type' ) || 1 === (int) $query->get( wp_user_media_get_download_rewrite_tag() ) || true === $query->is_embed ) {
+	if ( 'user_media' !== $query->get( 'post_type' ) || 1 === (int) $query->get( mediatheque_get_download_rewrite_tag() ) || true === $query->is_embed ) {
 		return;
 	}
 
 	$query->is_attachment = true;
-	add_filter( 'the_content', 'wp_user_media_prepend_user_media', 11 );
+	add_filter( 'the_content', 'mediatheque_prepend_user_media', 11 );
 }
 
 /**
@@ -1016,28 +1016,28 @@ function wp_user_media_parse_query( WP_Query $query ) {
  * @param  string $content The User Media description.
  * @return string          The User Media description.
  */
-function wp_user_media_prepend_user_media( $content = '' ) {
+function mediatheque_prepend_user_media( $content = '' ) {
 	if ( 'user_media' !== get_post_type() || empty( $GLOBALS['post'] ) ) {
 		return $content;
 	}
 
-	wp_user_media()->user_media_link = wp_user_media_get_download_url( $GLOBALS['post'] );
+	mediatheque()->user_media_link = mediatheque_get_download_url( $GLOBALS['post'] );
 
 	// Overrides
 	$reset_post = clone $GLOBALS['post'];
 	$GLOBALS['post']->post_type = 'attachment';
 	wp_cache_set( $reset_post->ID, $GLOBALS['post'], 'posts' );
-	add_filter( 'wp_get_attachment_link', 'wp_user_media_attachment_link', 10, 1 );
+	add_filter( 'wp_get_attachment_link', 'mediatheque_attachment_link', 10, 1 );
 
 	$content = prepend_attachment( $content );
 
 	// Resets
 	$GLOBALS['post'] = $reset_post;
 	wp_cache_set( $reset_post->ID, $reset_post, 'posts' );
-	remove_filter( 'the_content',            'wp_user_media_prepend_user_media', 11    );
-	remove_filter( 'wp_get_attachment_link', 'wp_user_media_attachment_link',    10, 1 );
+	remove_filter( 'the_content',            'mediatheque_prepend_user_media', 11    );
+	remove_filter( 'wp_get_attachment_link', 'mediatheque_attachment_link',    10, 1 );
 
-	unset( wp_user_media()->user_media_link );
+	unset( mediatheque()->user_media_link );
 
 	return $content;
 }
@@ -1050,7 +1050,7 @@ function wp_user_media_prepend_user_media( $content = '' ) {
  * @param  int|WP_Post         $dir  Required. The User Media Directory ID or Object.
  * @return array|false|WP_Post       False on failure.
  */
-function wp_user_media_delete_dir( $dir = null ) {
+function mediatheque_delete_dir( $dir = null ) {
 	if ( empty( $dir ) ) {
 		return false;
 	}
@@ -1061,8 +1061,8 @@ function wp_user_media_delete_dir( $dir = null ) {
 		return false;
 	}
 
-	$uploadpath = wp_user_media_get_upload_dir();
-	$dirpath    = get_post_meta( $dir->ID, '_wp_user_media_relative_path', true );
+	$uploadpath = mediatheque_get_upload_dir();
+	$dirpath    = get_post_meta( $dir->ID, '_mediatheque_relative_path', true );
 	$dirpath    = trailingslashit( $uploadpath['basedir'] ) . $dirpath;
 
 	if ( ! is_dir( $dirpath ) ) {
@@ -1082,12 +1082,12 @@ function wp_user_media_delete_dir( $dir = null ) {
 	 * @param WP_Post $dir      The User Media Directory Object.
 	 * @param array   $children The list of included User Media.
 	 */
-	do_action( 'wp_user_media_delete_dir', $dir, $children );
+	do_action( 'mediatheque_delete_dir', $dir, $children );
 
 	// Empty the directory's content.
 	if ( ! empty( $children ) ) {
 		foreach ( $children as $child ) {
-			wp_user_media_delete_media( $child );
+			mediatheque_delete_media( $child );
 		}
 	}
 
@@ -1103,7 +1103,7 @@ function wp_user_media_delete_dir( $dir = null ) {
 	 *
 	 * @param WP_Post $dir The User Media Directory Object.
 	 */
-	do_action( 'wp_user_media_deleted_dir', $dir );
+	do_action( 'mediatheque_deleted_dir', $dir );
 
 	return $dir;
 }
@@ -1116,7 +1116,7 @@ function wp_user_media_delete_dir( $dir = null ) {
  * @param  int|WP_Post         $media  Required. The User Media ID or Object.
  * @return array|false|WP_Post         False on failure.
  */
-function wp_user_media_delete_media( $media = null ) {
+function mediatheque_delete_media( $media = null ) {
 	if ( empty( $media ) ) {
 		return false;
 	}
@@ -1130,8 +1130,8 @@ function wp_user_media_delete_media( $media = null ) {
 	$user_media_type = wp_get_object_terms( $user_media->ID, 'user_media_types',  array( 'fields' => 'id=>slug' ) );
 	$user_media_type = reset( $user_media_type );
 
-	if ( 'wp-user-media-directory' === $user_media_type ) {
-		return wp_user_media_delete_dir( $user_media );
+	if ( 'mediatheque-directory' === $user_media_type ) {
+		return mediatheque_delete_dir( $user_media );
 	}
 
 	$meta = wp_get_attachment_metadata( $user_media->ID );
@@ -1149,9 +1149,9 @@ function wp_user_media_delete_media( $media = null ) {
 	 * @param WP_Post $user_media The User Media Object.
 	 * @param string  $file       The file absolute path.
 	 */
-	do_action( 'wp_user_media_delete_media', $user_media, $file );
+	do_action( 'mediatheque_delete_media', $user_media, $file );
 
-	$uploadpath = wp_user_media_get_upload_dir();
+	$uploadpath = mediatheque_get_upload_dir();
 
 	// Remove intermediate and backup images if there are any.
 	if ( isset( $meta['sizes'] ) && is_array( $meta['sizes'] ) ) {
@@ -1174,12 +1174,12 @@ function wp_user_media_delete_media( $media = null ) {
 	 *
 	 * @param WP_Post $value The User Media Object.
 	 */
-	do_action( 'wp_user_media_deleted_media', $user_media );
+	do_action( 'mediatheque_deleted_media', $user_media );
 
 	return $user_media;
 }
 
-function wp_user_media_move( $media = null, $parent = null ) {
+function mediatheque_move( $media = null, $parent = null ) {
 	if ( empty( $media ) || is_null( $parent ) ) {
 		return false;
 	}
@@ -1190,12 +1190,12 @@ function wp_user_media_move( $media = null, $parent = null ) {
 		return false;
 	}
 
-	$uploadpath = wp_user_media_get_upload_dir();
+	$uploadpath = mediatheque_get_upload_dir();
 
 	if ( 0 === $parent ) {
 		$path = sprintf( '%1$s/%2$s/%3$s', $uploadpath['subdir'], get_post_status( $user_media ), $user_media->post_author );
 	} else {
-		$path = '/' . get_post_meta( $parent, '_wp_user_media_relative_path', true );
+		$path = '/' . get_post_meta( $parent, '_mediatheque_relative_path', true );
 	}
 
 	if ( ! $path ) {
@@ -1236,7 +1236,7 @@ function medialibrary_button( $args = array() ) {
 	$r = wp_parse_args( $args, array(
 		'editor_id'           => 'content',
 		'editor_btn_classes'  => array( 'mediabrary-insert' ),
-		'editor_btn_text'     => __( 'Add Media', 'wp-user-media' ),
+		'editor_btn_text'     => __( 'Add Media', 'mediatheque' ),
 		'editor_btn_dashicon' => 'dashicons-format-image',
 		'echo'                => true,
 	) );
@@ -1287,7 +1287,7 @@ function medialibrary_button( $args = array() ) {
  * @param  string $editor_id The editor selector id.
  * @return array             The editor settings.
  */
-function wp_user_media_editor_settings( $settings = array(), $editor_id = '' ) {
+function mediatheque_editor_settings( $settings = array(), $editor_id = '' ) {
 	// In this case, the User Media UI is a sidebar item of the WP Media Editor
 	if ( current_user_can( 'upload_files' ) ) {
 		return $settings;
@@ -1298,7 +1298,7 @@ function wp_user_media_editor_settings( $settings = array(), $editor_id = '' ) {
 		return $settings;
 	}
 
-	wp_user_media()->editor_id = $editor_id;
+	mediatheque()->editor_id = $editor_id;
 
 	return $settings;
 }
@@ -1311,17 +1311,17 @@ function wp_user_media_editor_settings( $settings = array(), $editor_id = '' ) {
  * @param  string $editor The editor HTML Output.
  * @return string $editor The editor HTML Output.
  */
-function wp_user_media_the_editor( $editor = '' ) {
-	$wp_user_media = wp_user_media();
+function mediatheque_the_editor( $editor = '' ) {
+	$mediatheque = mediatheque();
 
-	if ( empty( $wp_user_media->editor_id ) || ! current_user_can( 'publish_user_uploads' ) ) {
+	if ( empty( $mediatheque->editor_id ) || ! current_user_can( 'publish_user_uploads' ) ) {
 		return $editor;
 	}
 
 	return sprintf( '<div id="wp-%1$s-media-buttons" class="wp-media-buttons mediatheque-buttons" data-editor="%1$s">%2$s</div>%3$s',
-		esc_attr( $wp_user_media->editor_id ),
+		esc_attr( $mediatheque->editor_id ),
 		medialibrary_button( array(
-			'editor_id'           => $wp_user_media->editor_id,
+			'editor_id'           => $mediatheque->editor_id,
 			'editor_btn_classes'  => array( 'mediatheque-insert' ),
 			'echo'                => false,
 		) ),

@@ -1,8 +1,8 @@
 <?php
 /**
- * WP User Media Rest Controller Class.
+ * MediaThèque Rest Controller Class.
  *
- * @package WP User Media\inc\classes
+ * @package mediatheque\inc\classes
  *
  * @since 1.0.0
  */
@@ -15,7 +15,7 @@ defined( 'ABSPATH' ) || exit;
  *
  * @since  1.0.0
  */
-class WP_User_Media_REST_Controller extends WP_REST_Attachments_Controller {
+class MediaTheque_REST_Controller extends WP_REST_Attachments_Controller {
 	public $user_media_status        = 'publish';
 	public $user_media_type_ids      = array();
 	public $user_media_parent        = 0;
@@ -103,7 +103,7 @@ class WP_User_Media_REST_Controller extends WP_REST_Attachments_Controller {
 		$params = parent::get_collection_params();
 
 		$params['parent'] = array(
-			'description'       => __( 'Limit result set to those of particular parent IDs.', 'wp-user-media' ),
+			'description'       => __( 'Limit result set to those of particular parent IDs.', 'mediatheque' ),
 			'type'              => 'array',
 			'items'             => array(
 				'type'          => 'integer',
@@ -112,7 +112,7 @@ class WP_User_Media_REST_Controller extends WP_REST_Attachments_Controller {
 		);
 
 		$params['orderby'] = array(
-			'description'        => __( 'Sort collection by object attribute.', 'wp-user-media' ),
+			'description'        => __( 'Sort collection by object attribute.', 'mediatheque' ),
 			'type'               => 'string',
 			'default'            => 'modified',
 			'enum'               => array(
@@ -205,7 +205,7 @@ class WP_User_Media_REST_Controller extends WP_REST_Attachments_Controller {
 	 * @return array The Uploads dir data.
 	 */
 	public function upload_dir_filter() {
-		$dir     = wp_user_media_get_upload_dir();
+		$dir     = mediatheque_get_upload_dir();
 		$user_id = $this->user_id;
 
 		if ( ! $user_id ) {
@@ -238,7 +238,7 @@ class WP_User_Media_REST_Controller extends WP_REST_Attachments_Controller {
 	 */
 	protected function upload_from_file( $files, $headers, $action = '' ) {
 		if ( empty( $files ) ) {
-			return new WP_Error( 'rest_upload_no_data', __( 'No data supplied.', 'wp-user-media' ), array( 'status' => 400 ) );
+			return new WP_Error( 'rest_upload_no_data', __( 'No data supplied.', 'mediatheque' ), array( 'status' => 400 ) );
 		}
 
 		// Verify hash, if given.
@@ -248,7 +248,7 @@ class WP_User_Media_REST_Controller extends WP_REST_Attachments_Controller {
 			$actual      = md5_file( $files['file']['tmp_name'] );
 
 			if ( $expected !== $actual ) {
-				return new WP_Error( 'rest_upload_hash_mismatch', __( 'Content hash did not match expected.', 'wp-user-media' ), array( 'status' => 412 ) );
+				return new WP_Error( 'rest_upload_hash_mismatch', __( 'Content hash did not match expected.', 'mediatheque' ), array( 'status' => 412 ) );
 			}
 		}
 
@@ -266,7 +266,7 @@ class WP_User_Media_REST_Controller extends WP_REST_Attachments_Controller {
 
 		add_filter( 'upload_dir', array( $this, 'upload_dir_filter' ), 1, 0 );
 
-		$file = wp_handle_upload( $files['wp_user_media_upload'], $overrides );
+		$file = wp_handle_upload( $files['mediatheque_upload'], $overrides );
 
 		remove_filter( 'upload_dir', array( $this, 'upload_dir_filter' ), 1, 0 );
 
@@ -342,7 +342,7 @@ class WP_User_Media_REST_Controller extends WP_REST_Attachments_Controller {
 		$response = parent::prepare_item_for_response( $post, $request );
 		$data     = $response->get_data();
 
-		if ( in_array( $this->get_user_media_type_id( 'wp-user-media-directory' ), $data['user_media_types'], true ) ) {
+		if ( in_array( $this->get_user_media_type_id( 'mediatheque-directory' ), $data['user_media_types'], true ) ) {
 			$data['media_type'] = 'dir';
 		} elseif ( 'image' !== $data['media_type'] ) {
 			$filepath = get_attached_file( $data['id'] );
@@ -393,7 +393,7 @@ class WP_User_Media_REST_Controller extends WP_REST_Attachments_Controller {
 
 			if ( ! empty( $post_parent->ID ) ) {
 				$this->user_media_parent     = $post_parent->ID;
-				$this->user_media_parent_dir = get_post_meta( $this->user_media_parent, '_wp_user_media_relative_path', true );
+				$this->user_media_parent_dir = get_post_meta( $this->user_media_parent, '_mediatheque_relative_path', true );
 			}
 		}
 
@@ -410,10 +410,10 @@ class WP_User_Media_REST_Controller extends WP_REST_Attachments_Controller {
 			$files   = $request->get_file_params();
 
 			if ( ! empty( $files ) ) {
-				$size = $files['wp_user_media_upload']['size'];
+				$size = $files['mediatheque_upload']['size'];
 				$file = $this->upload_from_file( $files, $headers, $action );
 			} else {
-				return new WP_Error( 'rest_upload_no_data', __( 'No data supplied.', 'wp-user-media' ), array( 'status' => 400 ) );
+				return new WP_Error( 'rest_upload_no_data', __( 'No data supplied.', 'mediatheque' ), array( 'status' => 400 ) );
 			}
 
 			if ( is_wp_error( $file ) ) {
@@ -450,12 +450,12 @@ class WP_User_Media_REST_Controller extends WP_REST_Attachments_Controller {
 				$user_media->post_title = preg_replace( '/\.[^.]+$/', '', basename( $file ) );
 			}
 
-			$user_media_type_id = $this->get_user_media_type_id( 'wp-user-media-file' );
+			$user_media_type_id = $this->get_user_media_type_id( 'mediatheque-file' );
 
 		// Add a folder
 		} else {
 			$user_media         = $this->prepare_item_for_database( $request );
-			$user_media_type_id = $this->get_user_media_type_id( 'wp-user-media-directory' );
+			$user_media_type_id = $this->get_user_media_type_id( 'mediatheque-directory' );
 		}
 
 		// Dir or file types are terms
@@ -481,7 +481,7 @@ class WP_User_Media_REST_Controller extends WP_REST_Attachments_Controller {
 				update_attached_file( $id, $file );
 
 				if ( $size ) {
-					wp_user_meta_disk_usage_update( get_current_user_id(), $size );
+					mediatheque_disk_usage_update( get_current_user_id(), $size );
 				}
 			}
 		}
@@ -519,17 +519,17 @@ class WP_User_Media_REST_Controller extends WP_REST_Attachments_Controller {
 			// If the user's root dir is not set yet, create it.
 			if ( ! is_dir( $dir ) ) {
 				if ( ! wp_mkdir_p( $dir ) ) {
-					return new WP_Error( 'rest_mkdir_failed', __( 'Writing the user\'s parent directory failed.', 'wp-user-media' ), array( 'status' => 400 ) );
+					return new WP_Error( 'rest_mkdir_failed', __( 'Writing the user\'s parent directory failed.', 'mediatheque' ), array( 'status' => 400 ) );
 				}
 			}
 
 			$dirname = wp_unique_filename( $dir, $user_media->post_name );
 
 			if ( ! wp_mkdir_p( $dir . '/' . $dirname ) ) {
-				return new WP_Error( 'rest_mkdir_failed', __( 'Writing the directory failed.', 'wp-user-media' ), array( 'status' => 400 ) );
+				return new WP_Error( 'rest_mkdir_failed', __( 'Writing the directory failed.', 'mediatheque' ), array( 'status' => 400 ) );
 			}
 
-			update_post_meta( $id, '_wp_user_media_relative_path', _wp_relative_upload_path( $dir . '/' . $dirname ) );
+			update_post_meta( $id, '_mediatheque_relative_path', _wp_relative_upload_path( $dir . '/' . $dirname ) );
 		}
 
 		$fields_update = $this->update_additional_fields_for_object( $user_media, $request );
@@ -587,7 +587,7 @@ class WP_User_Media_REST_Controller extends WP_REST_Attachments_Controller {
 		}
 
 		if ( ! $this->check_delete_permission( $user_media ) ) {
-			return new WP_Error( 'rest_user_cannot_delete_post', __( 'Sorry, you are not allowed to delete this user media.', 'wp-user-media' ), array( 'status' => rest_authorization_required_code() ) );
+			return new WP_Error( 'rest_user_cannot_delete_post', __( 'Sorry, you are not allowed to delete this user media.', 'mediatheque' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 
 		$request->set_param( 'context', 'edit' );
@@ -597,21 +597,21 @@ class WP_User_Media_REST_Controller extends WP_REST_Attachments_Controller {
 		// Reset the deleted space.
 		$this->user_media_deleted_space = 0;
 
-		add_action( 'wp_user_media_delete_media', array( $this, 'count_deleted_space' ), 10, 2 );
+		add_action( 'mediatheque_delete_media', array( $this, 'count_deleted_space' ), 10, 2 );
 
-		$result = wp_user_media_delete_media( $user_media );
+		$result = mediatheque_delete_media( $user_media );
 
-		remove_action( 'wp_user_media_delete_media', array( $this, 'count_deleted_space' ), 10, 2 );
+		remove_action( 'mediatheque_delete_media', array( $this, 'count_deleted_space' ), 10, 2 );
 
 		if ( $this->user_media_deleted_space ) {
-			wp_user_meta_disk_usage_update( $user_media->post_author, $this->user_media_deleted_space, true );
+			mediatheque_disk_usage_update( $user_media->post_author, $this->user_media_deleted_space, true );
 		}
 
 		$response = new WP_REST_Response();
 		$response->set_data( array( 'deleted' => true, 'previous' => $previous->get_data() ) );
 
 		if ( ! $result ) {
-			return new WP_Error( 'rest_cannot_delete', __( 'The user media cannot be deleted.', 'wp-user-media' ), array( 'status' => 500 ) );
+			return new WP_Error( 'rest_cannot_delete', __( 'The user media cannot be deleted.', 'mediatheque' ), array( 'status' => 500 ) );
 		}
 
 		/**
@@ -649,12 +649,12 @@ class WP_User_Media_REST_Controller extends WP_REST_Attachments_Controller {
 		$id = (int) $request->get_param( 'id' );
 
 		if ( empty( $id ) || 'user_media' !== get_post_type( $id ) ) {
-			return new WP_Error( 'rest_invalid_param', __( 'Invalid type.', 'wp-user-media' ), array( 'status' => 400 ) );
+			return new WP_Error( 'rest_invalid_param', __( 'Invalid type.', 'mediatheque' ), array( 'status' => 400 ) );
 		}
 
 		$this->user_media_status = $request->get_param( 'status' );
 		$parent                  = $request->get_param( 'post_parent' );
-		$uploadpath              = wp_user_media_get_upload_dir();
+		$uploadpath              = mediatheque_get_upload_dir();
 
 		if ( '' !== $parent ) {
 			$this->user_media_parent = (int) $parent;
@@ -664,10 +664,10 @@ class WP_User_Media_REST_Controller extends WP_REST_Attachments_Controller {
 			// Include admin functions to get access to wp_generate_attachment_metadata().
 			require_once ABSPATH . 'wp-admin/includes/admin.php';
 
-			$file = wp_user_media_move( $id, $this->user_media_parent );
+			$file = mediatheque_move( $id, $this->user_media_parent );
 
 			if ( ! $file ) {
-				return new WP_Error( 'rest_mv_failed', __( 'Moving the User Media failed.', 'wp-user-media' ), array( 'status' => 400 ) );
+				return new WP_Error( 'rest_mv_failed', __( 'Moving the User Media failed.', 'mediatheque' ), array( 'status' => 400 ) );
 			}
 
 			update_attached_file( $id, $file );

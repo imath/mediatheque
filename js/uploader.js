@@ -2,16 +2,16 @@
 
 // Make sure the wp object exists.
 window.wp = window.wp || {};
-window.wpUserMedia = window.wpUserMedia || _.extend( {}, _.pick( window.wp, 'Backbone', 'template' ) );
+window.mediaTheque = window.mediaTheque || _.extend( {}, _.pick( window.wp, 'Backbone', 'template' ) );
 
 ( function( $ ) {
 
-	wpUserMedia.Models      = wpUserMedia.Models || {};
-	wpUserMedia.Collections = wpUserMedia.Collections || {};
-	wpUserMedia.Views       = wpUserMedia.Views || {};
+	mediaTheque.Models      = mediaTheque.Models || {};
+	mediaTheque.Collections = mediaTheque.Collections || {};
+	mediaTheque.Views       = mediaTheque.Views || {};
 
 	// {@extends wp.api.WPApiBaseModel}
-	wpUserMedia.Models.File = wp.api.WPApiBaseModel.extend( {
+	mediaTheque.Models.File = wp.api.WPApiBaseModel.extend( {
 		file: {},
 
 		save: function( attrs, options ) {
@@ -29,7 +29,7 @@ window.wpUserMedia = window.wpUserMedia || _.extend( {}, _.pick( window.wp, 'Bac
 		}
 	} );
 
-	wpUserMedia.Uploader = function( options ) {
+	mediaTheque.Uploader = function( options ) {
 		var self = this, overrides;
 
 		if ( options.overrides ) {
@@ -110,7 +110,7 @@ window.wpUserMedia = window.wpUserMedia || _.extend( {}, _.pick( window.wp, 'Bac
 
 				// Create a model for the attachment, and add it to the Upload queue collection
 				// so listeners to the upload queue can track and display upload progress.
-				file.userMedia = new wpUserMedia.Models.File( attributes );
+				file.userMedia = new mediaTheque.Models.File( attributes );
 				self.filesQueue.add( file.userMedia );
 
 				self.added( file.userMedia );
@@ -160,7 +160,7 @@ window.wpUserMedia = window.wpUserMedia || _.extend( {}, _.pick( window.wp, 'Bac
 		 * @param {Array}             files    Array of file objects that were added to queue by the user.
 		 */
 		this.uploader.bind( 'BeforeUpload', function( uploader, files ) {
-			$( self ).trigger( 'wp-user-media-new-upload', uploader, files );
+			$( self ).trigger( 'mediatheque-new-upload', uploader, files );
 		} );
 
 		/**
@@ -171,7 +171,7 @@ window.wpUserMedia = window.wpUserMedia || _.extend( {}, _.pick( window.wp, 'Bac
 		 * @param {Array}             files    Array of file objects that were added to queue by the user.
 		 */
 		this.uploader.bind( 'UploadComplete', function( uploader, files ) {
-			$( self ).trigger( 'wp-user-media-upload-complete', uploader, files );
+			$( self ).trigger( 'mediatheque-upload-complete', uploader, files );
 			self.filesQueue.reset();
 		} );
 
@@ -203,13 +203,13 @@ window.wpUserMedia = window.wpUserMedia || _.extend( {}, _.pick( window.wp, 'Bac
 			}
 
 			error( message, pluploadError, pluploadError.file );
-			$( self ).trigger( 'wp-user-media-upload-error', uploader, pluploadError );
+			$( self ).trigger( 'mediatheque-upload-error', uploader, pluploadError );
 
 			uploader.refresh();
 		} );
 	};
 
-	$.extend( wpUserMedia.Uploader.prototype, {
+	$.extend( mediaTheque.Uploader.prototype, {
 		init    : function() {},
 		success : function() {},
 		added   : function() {},

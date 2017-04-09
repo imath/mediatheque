@@ -1,3 +1,3 @@
-# WP User Media
+# MediaThèque
 
-A media library for WP Users.
+Une gestion alternative des media dans WordPress

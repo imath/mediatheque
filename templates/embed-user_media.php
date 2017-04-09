@@ -5,7 +5,7 @@
  * When a post is embedded in an iframe, this file is used to create the output
  * if the active theme does not include an embed-user_media.php template.
  *
- * @package WP User Media
+ * @package mediatheque
  * @since 1.0.0
  */
 
@@ -21,7 +21,7 @@ if ( have_posts() ) :
 				</a>
 			</p>
 
-			<div class="wp-embed-excerpt"><?php wp_user_media_embed_excerpt(); ?></div>
+			<div class="wp-embed-excerpt"><?php mediatheque_embed_excerpt(); ?></div>
 
 			<div class="wp-embed-footer">
 				<?php the_embed_site_title() ?>
@@ -33,7 +33,7 @@ if ( have_posts() ) :
 					 *
 					 * @since 1.0.0
 					 */
-					do_action( 'wp_user_media_embed_content_meta' ); ?>
+					do_action( 'mediatheque_embed_content_meta' ); ?>
 				</div>
 			</div>
 		</div>

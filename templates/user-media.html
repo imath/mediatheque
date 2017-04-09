@@ -1,7 +1,7 @@
 <# if ( data.uploading ) { #>
 	<div id="{{data.id}}">
-		<div class="wp-user-media-progress">
-			<div class="wp-user-media-bar"></div>
+		<div class="mediatheque-progress">
+			<div class="mediatheque-bar"></div>
 		</div>
 	</div>
 <# } else { #>
@@ -19,7 +19,7 @@
 
 	</div>
 
-	<# if ( 'wp-editor' !== data.context ) { #>
+	<# if ( 'wp-editor' !== data.uiType ) { #>
 		<div class="user-media-actions">
 			<# if ( 'dir' === data.media_type ) { #>
 				<a href="#/name/{{data.slug}}" class="edit"><span class="dashicons dashicons-edit"></span></a>

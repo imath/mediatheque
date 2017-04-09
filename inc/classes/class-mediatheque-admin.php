@@ -1,8 +1,8 @@
 <?php
 /**
- * WP User Media Admin Class.
+ * MediaThèque Admin Class.
  *
- * @package WP User Media\inc\classes
+ * @package mediatheque\inc\classes
  *
  * @since 1.0.0
  */
@@ -15,7 +15,7 @@ defined( 'ABSPATH' ) || exit;
  *
  * @since  1.0.0
  */
-class WP_User_Media_Admin {
+class MediaTheque_Admin {
 
 	/**
 	 * The title used in various screens
@@ -50,13 +50,13 @@ class WP_User_Media_Admin {
 			return;
 		}
 
-		$wp_user_media = wp_user_media();
+		$mediatheque = mediatheque();
 
-		if ( empty( $wp_user_media->admin ) ) {
-			$wp_user_media->admin = new self;
+		if ( empty( $mediatheque->admin ) ) {
+			$mediatheque->admin = new self;
 		}
 
-		return $wp_user_media->admin;
+		return $mediatheque->admin;
 	}
 
 	/**
@@ -99,10 +99,10 @@ class WP_User_Media_Admin {
 	 * @since  1.0.0
 	 */
 	public function scripts() {
-		wp_enqueue_script( 'wp-user-media-editor' );
-		wp_user_media_localize_script();
+		wp_enqueue_script( 'mediatheque-editor' );
+		mediatheque_localize_script();
 
-		wp_enqueue_style( 'wp-user-media-uploader' );
+		wp_enqueue_style( 'mediatheque-uploader' );
 	}
 
 	/**
@@ -123,7 +123,7 @@ class WP_User_Media_Admin {
 				sprintf( '<a href="%1$s"%2$s>%3$s</a>',
 					esc_url( admin_url( 'options-media.php' ) ),
 					'options-media' === $screen->id ? ' class="current"' : '',
-					esc_html__( 'Shared Media', 'wp-user-media' )
+					esc_html__( 'Shared Media', 'mediatheque' )
 				),
 				sprintf( '<a href="%1$s"%2$s>%3$s</a>',
 					esc_url( add_query_arg( 'page', 'user-media-options', admin_url( 'options-general.php' ) ) ),
@@ -162,7 +162,7 @@ class WP_User_Media_Admin {
 			} );
 		';
 
-		$pointers = wp_user_media_get_pointers();
+		$pointers = mediatheque_get_pointers();
 
 		if ( $pointers ) {
 			$can_manage_options  = current_user_can( 'manage_options' );
@@ -214,14 +214,14 @@ class WP_User_Media_Admin {
 	}
 
 	public function get_template_parts() {
-		wp_user_media_get_template_part( 'toolbar-item', 'wp-user-media-toolbar-item' );
-		wp_user_media_get_template_part( 'feedback', 'wp-user-media-feedback' );
-		wp_user_media_get_template_part( 'user', 'wp-user-media-user' );
-		wp_user_media_get_template_part( 'user-media', 'wp-user-media-media' );
-		wp_user_media_get_template_part( 'user-media-trail', 'wp-user-media-trail' );
-		wp_user_media_get_template_part( 'uploader', 'wp-user-media-uploader' );
-		wp_user_media_get_template_part( 'progress', 'wp-user-media-progress' );
-		wp_user_media_get_template_part( 'dirmaker', 'wp-user-media-dirmaker' );
+		mediatheque_get_template_part( 'toolbar-item', 'mediatheque-toolbar-item' );
+		mediatheque_get_template_part( 'feedback', 'mediatheque-feedback' );
+		mediatheque_get_template_part( 'user', 'mediatheque-user' );
+		mediatheque_get_template_part( 'user-media', 'mediatheque-media' );
+		mediatheque_get_template_part( 'user-media-trail', 'mediatheque-trail' );
+		mediatheque_get_template_part( 'uploader', 'mediatheque-uploader' );
+		mediatheque_get_template_part( 'progress', 'mediatheque-progress' );
+		mediatheque_get_template_part( 'dirmaker', 'mediatheque-dirmaker' );
 	}
 
 	/**
@@ -230,7 +230,7 @@ class WP_User_Media_Admin {
 	 * @since  1.0.0
 	 */
 	public function template( $editor = true ) {
-		$base_layout = '<div id="wp-user-media-container">
+		$base_layout = '<div id="mediatheque-container">
 			<div id="toolbar" class="wp-filter"></div>
 			<div id="forms"></div>
 			<div id="users"></div>
@@ -239,7 +239,7 @@ class WP_User_Media_Admin {
 		</div>';
 
 		if ( true === $editor ) {
-			printf( '<script type="text/html" id="tmpl-user-media-main">%s</script>', $base_layout );
+			printf( '<script type="text/html" id="tmpl-mediatheque-main">%s</script>', $base_layout );
 			$this->get_template_parts();
 		}
 
@@ -252,10 +252,10 @@ class WP_User_Media_Admin {
 	 * @since 1.0.0
 	 */
 	public function menus() {
-		$menu_title = __( 'Ma MediaThèque', 'wp-user-media' );
+		$menu_title = __( 'Ma MediaThèque', 'mediatheque' );
 
 		if ( is_super_admin() ) {
-			$menu_title = __( 'MediaThèque Utilisateurs', 'wp-user-media' );
+			$menu_title = __( 'MediaThèque Utilisateurs', 'mediatheque' );
 		}
 
 		// Regular user
@@ -317,14 +317,14 @@ class WP_User_Media_Admin {
 	function do_settings() {
 		?>
 		<div class="wrap">
-			<h1><?php esc_html_e( 'Media Settings', 'wp-user-media' ); ?></h1>
+			<h1><?php esc_html_e( 'Media Settings', 'mediatheque' ); ?></h1>
 
 			<?php if ( ! empty( $GLOBALS['is_nginx'] ) ) {
 
 				printf(
 					'<textarea class="code" readonly="readonly" cols="100" rows="5">%s</textarea>',
 					sprintf( '
-location ~* /(?:uploads|files)/wp-user-media/private/.* {
+location ~* /(?:uploads|files)/mediatheque/private/.* {
 	if ($http_cookie !~* "wordpress_logged_in") {
 		return 301 %s;
 	}
@@ -342,16 +342,16 @@ location ~* /(?:uploads|files)/wp-user-media/private/.* {
 	 * @since 1.0.0
 	 */
 	public function media_grid() {
-		wp_enqueue_script( 'wp-user-media-manage' );
-		wp_user_media_localize_script();
+		wp_enqueue_script( 'mediatheque-manage' );
+		mediatheque_localize_script();
 
-		wp_enqueue_style( 'wp-user-media-uploader' );
+		wp_enqueue_style( 'mediatheque-uploader' );
 
 		wp_plupload_default_settings();
 
 		printf( '
 			<div class="wrap">
-				<h1 id="wp-user-media-title">%1$s</h1>
+				<h1 id="mediatheque-title">%1$s</h1>
 				%2$s
 			</div>
 		', esc_html( $this->title ), $this->template( false ) );
@@ -373,18 +373,18 @@ location ~* /(?:uploads|files)/wp-user-media/private/.* {
 
 		if ( $user->personal_avatar ) {
 			$message = sprintf(
-				__( 'To delete your personal avatar, you can %s.', 'wp-user-media' ),
-				sprintf( '<a href="#" class="mediabrary-remove">%s</a>', __( 'click here', 'wp-user-media' ) )
+				__( 'To delete your personal avatar, you can %s.', 'mediatheque' ),
+				sprintf( '<a href="#" class="mediabrary-remove">%s</a>', __( 'click here', 'mediatheque' ) )
 			);
 		}
 		?>
 		<div id="personal-avatar-editor">
 			<p class="description"><?php printf(
-				__( 'You can also select an image from your %1$s to use as your avatar. %2$s', 'wp-user-media' ),
+				__( 'You can also select an image from your %1$s to use as your avatar. %2$s', 'mediatheque' ),
 				medialibrary_button( array(
 					'editor_id'           => 'personal_avatar',
 					'editor_btn_classes'  => array( 'mediabrary-insert' ),
-					'editor_btn_text'     => __( 'MediaThèque', 'wp-user-media' ),
+					'editor_btn_text'     => __( 'MediaThèque', 'mediatheque' ),
 					'editor_btn_dashicon' => false,
 					'echo'                => false,
 				) ),

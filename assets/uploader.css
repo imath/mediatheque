@@ -54,13 +54,13 @@ p.drag-drop-buttons input[type="button"] {
 	text-align: center;
 }
 
-#wp-user-media-upload-status .wp-user-media-status {
+#mediatheque-upload-status .mediatheque-status {
 	overflow: hidden;
 	margin: 1em 0;
 }
 
-#wp-user-media-upload-status .wp-user-media-progress,
-#wp-user-media-container #media ul li.user-media .wp-user-media-progress {
+#mediatheque-upload-status .mediatheque-progress,
+#mediatheque-container #media ul li.user-media .mediatheque-progress {
 	background: none;
 	border: 1px solid #d1d1d1;
 	float: right;
@@ -73,14 +73,14 @@ p.drag-drop-buttons input[type="button"] {
 	width: 200px;
 }
 
-#wp-user-media-container #media ul li.user-media .wp-user-media-progress {
+#mediatheque-container #media ul li.user-media .mediatheque-progress {
 	float: left;
 	margin: 45% 2% 45% 2%;
 	width: 95%;
 }
 
-#wp-user-media-upload-status .wp-user-media-bar,
-#wp-user-media-container #media ul li.user-media .wp-user-media-bar {
+#mediatheque-upload-status .mediatheque-bar,
+#mediatheque-container #media ul li.user-media .mediatheque-bar {
 	background-color: #0073aa;
 	width: 0;
 	height: 100%;
@@ -141,14 +141,14 @@ p.drag-drop-buttons input[type="button"] {
 	box-shadow: 0 1px 0 #ccc;
 }
 
-#wp-user-media-container #users ul.users,
-#wp-user-media-container #media ul.user-media {
+#mediatheque-container #users ul.users,
+#mediatheque-container #media ul.user-media {
 	overflow: hidden;
 	list-style: none;
 }
 
-#wp-user-media-container #users ul li.user,
-#wp-user-media-container #media ul li.user-media {
+#mediatheque-container #users ul li.user,
+#mediatheque-container #media ul li.user-media {
 	float: left;
 	width: 200px;
 	min-height: 200px;
@@ -161,46 +161,46 @@ p.drag-drop-buttons input[type="button"] {
 	box-sizing: border-box;
 }
 
-#wp-user-media-container #media ul li.user-media:not( .dir ) {
+#mediatheque-container #media ul li.user-media:not( .dir ) {
 	background-color: #fff;
 }
 
-#wp-user-media-container #users ul li.user,
-#wp-user-media-container #media ul li.user-media.dir {
+#mediatheque-container #users ul li.user,
+#mediatheque-container #media ul li.user-media.dir {
 	background-image: url( 'folder.svg' );
 	background-size: cover;
 	background-repeat: no-repeat;
 }
 
-#wp-user-media-container #users ul li.user a {
+#mediatheque-container #users ul li.user a {
 	border: none;
 	margin-top: 45px;
 	display: block;
 	width: 100%;
 }
 
-#wp-user-media-container #users ul li.user .stats {
+#mediatheque-container #users ul li.user .stats {
 	margin-bottom: 0.5em;
 }
 
-#wp-user-media-container #media ul li.user-media div.user-media-content {
+#mediatheque-container #media ul li.user-media div.user-media-content {
 	width: 100%;
 	min-height: 175px;
 	position: relative;
 }
 
-#wp-user-media-container #media ul li.user-media:not( .dir ) div.user-media-content {
+#mediatheque-container #media ul li.user-media:not( .dir ) div.user-media-content {
 	background-size: cover;
 	background-repeat: no-repeat;
 }
 
-#wp-user-media-container #media ul li.user-media div.user-media-content h4 {
+#mediatheque-container #media ul li.user-media div.user-media-content h4 {
 	position: absolute;
 	bottom: 0;
 	width: 100%;
 }
 
-#wp-user-media-container #media ul li.user-media div.user-media-content div.bg-img {
+#mediatheque-container #media ul li.user-media div.user-media-content div.bg-img {
 	position: absolute;
 	bottom: 20px;
 	top: 0;
@@ -211,7 +211,7 @@ p.drag-drop-buttons input[type="button"] {
 	height: 64px;
 }
 
-#wp-user-media-container #media ul li.user-media div.user-media-actions {
+#mediatheque-container #media ul li.user-media div.user-media-actions {
 	margin: 0.5em 0;
 	overflow: hidden;
 	text-align: center;
@@ -219,25 +219,25 @@ p.drag-drop-buttons input[type="button"] {
 	height: 100%;
 }
 
-#wp-user-media-container #media ul li.user-media div.user-media-actions a {
+#mediatheque-container #media ul li.user-media div.user-media-actions a {
 	display: inline-block;
 	margin: 0 0.5em;
 	text-decoration: none;
 	border: none;
 }
 
-#wp-user-media-container #trail ul {
+#mediatheque-container #trail ul {
 	list-style: none;
 	overflow: hidden;
 	margin-top: 0;
 }
 
-#wp-user-media-container #trail ul li {
+#mediatheque-container #trail ul li {
 	float: left;
 	margin-right: 0.5em;
 }
 
-#wp-user-media-container #trail ul li img.avatar {
+#mediatheque-container #trail ul li img.avatar {
 	vertical-align: top;
 }
 
@@ -252,67 +252,67 @@ p.drag-drop-buttons input[type="button"] {
 	cursor:move;
 }
 
-#wp-user-media-container #media ul.loading,
-#wp-user-media-container #trail ul.loading {
+#mediatheque-container #media ul.loading,
+#mediatheque-container #trail ul.loading {
  	-webkit-filter: grayscale(1);
 	filter: grayscale(1);
 }
 
-#wp-user-media-container #media ul li.drag-over,
-#wp-user-media-container #trail ul li.drag-over {
+#mediatheque-container #media ul li.drag-over,
+#mediatheque-container #trail ul li.drag-over {
 	border: 0.2em dashed #0073aa;
 }
 
-#wp-user-media-container #media ul li.drag-over {
+#mediatheque-container #media ul li.drag-over {
 	margin-bottom: 1.1em;
 }
 
-#wp-user-media-container #trail ul li.drag-over {
+#mediatheque-container #trail ul li.drag-over {
 	display: block;
 	width: 250px;
 }
 
 /* Inside the WP Media Editor */
-.media-frame-content #wp-user-media-container .wp-filter {
+.media-frame-content #mediatheque-container .wp-filter {
 	margin-top: 0;
 	border-top: none;
 	border-left: none;
 	border-right: none;
 }
 
-.media-frame-content #wp-user-media-container #forms,
-.media-frame-content #wp-user-media-container #media,
-.media-frame-content #wp-user-media-container #trail {
+.media-frame-content #mediatheque-container #forms,
+.media-frame-content #mediatheque-container #media,
+.media-frame-content #mediatheque-container #trail {
 	width: 95%;
 	margin-right: auto;
 	margin-left: auto;
 }
 
-.media-frame-content #wp-user-media-container #media ul li.user-media {
+.media-frame-content #mediatheque-container #media ul li.user-media {
 	box-shadow: inset 0 0 15px rgba( 0, 0, 0, 0.1 ), inset 0 0 0 1px rgba( 0, 0, 0, 0.05 );
 	background-color: #eee;
 	background-image: none;
 	cursor: pointer;
 }
 
-.media-frame-content #wp-user-media-container #media ul li.user-media.dir .user-media-content {
+.media-frame-content #mediatheque-container #media ul li.user-media.dir .user-media-content {
 	background-image: url( 'folder.svg' );
 	background-size: 50%;
 	background-repeat: no-repeat;
 	background-position: center center;
 }
 
-.media-frame-content #wp-user-media-container #media ul li.user-media div.user-media-content {
+.media-frame-content #mediatheque-container #media ul li.user-media div.user-media-content {
 	min-height: 200px;
 }
 
-.media-frame-content #wp-user-media-container #media ul li.user-media.selected {
+.media-frame-content #mediatheque-container #media ul li.user-media.selected {
 	border: 8px inset #0073aa;
 	outline: none;
 	max-height: 184px;
 }
 
-.media-frame-content #wp-user-media-container #media ul li.user-media.selected .user-media-content {
+.media-frame-content #mediatheque-container #media ul li.user-media.selected .user-media-content {
 	min-width: 184px;
 	min-height: 184px;
 }

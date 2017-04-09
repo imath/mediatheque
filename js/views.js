@@ -2,16 +2,16 @@
 
 // Make sure the wp object exists.
 window.wp = window.wp || {};
-window.wpUserMedia = window.wpUserMedia || _.extend( {}, _.pick( window.wp, 'Backbone', 'template' ) );
+window.mediaTheque = window.mediaTheque || _.extend( {}, _.pick( window.wp, 'Backbone', 'template' ) );
 
 ( function( $ ) {
 
-	wpUserMedia.Models      = wpUserMedia.Models || {};
-	wpUserMedia.Collections = wpUserMedia.Collections || {};
-	wpUserMedia.Views       = wpUserMedia.Views || {};
+	mediaTheque.Models      = mediaTheque.Models || {};
+	mediaTheque.Collections = mediaTheque.Collections || {};
+	mediaTheque.Views       = mediaTheque.Views || {};
 
 	// Extend wp.Backbone.View with .prepare()
-	wpUserMedia.View = wpUserMedia.Backbone.View.extend( {
+	mediaTheque.View = mediaTheque.Backbone.View.extend( {
 		prepare: function() {
 			if ( ! _.isUndefined( this.model ) && _.isFunction( this.model.toJSON ) ) {
 				return this.model.toJSON();
@@ -21,22 +21,22 @@ window.wpUserMedia = window.wpUserMedia || _.extend( {}, _.pick( window.wp, 'Bac
 		}
 	} );
 
-	wpUserMedia.Views.User = wpUserMedia.View.extend( {
+	mediaTheque.Views.User = mediaTheque.View.extend( {
 		tagName:    'li',
 		className:  'user',
-		template: wpUserMedia.template( 'wp-user-media-user' )
+		template: mediaTheque.template( 'mediatheque-user' )
 	} );
 
-	wpUserMedia.Views.Feedback = wpUserMedia.Views.User.extend( {
+	mediaTheque.Views.Feedback = mediaTheque.Views.User.extend( {
 		className: 'notice',
-		template: wpUserMedia.template( 'wp-user-media-feedback' ),
+		template: mediaTheque.template( 'mediatheque-feedback' ),
 
 		events: {
 			'click .notice-dismiss' : 'removeSelf'
 		},
 
 		initialize: function() {
-			_.extend( this.model.attributes, _.pick( wpUserMediaSettings.common, 'dismissibleText' ) );
+			_.extend( this.model.attributes, _.pick( mediaThequeSettings.common, 'dismissibleText' ) );
 
 			if ( this.model.get( 'type' ) ) {
 				this.el.className += ' ' + this.model.get( 'type' );
@@ -52,7 +52,7 @@ window.wpUserMedia = window.wpUserMedia || _.extend( {}, _.pick( window.wp, 'Bac
 		}
 	} );
 
-	wpUserMedia.Views.Users = wpUserMedia.View.extend( {
+	mediaTheque.Views.Users = mediaTheque.View.extend( {
 		tagName:   'ul',
 		className: 'users',
 
@@ -82,7 +82,7 @@ window.wpUserMedia = window.wpUserMedia || _.extend( {}, _.pick( window.wp, 'Bac
 		},
 
 		addItemView: function( user ) {
-			this.views.add( new wpUserMedia.Views.User( { model: user } ) );
+			this.views.add( new mediaTheque.Views.User( { model: user } ) );
 		},
 
 		displayUserMedia: function( event ) {
@@ -138,7 +138,7 @@ window.wpUserMedia = window.wpUserMedia || _.extend( {}, _.pick( window.wp, 'Bac
 		}
 	} );
 
-	wpUserMedia.Views.Droppable = wpUserMedia.View.extend( {
+	mediaTheque.Views.Droppable = mediaTheque.View.extend( {
 		initialize: function() {
 			this.$el.attr( 'data-id',   this.model.get( 'id' ) );
 			this.$el.bind( 'dragover',  _.bind( this.dragOver, this  ) );
@@ -244,10 +244,10 @@ window.wpUserMedia = window.wpUserMedia || _.extend( {}, _.pick( window.wp, 'Bac
 		}
 	} );
 
-	wpUserMedia.Views.UserMedia = wpUserMedia.Views.Droppable.extend( {
+	mediaTheque.Views.UserMedia = mediaTheque.Views.Droppable.extend( {
 		tagName:    'li',
 		className:  'user-media',
-		template: wpUserMedia.template( 'wp-user-media-media' ),
+		template: mediaTheque.template( 'mediatheque-media' ),
 
 		events: {
 			'click .delete' : 'deleteUserMedia'
@@ -269,11 +269,11 @@ window.wpUserMedia = window.wpUserMedia || _.extend( {}, _.pick( window.wp, 'Bac
 			} else if ( 'dir' === this.model.get( 'media_type' ) ) {
 				this.el.className += ' dir droppable';
 
-				if ( 'wp-editor' !== o.context ) {
-					wpUserMedia.Views.Droppable.prototype.initialize.apply( this, arguments );
+				if ( 'wp-editor' !== o.uiType ) {
+					mediaTheque.Views.Droppable.prototype.initialize.apply( this, arguments );
 				} else {
 					this.$el.attr( 'data-id',   this.model.get( 'id' ) );
-					this.model.set( { context: o.context }, { silent: true } );
+					this.model.set( { uiType: o.uiType }, { silent: true } );
 				}
 
 			// Set additionnal properties
@@ -285,7 +285,7 @@ window.wpUserMedia = window.wpUserMedia || _.extend( {}, _.pick( window.wp, 'Bac
 		setMediaProps: function() {
 			var o = this.options || {};
 
-			if ( 'wp-editor' !== o.context ) {
+			if ( 'wp-editor' !== o.uiType ) {
 				this.$el.prop( 'draggable', true );
 			} else {
 				this.el.className += ' selectable';
@@ -306,19 +306,19 @@ window.wpUserMedia = window.wpUserMedia || _.extend( {}, _.pick( window.wp, 'Bac
 			}
 
 			this.model.set( {
-				download: this.model.get( 'link' ) + wpUserMediaSettings.common.downloadSlug + '/',
-				context : o.context
+				download: this.model.get( 'link' ) + mediaThequeSettings.common.downloadSlug + '/',
+				uiType : o.uiType
 			}, { silent: true } );
 
 			// Files need their root Url to be set as the Rest Endpoint.
 			if ( true === this.model.previous( 'uploading' ) ) {
-				_.extend( this.model, { urlRoot: wpUserMedia.App.overrides.url } );
+				_.extend( this.model, { urlRoot: mediaTheque.App.overrides.url } );
 			}
 		},
 
 		progress: function( file ) {
 			if ( ! _.isUndefined( file.get( 'percent' ) ) ) {
-				$( '#' + file.get( 'id' ) + ' .wp-user-media-progress .wp-user-media-bar' ).css( 'width', file.get('percent') + '%' );
+				$( '#' + file.get( 'id' ) + ' .mediatheque-progress .mediatheque-bar' ).css( 'width', file.get('percent') + '%' );
 			}
 		},
 
@@ -356,7 +356,7 @@ window.wpUserMedia = window.wpUserMedia || _.extend( {}, _.pick( window.wp, 'Bac
 		}
 	} );
 
-	wpUserMedia.Views.UserMedias = wpUserMedia.Views.Users.extend( {
+	mediaTheque.Views.UserMedias = mediaTheque.Views.Users.extend( {
 		tagName:   'ul',
 		className: 'user-media',
 
@@ -370,7 +370,7 @@ window.wpUserMedia = window.wpUserMedia || _.extend( {}, _.pick( window.wp, 'Bac
 		initialize: function() {
 			var o = this.options || {};
 
-			wpUserMedia.Views.Users.prototype.initialize.apply( this, arguments );
+			mediaTheque.Views.Users.prototype.initialize.apply( this, arguments );
 
 			// Init the view with default Query Vars.
 			this.queryUserMedia();
@@ -480,7 +480,7 @@ window.wpUserMedia = window.wpUserMedia || _.extend( {}, _.pick( window.wp, 'Bac
 
 			if ( _.isUndefined( request.responseJSON ) ) {
 				feedback.set( {
-					message: wpUserMediaSettings.common.noUserMedia,
+					message: mediaThequeSettings.common.noUserMedia,
 					type:    'notice-warning'
 				} );
 			} else if ( ! _.isUndefined( request.responseJSON.message ) ) {
@@ -492,20 +492,20 @@ window.wpUserMedia = window.wpUserMedia || _.extend( {}, _.pick( window.wp, 'Bac
 				return;
 			}
 
-			this.views.add( new wpUserMedia.Views.Feedback( { model: feedback } ), { at: 0 } );
+			this.views.add( new mediaTheque.Views.Feedback( { model: feedback } ), { at: 0 } );
 		},
 
 		addItemView: function( userMedia ) {
 			var o = this.options || {}, position = userMedia.get( 'at' ),
-			    context = o.queryVars.get( 'user_media_context' );
+			    uiType = o.queryVars.get( 'user_media_context' );
 
 			// Remove all feedbacks.
 			this.removeFeedback();
 
 			if ( _.isUndefined( position ) ) {
-				this.views.add( new wpUserMedia.Views.UserMedia( { model: userMedia, ghost: o.ghost, context: context } ) );
+				this.views.add( new mediaTheque.Views.UserMedia( { model: userMedia, ghost: o.ghost, uiType: uiType } ) );
 			} else {
-				this.views.add( new wpUserMedia.Views.UserMedia( { model: userMedia, ghost: o.ghost, context: context } ), { at: position } );
+				this.views.add( new mediaTheque.Views.UserMedia( { model: userMedia, ghost: o.ghost, uiType: uiType } ), { at: position } );
 			}
 		},
 
@@ -597,10 +597,10 @@ window.wpUserMedia = window.wpUserMedia || _.extend( {}, _.pick( window.wp, 'Bac
 		}
 	} );
 
-	wpUserMedia.Views.uploaderProgress = wpUserMedia.View.extend( {
+	mediaTheque.Views.uploaderProgress = mediaTheque.View.extend( {
 		tagName: 'div',
-		className: 'wp-user-media-status',
-		template: wpUserMedia.template( 'wp-user-media-progress' ),
+		className: 'mediatheque-status',
+		template: mediaTheque.template( 'mediatheque-progress' ),
 
 		initialize: function() {
 			this.model.on( 'change:percent', this.progress, this );
@@ -608,16 +608,16 @@ window.wpUserMedia = window.wpUserMedia || _.extend( {}, _.pick( window.wp, 'Bac
 
 		progress: function( model ) {
 			if ( ! _.isUndefined( model.get( 'percent' ) ) ) {
-				$( '#' + model.get( 'id' ) + ' .wp-user-media-progress .wp-user-media-bar' ).css( 'width', model.get('percent') + '%' );
+				$( '#' + model.get( 'id' ) + ' .mediatheque-progress .mediatheque-bar' ).css( 'width', model.get('percent') + '%' );
 			}
 		}
 	} );
 
-	wpUserMedia.Views.MkDir = wpUserMedia.View.extend( {
+	mediaTheque.Views.MkDir = mediaTheque.View.extend( {
 		tagName: 'div',
 		id: 'directory-form',
 		className: 'postbox',
-		template: wpUserMedia.template( 'wp-user-media-dirmaker' ),
+		template: mediaTheque.template( 'mediatheque-dirmaker' ),
 
 		events: {
 			'click button.close' : 'removeSelf',
@@ -625,7 +625,7 @@ window.wpUserMedia = window.wpUserMedia || _.extend( {}, _.pick( window.wp, 'Bac
 		},
 
 		initialize: function() {
-			this.model.set( _.pick( wpUserMediaSettings.common, 'closeBtn' ), { silent: true } );
+			this.model.set( _.pick( mediaThequeSettings.common, 'closeBtn' ), { silent: true } );
 		},
 
 		removeSelf: function( event ) {
@@ -633,7 +633,7 @@ window.wpUserMedia = window.wpUserMedia || _.extend( {}, _.pick( window.wp, 'Bac
 				event.preventDefault();
 			}
 
-			wpUserMedia.App.toolbarItems.get( this.options.toolbarItem ).set( { active: false } );
+			mediaTheque.App.toolbarItems.get( this.options.toolbarItem ).set( { active: false } );
 		},
 
 		createDir: function( event ) {
@@ -665,7 +665,7 @@ window.wpUserMedia = window.wpUserMedia || _.extend( {}, _.pick( window.wp, 'Bac
 
 		mkdirSuccess: function( model ) {
 			model.set( { at: 0 }, { silent: true } );
-			wpUserMedia.App.userMedia.add( model );
+			mediaTheque.App.userMedia.add( model );
 			this.removeSelf();
 		},
 
@@ -674,16 +674,16 @@ window.wpUserMedia = window.wpUserMedia || _.extend( {}, _.pick( window.wp, 'Bac
 		}
 	} );
 
-	wpUserMedia.Views.Uploader = wpUserMedia.Views.MkDir.extend( {
-		id: wpUserMediaSettings.params.container,
-		className: 'wp-user-media-uploader-box',
-		template: wpUserMedia.template( 'wp-user-media-uploader' ),
+	mediaTheque.Views.Uploader = mediaTheque.Views.MkDir.extend( {
+		id: mediaThequeSettings.params.container,
+		className: 'mediatheque-uploader-box',
+		template: mediaTheque.template( 'mediatheque-uploader' ),
 
 		initialize: function() {
-			this.model = new Backbone.Model( wpUserMediaSettings.params );
+			this.model = new Backbone.Model( mediaThequeSettings.params );
 			this.on( 'ready', this.initUploader );
 
-			wpUserMedia.Views.MkDir.prototype.initialize.apply( this, arguments );
+			mediaTheque.Views.MkDir.prototype.initialize.apply( this, arguments );
 		},
 
 		initUploader: function() {
@@ -692,7 +692,7 @@ window.wpUserMedia = window.wpUserMedia || _.extend( {}, _.pick( window.wp, 'Bac
 			} );
 
 			_.extend( pluploadOptions, this.options || {} );
-			this.uploader = new wpUserMedia.Uploader( pluploadOptions );
+			this.uploader = new mediaTheque.Uploader( pluploadOptions );
 
 			this.uploader.filesError.on( 'add', this.uploadError, this );
 			this.uploader.filesQueue.on( 'add', this.addProgressView, this );
@@ -720,9 +720,9 @@ window.wpUserMedia = window.wpUserMedia || _.extend( {}, _.pick( window.wp, 'Bac
 				o.mediaView.collection.remove( file.id );
 
 				// The message should be preprended with the File name.
-				o.mediaView.views.add( new wpUserMedia.Views.Feedback( { model: feedback } ), { at: 0 } );
+				o.mediaView.views.add( new mediaTheque.Views.Feedback( { model: feedback } ), { at: 0 } );
 			} else {
-				this.views.add( '#wp-user-media-upload-status', new wpUserMedia.Views.Feedback( { model: feedback } ) );
+				this.views.add( '#mediatheque-upload-status', new mediaTheque.Views.Feedback( { model: feedback } ) );
 			}
 		},
 
@@ -730,16 +730,16 @@ window.wpUserMedia = window.wpUserMedia || _.extend( {}, _.pick( window.wp, 'Bac
 			var o = this.options || {};
 
 			if ( ! _.isObject( o.mediaView ) ) {
-				this.views.add( '#wp-user-media-upload-status', new wpUserMedia.Views.uploaderProgress( { model: file } ) );
+				this.views.add( '#mediatheque-upload-status', new mediaTheque.Views.uploaderProgress( { model: file } ) );
 			} else {
 				o.mediaView.collection.add( file.set( { at: 0 }, { silent: true } ) );
 			}
 		}
 	} );
 
-	wpUserMedia.Views.ToolbarItem = wpUserMedia.View.extend( {
+	mediaTheque.Views.ToolbarItem = mediaTheque.View.extend( {
 		tagName  : 'li',
-		template: wpUserMedia.template( 'wp-user-media-toolbar-item' ),
+		template: mediaTheque.template( 'mediatheque-toolbar-item' ),
 
 		initialize: function() {
 			if ( this.model.get( 'current' ) ) {
@@ -756,7 +756,7 @@ window.wpUserMedia = window.wpUserMedia || _.extend( {}, _.pick( window.wp, 'Bac
 		}
 	} );
 
-	wpUserMedia.Views.Toolbar = wpUserMedia.View.extend( {
+	mediaTheque.Views.Toolbar = mediaTheque.View.extend( {
 		tagName  : 'ul',
 		className: 'filter-links',
 
@@ -767,7 +767,7 @@ window.wpUserMedia = window.wpUserMedia || _.extend( {}, _.pick( window.wp, 'Bac
 		initialize: function() {
 			var o = this.options || {}, position = 0, current = false;
 
-			_.each( wpUserMediaSettings.toolbarItems, function( name, id ) {
+			_.each( mediaThequeSettings.toolbarItems, function( name, id ) {
 				position += 1;
 
 				if ( o.users.length && 'users' === id ) {
@@ -791,7 +791,7 @@ window.wpUserMedia = window.wpUserMedia || _.extend( {}, _.pick( window.wp, 'Bac
 		},
 
 		addItemBar: function( toolbarItem ) {
-			this.views.add( new wpUserMedia.Views.ToolbarItem( { model: toolbarItem } ) );
+			this.views.add( new mediaTheque.Views.ToolbarItem( { model: toolbarItem } ) );
 		},
 
 		refreshToolbar: function( model, changed ) {
@@ -844,12 +844,12 @@ window.wpUserMedia = window.wpUserMedia || _.extend( {}, _.pick( window.wp, 'Bac
 		}
 	} );
 
-	wpUserMedia.Views.trailItem = wpUserMedia.Views.Droppable.extend( {
+	mediaTheque.Views.trailItem = mediaTheque.Views.Droppable.extend( {
 		tagName  : 'li',
-		template: wpUserMedia.template( 'wp-user-media-trail' ),
+		template: mediaTheque.template( 'mediatheque-trail' ),
 
 		initialize: function() {
-			wpUserMedia.Views.Droppable.prototype.initialize.apply( this, arguments );
+			mediaTheque.Views.Droppable.prototype.initialize.apply( this, arguments );
 
 			this.isDroppable = false;
 
@@ -873,7 +873,7 @@ window.wpUserMedia = window.wpUserMedia || _.extend( {}, _.pick( window.wp, 'Bac
 		}
 	} );
 
-	wpUserMedia.Views.Trail = wpUserMedia.View.extend( {
+	mediaTheque.Views.Trail = mediaTheque.View.extend( {
 		tagName  : 'ul',
 		className: 'trail-links',
 
@@ -896,7 +896,7 @@ window.wpUserMedia = window.wpUserMedia || _.extend( {}, _.pick( window.wp, 'Bac
 		},
 
 		addTrailItem: function( trailItem ) {
-			this.views.add( new wpUserMedia.Views.trailItem( { model: trailItem, ghost: this.options.ghost } ) );
+			this.views.add( new mediaTheque.Views.trailItem( { model: trailItem, ghost: this.options.ghost } ) );
 		},
 
 		moveUp: function( event ) {
@@ -920,7 +920,7 @@ window.wpUserMedia = window.wpUserMedia || _.extend( {}, _.pick( window.wp, 'Bac
 		}
 	} );
 
-	wpUserMedia.Views.Root = wpUserMedia.View.extend( {
+	mediaTheque.Views.Root = mediaTheque.View.extend( {
 
 		initialize: function() {
 			var o = this.options || {};
@@ -932,13 +932,13 @@ window.wpUserMedia = window.wpUserMedia || _.extend( {}, _.pick( window.wp, 'Bac
 			this.listenTo( o.queryVars,    'change:parent',  this.updateTrail );
 
 			// Using the App into the WordPress Editor
-			if ( 'wp-editor' === o.context ) {
+			if ( 'wp-editor' === o.uiType ) {
 				o.users = [];
 				this.setToolbar();
 
 			// Using the App elsewhere.
 			} else {
-				this.views.set( '#users', new wpUserMedia.Views.Users( { collection: o.users, ghost: this.ghost } ) );
+				this.views.set( '#users', new mediaTheque.Views.Users( { collection: o.users, ghost: this.ghost } ) );
 
 				this.listenTo( o.users, 'reset', this.queryUsers );
 				o.users.on( 'change:current', this.setToolbar, this );
@@ -970,7 +970,7 @@ window.wpUserMedia = window.wpUserMedia || _.extend( {}, _.pick( window.wp, 'Bac
 				return;
 			}
 
-			this.views.add( '#toolbar', new wpUserMedia.Views.Toolbar( {
+			this.views.add( '#toolbar', new mediaTheque.Views.Toolbar( {
 				collection: o.toolbarItems,
 				users: o.users
 			} ) );
@@ -988,7 +988,7 @@ window.wpUserMedia = window.wpUserMedia || _.extend( {}, _.pick( window.wp, 'Bac
 
 			// The User is not an admin.
 			if ( _.isUndefined( this.views._views['#toolbar'] ) ) {
-				delete wpUserMediaSettings.toolbarItems.users;
+				delete mediaThequeSettings.toolbarItems.users;
 
 				this.displayToolbar();
 
@@ -1061,17 +1061,17 @@ window.wpUserMedia = window.wpUserMedia || _.extend( {}, _.pick( window.wp, 'Bac
 				}
 
 				if ( 'upload' === model.get( 'id' ) ) {
-					this.views.add( '#forms', new wpUserMedia.Views.Uploader( {
+					this.views.add( '#forms', new mediaTheque.Views.Uploader( {
 						overrides: o.overrides,
 						params: params,
 						toolbarItem: 'upload',
 						mediaView: _.first( this.views._views['#media'] )
 					} ) );
 				} else {
-					this.views.add( '#forms', new wpUserMedia.Views.MkDir( {
+					this.views.add( '#forms', new mediaTheque.Views.MkDir( {
 						params: params,
 						toolbarItem: 'directory',
-						model: new Backbone.Model( wpUserMediaSettings.dirmaker )
+						model: new Backbone.Model( mediaThequeSettings.dirmaker )
 					} ) );
 				}
 			}
@@ -1092,7 +1092,7 @@ window.wpUserMedia = window.wpUserMedia || _.extend( {}, _.pick( window.wp, 'Bac
 				}
 
 				if ( true === changed ) {
-					this.views.set( '#users', new wpUserMedia.Views.Users( { collection: o.users, ghost: this.ghost } ) );
+					this.views.set( '#users', new mediaTheque.Views.Users( { collection: o.users, ghost: this.ghost } ) );
 					o.users.reset();
 
 					// Remove the trail when switching users.
@@ -1106,7 +1106,7 @@ window.wpUserMedia = window.wpUserMedia || _.extend( {}, _.pick( window.wp, 'Bac
 
 				// Add the trail view
 				if ( _.isUndefined( this.views._views['#trail'] ) || 0 === this.views._views['#trail'].length ) {
-					this.views.add( '#trail', new wpUserMedia.Views.Trail( {
+					this.views.add( '#trail', new mediaTheque.Views.Trail( {
 						collection: o.trailItems,
 						ghost:     this.ghost,
 						queryVars: o.queryVars
@@ -1119,7 +1119,7 @@ window.wpUserMedia = window.wpUserMedia || _.extend( {}, _.pick( window.wp, 'Bac
 				// Reset the Query vars
 				o.queryVars.clear();
 				o.queryVars.set( {
-					'user_media_context': ! _.isUndefined( o.context ) ? o.context : 'admin',
+					'user_media_context': ! _.isUndefined( o.uiType ) ? o.uiType : 'admin',
 					'post_status': model.get( 'id' ),
 					'parent'     : 0
 				}, { silent: true } );
@@ -1139,7 +1139,7 @@ window.wpUserMedia = window.wpUserMedia || _.extend( {}, _.pick( window.wp, 'Bac
 				o.trailItems.add( model );
 
 				// Add the media view
-				this.views.set( '#media', new wpUserMedia.Views.UserMedias( {
+				this.views.set( '#media', new mediaTheque.Views.UserMedias( {
 					collection: o.media,
 					ghost:      this.ghost,
 					queryVars:  o.queryVars,

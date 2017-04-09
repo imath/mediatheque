@@ -2,15 +2,15 @@
 
 // Make sure the wp object exists.
 window.wp = window.wp || {};
-window.wpUserMedia = window.wpUserMedia || _.extend( {}, _.pick( window.wp, 'Backbone', 'template' ) );
+window.mediaTheque = window.mediaTheque || _.extend( {}, _.pick( window.wp, 'Backbone', 'template' ) );
 
 ( function( $ ) {
 
-	wpUserMedia.Models      = wpUserMedia.Models || {};
-	wpUserMedia.Collections = wpUserMedia.Collections || {};
-	wpUserMedia.Views       = wpUserMedia.Views || {};
+	mediaTheque.Models      = mediaTheque.Models || {};
+	mediaTheque.Collections = mediaTheque.Collections || {};
+	mediaTheque.Views       = mediaTheque.Views || {};
 
-	wpUserMedia.App = {
+	mediaTheque.App = {
 		init: function( restUrl ) {
 			this.views        = new Backbone.Collection();
 			this.users        = new wp.api.collections.Users();
@@ -21,14 +21,14 @@ window.wpUserMedia = window.wpUserMedia || _.extend( {}, _.pick( window.wp, 'Bac
 
 			this.overrides = {
 				url: restUrl,
-				'file_data_name': 'wp_user_media_upload',
+				'file_data_name': 'mediatheque_upload',
 				headers: {
 					'X-WP-Nonce' : wpApiSettings.nonce
 				}
 			};
 
-			var rootView = new wpUserMedia.Views.Root( {
-				el:           $( '#wp-user-media-container' ),
+			var rootView = new mediaTheque.Views.Root( {
+				el:           $( '#mediatheque-container' ),
 				users:        this.users,
 				media:        this.userMedia,
 				overrides:    this.overrides,
@@ -46,7 +46,7 @@ window.wpUserMedia = window.wpUserMedia || _.extend( {}, _.pick( window.wp, 'Bac
 			restUrl = api.get( 'apiRoot' ) + api.get( 'versionString' ) + 'user-media';
 		}
 
-		wpUserMedia.App.init( restUrl );
+		mediaTheque.App.init( restUrl );
 	} );
 
 } )( jQuery );
