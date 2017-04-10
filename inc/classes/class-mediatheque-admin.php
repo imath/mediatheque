@@ -123,7 +123,7 @@ class MediaTheque_Admin {
 				sprintf( '<a href="%1$s"%2$s>%3$s</a>',
 					esc_url( admin_url( 'options-media.php' ) ),
 					'options-media' === $screen->id ? ' class="current"' : '',
-					esc_html__( 'Shared Media', 'mediatheque' )
+					esc_html__( 'Bibliothèque partagée', 'mediatheque' )
 				),
 				sprintf( '<a href="%1$s"%2$s>%3$s</a>',
 					esc_url( add_query_arg( 'page', 'user-media-options', admin_url( 'options-general.php' ) ) ),
@@ -317,7 +317,7 @@ class MediaTheque_Admin {
 	function do_settings() {
 		?>
 		<div class="wrap">
-			<h1><?php esc_html_e( 'Media Settings', 'mediatheque' ); ?></h1>
+			<h1><?php esc_html_e( 'Réglages de la MediaThèque', 'mediatheque' ); ?></h1>
 
 			<?php if ( ! empty( $GLOBALS['is_nginx'] ) ) {
 
@@ -373,14 +373,14 @@ location ~* /(?:uploads|files)/mediatheque/private/.* {
 
 		if ( $user->personal_avatar ) {
 			$message = sprintf(
-				__( 'To delete your personal avatar, you can %s.', 'mediatheque' ),
-				sprintf( '<a href="#" class="mediabrary-remove">%s</a>', __( 'click here', 'mediatheque' ) )
+				__( 'Pour supprimer votre avatar local, vous pouvez %s.', 'mediatheque' ),
+				sprintf( '<a href="#" class="mediabrary-remove">%s</a>', __( 'cliquer ici', 'mediatheque' ) )
 			);
 		}
 		?>
 		<div id="personal-avatar-editor">
 			<p class="description"><?php printf(
-				__( 'You can also select an image from your %1$s to use as your avatar. %2$s', 'mediatheque' ),
+				__( 'Vous pouvez également utiliser une des images de votre %1$s comme avatar pour ce site. %2$s', 'mediatheque' ),
 				medialibrary_button( array(
 					'editor_id'           => 'personal_avatar',
 					'editor_btn_classes'  => array( 'mediabrary-insert' ),

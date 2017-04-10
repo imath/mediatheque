@@ -375,7 +375,7 @@ function mediatheque_disk_usage_update( $user_id = 0, $bytes = 0, $remove = fals
 function mediatheque_additionnal_user_rest_param( $query_params = array() ) {
 	return array_merge( $query_params, array(
 		'has_disk_usage' => array(
-			'description' => __( 'True to limit the users to the ones who uploaded some files.' ),
+			'description' => __( 'True pour limiter les résultats aux utilisateurs ayant soumis des fichiers.', 'mediatheque' ),
 			'type'        => 'boolean',
 		)
 	) );
@@ -562,7 +562,7 @@ function mediatheque_get_upload_dir() {
  */
 function mediatheque_set_upload_base_dir( $dir = array() ) {
 	if ( empty( $dir['basedir'] ) || empty( $dir['baseurl'] ) ) {
-		_doing_it_wrong( __FUNCTION__, __( 'Missing parameters.', 'mediatheque' ) );
+		_doing_it_wrong( __FUNCTION__, __( 'Paramètres manquants.', 'mediatheque' ) );
 		return $dir;
 	}
 
@@ -648,28 +648,28 @@ function mediatheque_localize_script( $handle = 'mediatheque-views' ) {
 			'container' => 'mediatheque-ui',
 			'browser'   => 'mediatheque-browse',
 			'dropzone'  => 'drag-drop-area',
-			'dropHelp'  => __( 'Drop files anywhere to upload', 'mediatheque' ),
-			'dropOr'    => __( 'or', 'mediatheque' ),
-			'btnBrowse' => __( 'Select files', 'mediatheque' ),
+			'dropHelp'  => __( 'Déposez vos fichiers pour les mettre en ligne', 'mediatheque' ),
+			'dropOr'    => __( 'ou', 'mediatheque' ),
+			'btnBrowse' => __( 'Choisissez des fichiers', 'mediatheque' ),
 		),
 		'toolbarItems' => array_merge( array(
-				'users'    => __( 'Browse Users', 'mediatheque' )
+				'users'    => __( 'Choisissez un utilisateur', 'mediatheque' )
 			),
 			wp_list_pluck( mediatheque_get_post_statuses( 'all' ), 'label', 'name' ),
 			array(
-				'upload'    => __( 'Upload file(s)', 'mediatheque' ),
-				'directory' => __( 'Add a directory', 'mediatheque' ),
+				'upload'    => __( 'Nouveau(x) fichier(s)', 'mediatheque' ),
+				'directory' => __( 'Nouveau répertoire', 'mediatheque' ),
 			)
 		),
 		'dirmaker' => array(
-			'label'   => __( 'Name of your directory', 'mediatheque' ),
-			'saveBtn' => __( 'Create', 'mediatheque' ),
+			'label'   => __( 'Nom de votre répertoire', 'mediatheque' ),
+			'saveBtn' => __( 'Créer', 'mediatheque' ),
 		),
 		'common' => array(
 			'downloadSlug'    => mediatheque_get_download_rewrite_slug(),
-			'closeBtn'        => __( 'Close', 'mediatheque' ),
-			'noUserMedia'     => __( 'No User Media were found for the request.', 'mediatheque' ),
-			'dismissibleText' => __( 'Dismiss', 'mediatheque' ),
+			'closeBtn'        => __( 'Fermer', 'mediatheque' ),
+			'noUserMedia'     => __( 'Aucun media utilisateur ne correspond à votre requête.', 'mediatheque' ),
+			'dismissibleText' => __( 'Rejeter', 'mediatheque' ),
 		),
 	) );
 }
@@ -721,23 +721,23 @@ function mediatheque_register_objects() {
 
 	register_post_type( 'user_media', array(
 		'labels'  => array(
-			'name'                  => __( 'User Media',                    'mediatheque' ),
-			'menu_name'             => _x( 'User Media', 'Plugin submenu',  'mediatheque' ),
-			'all_items'             => __( 'All User Media files',          'mediatheque' ),
-			'singular_name'         => __( 'User Media',                    'mediatheque' ),
-			'add_new'               => __( 'New User Media file',           'mediatheque' ),
-			'add_new_item'          => __( 'Add new User Media file',       'mediatheque' ),
-			'edit_item'             => __( 'Edit User Media file',          'mediatheque' ),
-			'new_item'              => __( 'New User Media',                'mediatheque' ),
-			'view_item'             => __( 'View User Media',               'mediatheque' ),
-			'search_items'          => __( 'Search User Media files',       'mediatheque' ),
-			'not_found'             => __( 'User Media not found',          'mediatheque' ),
-			'not_found_in_trash'    => __( 'User Media not found in trash', 'mediatheque' ),
-			'insert_into_item'      => __( 'Add User Media to content',     'mediatheque' ),
-			'uploaded_to_this_item' => __( 'Attached to this content',      'mediatheque' ),
-			'filter_items_list'     => __( 'Filter User Media',             'mediatheque' ),
-			'items_list_navigation' => __( 'User Media navigation',         'mediatheque' ),
-			'items_list'            => __( 'User Media List',               'mediatheque' ),
+			'name'                  => __( 'Media utilisateurs',                              'mediatheque' ),
+			'menu_name'             => _x( 'Ma MediaThèque', 'Plugin submenu',                'mediatheque' ),
+			'all_items'             => __( 'Tous les media utilisateurs',                     'mediatheque' ),
+			'singular_name'         => __( 'Media utilisateur',                               'mediatheque' ),
+			'add_new'               => __( 'Nouveau media utilisateur',                       'mediatheque' ),
+			'add_new_item'          => __( 'Ajouter un media utilisateur',                    'mediatheque' ),
+			'edit_item'             => __( 'Modifier le media utilisateur',                   'mediatheque' ),
+			'new_item'              => __( 'Nouveau media utilisateur',                       'mediatheque' ),
+			'view_item'             => __( 'Afficher le media utilisateur',                   'mediatheque' ),
+			'search_items'          => __( 'Rechercher un media utilisateur',                 'mediatheque' ),
+			'not_found'             => __( 'Media utilisateur introuvable',                   'mediatheque' ),
+			'not_found_in_trash'    => __( 'Media utilisateur introuvable dans la corbeille', 'mediatheque' ),
+			'insert_into_item'      => __( 'Insérer dans le contenu',                         'mediatheque' ),
+			'uploaded_to_this_item' => __( 'Attaché à ce contenu',                            'mediatheque' ),
+			'filter_items_list'     => __( 'Filtrer les Media utilisateurs',                  'mediatheque' ),
+			'items_list_navigation' => __( 'Navigation des Media utilisateurs',               'mediatheque' ),
+			'items_list'            => __( 'Liste des Media utilisateurs',                    'mediatheque' ),
 		),
 		'public'                => true,
 		'query_var'             => 'mediatheque',
@@ -912,7 +912,7 @@ function mediatheque_embed_download_button() {
 		</div>',
 		esc_url( mediatheque_get_download_url() ),
 		sprintf(
-			__( 'Download<span class="screen-reader-text"> %s</span>', 'mediatheque' ),
+			__( 'Télécharger<span class="screen-reader-text"> %s</span>', 'mediatheque' ),
 			esc_html( get_the_title() )
 		)
 	);
@@ -1236,7 +1236,7 @@ function medialibrary_button( $args = array() ) {
 	$r = wp_parse_args( $args, array(
 		'editor_id'           => 'content',
 		'editor_btn_classes'  => array( 'mediabrary-insert' ),
-		'editor_btn_text'     => __( 'Add Media', 'mediatheque' ),
+		'editor_btn_text'     => __( 'Ajouter un media', 'mediatheque' ),
 		'editor_btn_dashicon' => 'dashicons-format-image',
 		'echo'                => true,
 	) );
