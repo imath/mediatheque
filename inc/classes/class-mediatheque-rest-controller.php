@@ -329,6 +329,23 @@ class MediaTheque_REST_Controller extends WP_REST_Attachments_Controller {
 	}
 
 	/**
+	 * Temporarly remove the Private prefix from User Media titles.
+	 *
+	 * @since
+	 *
+	 * @param string  $prefixed_title The User Media prefixed title.
+	 * @param WP_Post $user_media     The User Media object.
+	 * @param string                  The User Media title.
+	 */
+	public function no_title_prefix( $prefixed_title = '', $user_media = null ) {
+		if ( empty( $user_media->post_title ) ) {
+			return $prefixed_title;
+		}
+
+		return $user_media->post_title;
+	}
+
+	/**
 	 * Prepares a single User Media output for response.
 	 *
 	 * @since 1.0.0
@@ -339,8 +356,16 @@ class MediaTheque_REST_Controller extends WP_REST_Attachments_Controller {
 	 * @return WP_REST_Response Response object.
 	 */
 	public function prepare_item_for_response( $post, $request ) {
+		// Remove the 'Private Prefix'
+		add_filter( 'private_title_format', array( $this, 'no_title_prefix' ), 10, 2 );
+
 		$response = parent::prepare_item_for_response( $post, $request );
-		$data     = $response->get_data();
+
+		// Restore the 'Private Prefix'
+		remove_filter( 'private_title_format', array( $this, 'no_title_prefix' ), 10, 2 );
+
+		// Get the Response Data.
+		$data = $response->get_data();
 
 		if ( in_array( $this->get_user_media_type_id( 'mediatheque-directory' ), $data['user_media_types'], true ) ) {
 			$data['media_type'] = 'dir';
