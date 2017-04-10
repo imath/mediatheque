@@ -65,8 +65,8 @@ class MediaTheque_Admin {
 	 * @since 1.0.0
 	 */
 	private function hooks() {
-		add_action( 'admin_menu',            array( $this, 'menus'     )     );
-		add_action( 'init',                  array( $this, 'globals'   ), 14 );
+		add_action( 'admin_menu', array( $this, 'menus'     )     );
+		add_action( 'init',       array( $this, 'globals'   ), 14 );
 
 		/** Media Editor ******************************************************/
 
@@ -91,6 +91,10 @@ class MediaTheque_Admin {
 	public function globals() {
 		$this->post_type_object = get_post_type_object( 'user_media' );
 		$this->title            = $this->post_type_object->labels->menu_name;
+
+		if ( is_super_admin() ) {
+			$this->title = __( 'MediaThèque Utilisateurs', 'mediatheque' );
+		}
 	}
 
 	/**
@@ -214,14 +218,9 @@ class MediaTheque_Admin {
 	}
 
 	public function get_template_parts() {
-		mediatheque_get_template_part( 'toolbar-item', 'mediatheque-toolbar-item' );
-		mediatheque_get_template_part( 'feedback', 'mediatheque-feedback' );
-		mediatheque_get_template_part( 'user', 'mediatheque-user' );
-		mediatheque_get_template_part( 'user-media', 'mediatheque-media' );
-		mediatheque_get_template_part( 'user-media-trail', 'mediatheque-trail' );
-		mediatheque_get_template_part( 'uploader', 'mediatheque-uploader' );
-		mediatheque_get_template_part( 'progress', 'mediatheque-progress' );
-		mediatheque_get_template_part( 'dirmaker', 'mediatheque-dirmaker' );
+		foreach ( mediatheque_get_template_parts() as $id => $tmpl ) {
+			mediatheque_get_template_part( $id, $tmpl );
+		}
 	}
 
 	/**
@@ -252,17 +251,13 @@ class MediaTheque_Admin {
 	 * @since 1.0.0
 	 */
 	public function menus() {
-		$menu_title = __( 'Ma MediaThèque', 'mediatheque' );
-
-		if ( is_super_admin() ) {
-			$menu_title = __( 'MediaThèque Utilisateurs', 'mediatheque' );
-		}
+		$menu_title = $this->title;
 
 		// Regular user
 		if ( is_user_logged_in() && ! current_user_can( 'upload_files' ) ) {
 			add_menu_page(
 				$this->title,
-				$menu_title,
+				$this->title,
 				'exist',
 				'user-media',
 				array( $this, 'media_grid' ),
@@ -274,7 +269,7 @@ class MediaTheque_Admin {
 		} else {
 			add_media_page(
 				$this->title,
-				$menu_title,
+				$this->title,
 				'upload_files',
 				'user-media',
 				array( $this, 'media_grid' )

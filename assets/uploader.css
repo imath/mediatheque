@@ -189,6 +189,10 @@ p.drag-drop-buttons input[type="button"] {
 	position: relative;
 }
 
+#mediatheque-container #media ul li.user-media.dir div.user-media-content {
+	cursor: pointer;
+}
+
 #mediatheque-container #media ul li.user-media:not( .dir ) div.user-media-content {
 	background-size: cover;
 	background-repeat: no-repeat;

@@ -99,19 +99,19 @@ add_action( 'admin_init', 'mediatheque_upgrade', 999 );
 function mediatheque_get_pointers() {
 	return array(
 		'user-media-permalinks' => array(
-			'title'   => __( 'Modifier la structure de vos permaliens.', 'mediatheque' ),
+			'title'   => __( 'Modifiez la structure de vos permaliens.', 'mediatheque' ),
 			'content' => __( 'MediaThèque nécessite que la structure de vos permaliens soit différente que celle définie par défaut.', 'mediatheque' ),
 		),
 		'menu-settings' => array(
 			'title'   => __( 'Options des media utilisateurs', 'mediatheque' ),
-			'content' => __( 'Personnaliser les options des media utilisateur depuis les réglages des media.', 'mediatheque' ),
+			'content' => __( 'Personnalisez les options des media utilisateurs depuis les réglages des media.', 'mediatheque' ),
 		),
 		'menu-media' => array(
-			'title'   => __( 'Gestion des media utilisateur', 'mediatheque' ),
+			'title'   => __( 'Gestion des media utilisateurs', 'mediatheque' ),
 			'content' => __( 'Vous pouvez gérer les media utilisateurs depuis le sous-menu de la bibliothèque de media correspondant.', 'mediatheque' ),
 		),
 		'toplevel_page_user-media' => array(
-			'title'   => __( 'Accéder à votre MediaThèque', 'mediatheque' ),
+			'title'   => __( 'Accédez à votre MediaThèque', 'mediatheque' ),
 			'content' => __( 'Vous pouvez ajouter, organiser et supprimer vos media utilisateurs depuis ce menu.', 'mediatheque' ),
 		),
 	);

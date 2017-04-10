@@ -748,7 +748,7 @@ function mediatheque_register_objects() {
 		'has_archive'           => false,
 		'exclude_from_search'   => true,
 		'show_in_nav_menus'     => false,
-		'show_ui'               => mediatheque_is_debug(),
+		'show_ui'               => false,
 		'supports'              => array( 'title', 'editor', 'comments' ),
 		'taxonomies'            => array( 'user_media_type' ),
 		'capability_type'       => array( 'user_upload', 'user_uploads' ),
@@ -976,6 +976,32 @@ function mediatheque_get_template_part( $template = '', $id = '', $load = true )
 	}
 
 	return $located;
+}
+
+/**
+ * Get all or some Underscore templates.
+ *
+ * @since 1.0.0
+ *
+ * @param array $list An associative array containing all template Ids to keep.
+ */
+function mediatheque_get_template_parts( $list = array() ) {
+	$template_parts = (array) apply_filters( 'mediatheque_get_template_parts', array(
+		'toolbar-item'     => 'mediatheque-toolbar-item',
+		'feedback'         => 'mediatheque-feedback',
+		'user'             => 'mediatheque-user',
+		'user-media'       => 'mediatheque-media',
+		'user-media-trail' => 'mediatheque-trail',
+		'uploader'         => 'mediatheque-uploader',
+		'progress'         => 'mediatheque-progress',
+		'dirmaker'         => 'mediatheque-dirmaker',
+	) );
+
+	if ( ! empty( $list ) ) {
+		return array_intersect_key( $template_parts, $list );
+	}
+
+	return $template_parts;
 }
 
 /**
