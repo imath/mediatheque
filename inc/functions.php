@@ -643,6 +643,8 @@ function mediatheque_get_post_statuses( $status = '' ) {
 }
 
 function mediatheque_localize_script( $handle = 'mediatheque-views' ) {
+	$post_type_object = get_post_type_object( 'user_media' );
+
 	wp_localize_script( $handle, 'mediaThequeSettings', array(
 		'params' => array(
 			'container' => 'mediatheque-ui',
@@ -670,6 +672,9 @@ function mediatheque_localize_script( $handle = 'mediatheque-views' ) {
 			'closeBtn'        => __( 'Fermer', 'mediatheque' ),
 			'noUserMedia'     => __( 'Aucun media utilisateur ne correspond à votre requête.', 'mediatheque' ),
 			'dismissibleText' => __( 'Rejeter', 'mediatheque' ),
+			'insertBtn'       => $post_type_object->labels->insert_into_item,
+			'avatarBtn'       => $post_type_object->labels->use_as_avatar,
+			'frameTitle'      => $post_type_object->labels->menu_name,
 		),
 	) );
 }
@@ -734,6 +739,7 @@ function mediatheque_register_objects() {
 			'not_found'             => __( 'Media utilisateur introuvable',                   'mediatheque' ),
 			'not_found_in_trash'    => __( 'Media utilisateur introuvable dans la corbeille', 'mediatheque' ),
 			'insert_into_item'      => __( 'Insérer dans le contenu',                         'mediatheque' ),
+			'use_as_avatar'         => __( 'Utiliser comme avatar',                           'mediatheque' ),
 			'uploaded_to_this_item' => __( 'Attaché à ce contenu',                            'mediatheque' ),
 			'filter_items_list'     => __( 'Filtrer les Media utilisateurs',                  'mediatheque' ),
 			'items_list_navigation' => __( 'Navigation des Media utilisateurs',               'mediatheque' ),

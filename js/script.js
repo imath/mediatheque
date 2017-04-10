@@ -12,7 +12,7 @@ window.mediaTheque = window.mediaTheque || _.extend( {}, _.pick( window.wp, 'Bac
 	mediaTheque.media.controller.UserMedia = wp.media.controller.State.extend( {
 		defaults: {
 			id:       'user-media',
-			title:    'User Media',
+			title:    mediaThequeSettings.common.frameTitle,
 			content:  'user-media',
 			menu:     'default',
 			toolbar:  'main-user-media',
@@ -50,7 +50,7 @@ window.mediaTheque = window.mediaTheque || _.extend( {}, _.pick( window.wp, 'Bac
 	mediaTheque.media.view.Toolbar.UserMedia = mediaTheque.media.view.Toolbar.Select.extend( {
 		initialize: function() {
 			_.defaults( this.options, {
-				text: 'Insert the User Media',
+				text: mediaThequeSettings.common.insertBtn,
 				requires: false
 			} );
 
@@ -247,7 +247,7 @@ window.mediaTheque = window.mediaTheque || _.extend( {}, _.pick( window.wp, 'Bac
 			this._frame.on( 'toolbar:create:main-user-media', function( toolbar ) {
 				toolbar.view = new mediaTheque.media.view.Toolbar.UserMedia( {
 					controller: this,
-					text:       'Set Avatar'
+					text:       mediaThequeSettings.common.avatarBtn
 				} );
 			}, this._frame );
 

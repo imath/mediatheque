@@ -282,6 +282,7 @@ p.drag-drop-buttons input[type="button"] {
 	border-top: none;
 	border-left: none;
 	border-right: none;
+	width: 98%;
 }
 
 .media-frame-content #mediatheque-container #forms,
