@@ -174,14 +174,7 @@ window.mediaTheque = window.mediaTheque || _.extend( {}, _.pick( window.wp, 'Bac
 			model = _.first( selection.models );
 
 			if ( 'image' === model.get( 'media_type' ) ) {
-				_.defaults( userMedia, {
-					title:   model.get( 'title' ).rendered,
-					linkUrl: model.get( 'link' ),
-					align:   'none',
-					url:     model.get( 'background' )
-				} );
-
-				mediaTheque.media.editor.insert( mediaTheque.media.string.image( userMedia ) );
+				mediaTheque.media.editor.insert( model.get( 'link' ) + '?attached=true' );
 			}
 		}
 	} );

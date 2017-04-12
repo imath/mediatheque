@@ -294,15 +294,15 @@ window.mediaTheque = window.mediaTheque || _.extend( {}, _.pick( window.wp, 'Bac
 			this.$el.attr( 'data-id', this.model.get( 'id' ) );
 
 			if ( 'image' === this.model.get( 'media_type' ) && this.model.get( 'guid' ) ) {
-				var bgUrl = this.model.get( 'guid' ).rendered,
+				var bgUrl = fullUrl = this.model.get( 'guid' ).rendered,
 				    mediaDetails = this.model.get( 'media_details' ), fileName;
 
-				if ( _.isObject( mediaDetails.medium ) ) {
+				if ( _.isObject( mediaDetails.sizes ) && mediaDetails.sizes.medium ) {
 					fileName = mediaDetails.file.split( '/' );
-					bgUrl = bgUrl.replace( fileName[ oFile.length - 1 ], mediaDetails.medium.file );
+					bgUrl = bgUrl.replace( fileName[ fileName.length - 1 ], mediaDetails.sizes.medium.file );
 				}
 
-				this.model.set( { background: bgUrl }, { silent: true } );
+				this.model.set( { background: bgUrl, fullUrl: fullUrl }, { silent: true } );
 			}
 
 			this.model.set( {

@@ -78,13 +78,14 @@ final class MediaTheque {
 		$this->basename  = plugin_basename( $this->file );
 
 		// Path and URL
-		$this->dir              = plugin_dir_path( $this->file );
-		$this->url              = plugin_dir_url ( $this->file );
-		$this->js_url           = trailingslashit( $this->url . 'js' );
-		$this->assets_url       = trailingslashit( $this->url . 'assets' );
-		$this->inc_dir          = trailingslashit( $this->dir . 'inc' );
-		$this->templates        = trailingslashit( $this->dir . 'templates' );
-		$this->personal_avatars = array();
+		$this->dir                = plugin_dir_path( $this->file );
+		$this->url                = plugin_dir_url ( $this->file );
+		$this->js_url             = trailingslashit( $this->url . 'js' );
+		$this->assets_url         = trailingslashit( $this->url . 'assets' );
+		$this->inc_dir            = trailingslashit( $this->dir . 'inc' );
+		$this->templates          = trailingslashit( $this->dir . 'templates' );
+		$this->personal_avatars   = array();
+		$this->user_media_oembeds = array();
 	}
 
 	/**
@@ -128,11 +129,15 @@ final class MediaTheque {
 		add_filter( 'pre_get_avatar_data', 'mediatheque_get_avatar_data',  10, 2 );
 
 		// Set the single User Media Templates
-		add_action( 'parse_query',                      'mediatheque_parse_query'           );
-		add_filter( 'embed_template',                   'mediatheque_embed_template'        );
+		add_action( 'parse_query',                    'mediatheque_parse_query'           );
+		add_filter( 'embed_template',                 'mediatheque_embed_template'        );
 		add_action( 'mediatheque_embed_content_meta', 'mediatheque_embed_download_button' );
-		add_action( 'mediatheque_embed_content_meta', 'print_embed_sharing_button'          );
-		add_action( 'enqueue_embed_scripts',            'mediatheque_embed_style'           );
+		add_action( 'mediatheque_embed_content_meta', 'print_embed_sharing_button'        );
+		add_action( 'enqueue_embed_scripts',          'mediatheque_embed_style'           );
+
+		add_filter( 'oembed_request_post_id', 'mediatheque_oembed_user_media_id',     9, 2 );
+		add_filter( 'oembed_dataparse',       'mediatheque_oembed_pre_dataparse',     9, 3 );
+		add_filter( 'oembed_dataparse',       'mediatheque_oembed_dataparse',        11, 3 );
 
 		// Check if we need to add a specific The User Media UI
 		add_filter( 'wp_editor_settings', 'mediatheque_editor_settings', 10, 2 );

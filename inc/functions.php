@@ -451,7 +451,20 @@ function mediatheque_image_get_intermediate_size( $user_media_id = 0, $size = ar
 		$size = 'full';
 	}
 
-	$size_data = image_get_intermediate_size( $user_media->ID, $size );
+	// Get the full image
+	if ( 'full' === $size ) {
+		$meta_data = wp_get_attachment_metadata( $user_media->ID );
+
+		if ( empty( $meta_data['file'] ) ) {
+			return $size_data;
+		}
+
+		$size_data['path'] = $meta_data['file'];
+
+	// Get the the intermediate size
+	} else {
+		$size_data = image_get_intermediate_size( $user_media->ID, $size );
+	}
 
 	if ( empty( $size_data['path'] ) ) {
 		return $size_data;
@@ -1359,4 +1372,65 @@ function mediatheque_the_editor( $editor = '' ) {
 		) ),
 		$editor
 	);
+}
+
+function mediatheque_oembed_pre_dataparse( $result = null, $data = null, $url = '' ) {
+	$mediatheque = mediatheque();
+
+	if ( ! empty( $mediatheque->user_media_oembeds[ $url ] ) ) {
+		return false;
+	}
+
+	return $result;
+}
+
+function mediatheque_oembed_dataparse( $result = null, $data = null, $url = '' ) {
+	$mediatheque = mediatheque();
+
+	if ( false !== $result || empty( $mediatheque->user_media_oembeds[ $url ] ) ) {
+		return $result;
+	}
+
+	return $mediatheque->user_media_oembeds[ $url ];
+}
+
+function mediatheque_oembed_user_media_id( $id = 0, $url = '' ) {
+	if ( ! $id ) {
+		return $id;
+	}
+
+	$url_parts = parse_url( str_replace( '&amp;', '&', $url ) );
+
+	if ( false === array_search( mediatheque_get_root_slug(), explode( '/', wp_unslash( $url_parts['path'] ) ) ) ) {
+		return $pre;
+	}
+
+	$args = array(
+		'attached' => 0,
+		'size'     => 'full',
+		'align'    => 'alignenone',
+	);
+
+	if ( ! empty( $url_parts['query'] ) ) {
+		$args = wp_parse_args( $url_parts['query'], $args );
+	}
+
+	if ( ! $args['attached'] ) {
+		return $id;
+	}
+
+	$user_media = get_post( $id );
+	$image = mediatheque_image_get_intermediate_size( $user_media, $args['size'] );
+
+	if ( ! empty( $image['url'] ) ) {
+		mediatheque()->user_media_oembeds[ $url ] = sprintf(
+			'<a href="%1$s"><img class="mediatheque-user-media size-%2$s %3$s" src="%4$s"></a>',
+			esc_url_raw( get_post_permalink( $user_media ) ),
+			esc_attr( $args['size'] ),
+			esc_attr( $args['align'] ),
+			esc_url_raw( $image['url'] )
+		);
+	}
+
+	return $id;
 }
