@@ -321,3 +321,14 @@ p.drag-drop-buttons input[type="button"] {
 	min-width: 184px;
 	min-height: 184px;
 }
+
+.media-frame.mediatheque-hide-menu .media-frame-title,
+.media-frame.mediatheque-hide-menu .media-frame-router,
+.media-frame.mediatheque-hide-menu .media-frame-toolbar,
+.media-frame.mediatheque-hide-menu .media-frame-content {
+	left: 0;
+}
+
+.media-frame.mediatheque-hide-menu .media-frame-menu {
+	display: none;
+}

@@ -7,7 +7,52 @@ window.mediaTheque = window.mediaTheque || _.extend( {}, _.pick( window.wp, 'Bac
 ( function( exports, $ ) {
 
 	_.extend( mediaTheque, _.pick( window.wp, 'media' ) );
-	mediaTheque.post = mediaTheque.media.view.MediaFrame.Post;
+	mediaTheque.post  = mediaTheque.media.view.MediaFrame.Post;
+	mediaTheque.embed = mediaTheque.media.controller.Embed;
+
+	wp.media.controller.Embed = mediaTheque.embed.extend( {
+		initialize: function( options ) {
+			var isMediaTheque = false, match;
+
+			if ( options.metadata && ! _.isUndefined( options.metadata.url ) ) {
+				match = options.metadata.url.match( /user-media\/(.*?)\/\?attached=true/ );
+
+				if ( match.length && match[1] ) {
+					isMediaTheque = true;
+
+					var params = options.metadata || { url: '' };
+					_.extend( params, { isMediaTheque: isMediaTheque } );
+
+					this.props = new Backbone.Model( params );
+				}
+			}
+
+			if ( ! isMediaTheque ) {
+
+				// Call 'initialize' directly on the parent class.
+				mediaTheque.embed.prototype.initialize.apply( this, arguments );
+			}
+		},
+
+		activate: function() {
+			// Call 'activate' directly on the parent class.
+			mediaTheque.embed.prototype.activate.apply( this, arguments );
+
+			if ( this.props.get( 'isMediaTheque' ) ) {
+				/**
+				 * Customize the title to inform the user can define
+				 * display preferences for the user media
+				 */
+				this.set( { title: mediaThequeSettings.common.embedTitle } );
+
+				/**
+				 * Workaround to hide the main menu.
+				 * @todo  improve this!
+				 */
+				this.frame.$el.addClass( 'mediatheque-hide-menu' );
+			}
+		}
+	} );
 
 	mediaTheque.media.controller.UserMedia = wp.media.controller.State.extend( {
 		defaults: {
@@ -175,6 +220,17 @@ window.mediaTheque = window.mediaTheque || _.extend( {}, _.pick( window.wp, 'Bac
 
 			if ( 'image' === model.get( 'media_type' ) ) {
 				mediaTheque.media.editor.insert( model.get( 'link' ) + '?attached=true' );
+			}
+		},
+
+		embedContent: function() {
+			var state = this.state();
+
+			if ( state.props.get( 'isMediaTheque' ) ) {
+				// Attach a specific view to let user choose some display preferences.
+			} else {
+				// Call 'embedContent' directly on the parent class.
+				mediaTheque.post.prototype.embedContent.apply( this, arguments );
 			}
 		}
 	} );

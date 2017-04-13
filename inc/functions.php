@@ -688,6 +688,8 @@ function mediatheque_localize_script( $handle = 'mediatheque-views' ) {
 			'insertBtn'       => $post_type_object->labels->insert_into_item,
 			'avatarBtn'       => $post_type_object->labels->use_as_avatar,
 			'frameTitle'      => $post_type_object->labels->menu_name,
+			'embedTitle'      => __( 'Définissez vos préférences d\'affichage du media', 'mediatheque' ),
+			'embedBtn'        => __( 'Définir', 'mediatheque' ),
 		),
 	) );
 }
