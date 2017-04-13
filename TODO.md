@@ -23,3 +23,6 @@
 [] Change "ghost" for "selection" ?
 [x] Find way to avoid the wpUploader to listen to drag and drop inside the WP Media Editor.
 [] Find a way to deal with Media insterted into content when its parent directory has been changed 'embed?'
+[] Make sure the htaccess file is only added to the "private status" user dir and not in children
+[] Take care of folder display
+
