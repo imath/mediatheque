@@ -1410,7 +1410,8 @@ function mediatheque_oembed_user_media_id( $id = 0, $url = '' ) {
 	$args = array(
 		'attached' => 0,
 		'size'     => 'full',
-		'align'    => 'alignenone',
+		'align'    => 'none',
+		'link'     => 'file'
 	);
 
 	if ( ! empty( $url_parts['query'] ) ) {
@@ -1425,13 +1426,30 @@ function mediatheque_oembed_user_media_id( $id = 0, $url = '' ) {
 	$image = mediatheque_image_get_intermediate_size( $user_media, $args['size'] );
 
 	if ( ! empty( $image['url'] ) ) {
-		mediatheque()->user_media_oembeds[ $url ] = sprintf(
-			'<a href="%1$s"><img class="mediatheque-user-media size-%2$s %3$s" src="%4$s"></a>',
-			esc_url_raw( get_post_permalink( $user_media ) ),
+		$output = sprintf(
+			'<img class="mediatheque-user-media size-%1$s align%2$s" src="%3$s" draggable="false" height="%4$s" width="%5$s" style="width: auto; height: auto">',
 			esc_attr( $args['size'] ),
 			esc_attr( $args['align'] ),
-			esc_url_raw( $image['url'] )
+			esc_url_raw( $image['url'] ),
+			esc_attr( $image['height'] ),
+			esc_attr( $image['width'] )
 		);
+
+		if ( 'post' === $args['link'] ) {
+			$link = get_post_permalink( $user_media );
+		} elseif ( 'file' === $args['link'] ) {
+			$link = mediatheque_get_download_url( $user_media );
+		}
+
+		if ( ! empty( $link ) ) {
+			$output = sprintf(
+				'<a href="%1$s">%2$s</a>',
+				esc_url_raw( $link ),
+				$output
+			);
+		}
+
+		mediatheque()->user_media_oembeds[ $url ] = $output;
 	}
 
 	return $id;

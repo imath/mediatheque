@@ -332,3 +332,20 @@ p.drag-drop-buttons input[type="button"] {
 .media-frame.mediatheque-hide-menu .media-frame-menu {
 	display: none;
 }
+
+.media-frame .user-media-preferences .embed-media-settings {
+	top: 0;
+}
+
+.media-frame .user-media-preferences .embed-media-settings .column-image {
+	float: right;
+	margin-right: 1em;
+	width: 48%;
+}
+
+.media-frame .user-media-preferences .embed-media-settings .column-settings {
+	float: left;
+	margin-left: 1em;
+	overflow: hidden;
+	width: 48%;
+}

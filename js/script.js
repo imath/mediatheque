@@ -142,6 +142,89 @@ window.mediaTheque = window.mediaTheque || _.extend( {}, _.pick( window.wp, 'Bac
 		}
 	} );
 
+	mediaTheque.media.view.customizeUserMedia = mediaTheque.media.view.EmbedImage.extend( {
+		className: 'user-media-preferences',
+		template : mediaTheque.template( 'image-details' ),
+
+		initialize: function() {
+			var media = this.model.get( 'media' ), url = media.get( 'guid' ).rendered,
+				fileName, mediaDetails = media.get( 'media_details');
+
+			// Temporarly disable imageEdit.
+			if ( window.imageEdit ) {
+				this.imageEdit   = _.clone( window.imageEdit );
+				window.imageEdit = false;
+			}
+
+			_.extend( mediaDetails.sizes, { full: {
+				width       : mediaDetails.width,
+				height      : mediaDetails.height,
+				'mime_type' : media.get( 'mime_type'),
+				file        : mediaDetails.file
+			} } );
+
+			this.options.attachment.set( {
+				sizes: mediaDetails.sizes,
+				url  : media.get( 'link' ) + mediaThequeSettings.common.downloadSlug + '/'
+			}, { silent: true } );
+
+			if ( mediaDetails.sizes.medium ) {
+				fileName = mediaDetails.file.split( '/' );
+				url = url.replace( fileName[ fileName.length - 1 ], mediaDetails.sizes.medium.file );
+			}
+
+			this.model.set( {
+				url        : url,
+				'base_url' : media.get( 'link' )
+			}, { silent: true } );
+
+			this.queryString = _.defaults(
+				_.pick( this.model, ['align', 'size'] ),
+				{
+					attached: true
+				}
+			);
+
+			mediaTheque.media.view.EmbedImage.prototype.initialize.apply( this, arguments );
+
+			this.on( 'ready', this.setFormElements, this );
+		},
+
+		prepare: function() {
+			var attachment = false;
+
+			if ( this.options.attachment ) {
+				attachment = this.options.attachment.toJSON();
+			}
+
+			return _.defaults( {
+				model: this.model.toJSON(),
+				attachment: attachment
+			}, this.options );
+		},
+
+		setFormElements: function() {
+			this.$el.find( '.caption, .alt-text, .advanced-toggle' ).css( { display: 'none' } );
+			this.$el.find( 'input.link-to-custom' ).val( this.options.attachment.get( 'url' ) );
+			this.$el.find( 'select.size' ).val( 'full' );
+			this.$el.find( 'select.size option[value="full"]' ).prop( 'selected', 'selected' );
+
+			if ( this.imageEdit ) {
+				window.imageEdit = _.clone( this.imageEdit );
+				delete this.imageEdit;
+			}
+		},
+
+		updateChanges: function( model ) {
+			mediaTheque.media.view.EmbedImage.prototype.updateChanges.apply( this, arguments );
+
+			_.extend( this.queryString, _.pick( model.attributes, ['align', 'link', 'size'] ) );
+			this.model.metadata = {
+				url: this.model.get( 'base_url' ) + '?' + $.param( this.queryString )
+			};
+		}
+	} );
+
 	wp.media.view.MediaFrame.Post = mediaTheque.post.extend( {
 		initialize: function() {
 			// Call 'initialize' directly on the parent class.
@@ -223,11 +306,58 @@ window.mediaTheque = window.mediaTheque || _.extend( {}, _.pick( window.wp, 'Bac
 			}
 		},
 
+		editMedia: function( collection ) {
+			var media, queryString, state = this.state();
+
+			if ( _.isUndefined( collection.models) || collection.models.length !== 1 ) {
+				return;
+			}
+
+			media       = _.first( collection.models );
+			queryString = mediaTheque.App.getURLparams( state.props.get( 'url' ) );
+			media.set( _.pick( queryString, ['size', 'align'] ) );
+
+			if ( 'image' === media.get( 'media_type' ) ) {
+				state.set( { media: media } );
+
+				this.customizeUserMediaDisplay();
+			}
+		},
+
+		// Attach a specific view to let user choose some display preferences.
+		customizeUserMediaDisplay: function() {
+			var state = this.state(),
+				view = new mediaTheque.media.view.customizeUserMedia( {
+					model: state,
+					attachment: state.get( 'media' ),
+					controller: this,
+					priority: 40
+				} ).render();
+
+			this.content.set( view );
+		},
+
 		embedContent: function() {
-			var state = this.state();
+			var state = this.state(), userMediaSlug, userMedia;
 
 			if ( state.props.get( 'isMediaTheque' ) ) {
-				// Attach a specific view to let user choose some display preferences.
+				userMediaSlug = _.first( _.map(
+					state.props.get( 'url' )
+						.replace( wp.api.utils.getRootUrl() + 'user-media/', '' )
+						.split( '?' ), function( part, i ) {
+							if ( 0 === i ) {
+								return part.replace( '/', '' );
+							}
+						}
+				) );
+
+				if ( userMediaSlug ) {
+					userMedia = new wp.api.collections.UserMedia();
+					userMedia.fetch( {
+						data: { slug: userMediaSlug },
+						success: _.bind( this.editMedia, this )
+					} );
+				}
 			} else {
 				// Call 'embedContent' directly on the parent class.
 				mediaTheque.post.prototype.embedContent.apply( this, arguments );
@@ -424,6 +554,28 @@ window.mediaTheque = window.mediaTheque || _.extend( {}, _.pick( window.wp, 'Bac
 					'X-WP-Nonce' : wpApiSettings.nonce
 				}
 			};
+		},
+
+		getURLparams: function( url, param ) {
+			if ( url ) {
+				qs = ( -1 !== url.indexOf( '?' ) ) ? '?' + url.split( '?' )[1] : '';
+			} else {
+				qs = document.location.search;
+			}
+
+			if ( ! qs ) {
+				return null;
+			}
+
+			var params = qs.replace( /(^\?)/, '' ).split( '&' ).map( function( n ) {
+				return n = n.split( '=' ), this[n[0]] = n[1], this;
+			}.bind( {} ) )[0];
+
+			if ( param ) {
+				return params[param];
+			}
+
+			return params;
 		}
 	};
 
