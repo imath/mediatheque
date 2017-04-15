@@ -461,6 +461,11 @@ function mediatheque_image_get_intermediate_size( $user_media_id = 0, $size = ar
 
 		$size_data['path'] = $meta_data['file'];
 
+		if ( isset( $meta_data['width'] ) && isset( $meta_data['height'] ) ) {
+			$size_data['width']  = $meta_data['width'];
+			$size_data['height'] = $meta_data['height'];
+		}
+
 	// Get the the intermediate size
 	} else {
 		$size_data = image_get_intermediate_size( $user_media->ID, $size );
@@ -858,7 +863,7 @@ function mediatheque_register_objects() {
 	/** Avatar image sizes **************************************************/
 
 	foreach ( (array) rest_get_avatar_sizes() as $size ) {
-		add_image_size( sprintf( 'avatat-%s', $size ), $size, $size, true );
+		add_image_size( sprintf( 'avatar-%s', $size ), $size, $size, true );
 	}
 }
 
@@ -1108,8 +1113,9 @@ function mediatheque_delete_dir( $dir = null ) {
 		return false;
 	}
 
+	$dir_id     = (int) $dir->ID;
 	$uploadpath = mediatheque_get_upload_dir();
-	$dirpath    = get_post_meta( $dir->ID, '_mediatheque_relative_path', true );
+	$dirpath    = get_post_meta( $dir_id, '_mediatheque_relative_path', true );
 	$dirpath    = trailingslashit( $uploadpath['basedir'] ) . $dirpath;
 
 	if ( ! is_dir( $dirpath ) ) {
@@ -1141,16 +1147,16 @@ function mediatheque_delete_dir( $dir = null ) {
 	// Remove the empty directory
 	@ rmdir( $dirpath );
 
-	$dir = wp_delete_post( $dir->ID, true );
+	$dir = wp_delete_post( $dir_id, true );
 
 	/**
 	 * Fires after a directory of User Media is deleted.
 	 *
 	 * @since 1.0.0
 	 *
-	 * @param WP_Post $dir The User Media Directory Object.
+	 * @param int $dir_id The User Media Directory ID.
 	 */
-	do_action( 'mediatheque_deleted_dir', $dir );
+	do_action( 'mediatheque_deleted_dir', $dir_id );
 
 	return $dir;
 }
@@ -1181,8 +1187,9 @@ function mediatheque_delete_media( $media = null ) {
 		return mediatheque_delete_dir( $user_media );
 	}
 
-	$meta = wp_get_attachment_metadata( $user_media->ID );
-	$file = get_attached_file( $user_media->ID );
+	$user_media_id = (int) $user_media->ID;
+	$meta          = wp_get_attachment_metadata( $user_media_id );
+	$file          = get_attached_file( $user_media_id );
 
 	if ( is_multisite() ) {
 		delete_transient( 'dirsize_cache' );
@@ -1212,16 +1219,16 @@ function mediatheque_delete_media( $media = null ) {
 
 	wp_delete_file( $file );
 
-	$user_media = wp_delete_post( $user_media->ID, true );
+	$user_media = wp_delete_post( $user_media_id, true );
 
 	/**
 	 * Fires after a User Media is deleted.
 	 *
 	 * @since 1.0.0
 	 *
-	 * @param WP_Post $value The User Media Object.
+	 * @param int $user_media_id The User Media ID.
 	 */
-	do_action( 'mediatheque_deleted_media', $user_media );
+	do_action( 'mediatheque_deleted_media', $user_media_id );
 
 	return $user_media;
 }
@@ -1249,12 +1256,23 @@ function mediatheque_move( $media = null, $parent = null ) {
 		return false;
 	}
 
-	$meta       = wp_get_attachment_metadata( $user_media->ID );
-	$file       = get_attached_file( $user_media->ID );
+	$user_media_id = (int) $user_media->ID;
+	$meta          = wp_get_attachment_metadata( $user_media_id );
+	$file          = get_attached_file( $user_media_id );
 
 	$newdir     = $uploadpath['basedir'] . $path;
 	$filename   = wp_unique_filename( $newdir, basename( $file ) );
 	$new_file   = trailingslashit( $newdir ) . $filename;
+
+	/**
+	 * Fires before a media is moved to another place.
+	 *
+	 * @since  1.0.0
+	 *
+	 * @param  WP_Post $media  The Use Media Object.
+	 * @param  string  $newdir The new destination dir.
+	 */
+	do_action( 'mediatheque_move_media', $user_media, $newdir );
 
 	$moved = @ copy( $file, $new_file );
 
@@ -1272,6 +1290,16 @@ function mediatheque_move( $media = null, $parent = null ) {
 			@ unlink( path_join( $uploadpath['basedir'], $intermediate_file ) );
 		}
 	}
+
+	/**
+	 * Fires after a media has moved to another place.
+	 *
+	 * @since  1.0.0
+	 *
+	 * @param  int     $user_media_id The Use Media ID.
+	 * @param  string  $newdir        The new destination dir.
+	 */
+	do_action( 'mediatheque_moved_media', $user_media_id, $newdir );
 
 	return $new_file;
 }
@@ -1396,29 +1424,41 @@ function mediatheque_oembed_dataparse( $result = null, $data = null, $url = '' )
 	return $mediatheque->user_media_oembeds[ $url ];
 }
 
+function mediatheque_oembed_get_url_args( $url = '' ) {
+	$args = array();
+
+	if ( empty( $url ) ) {
+		return $args;
+	}
+
+	$url       = str_replace( '&amp;', '&', $url );
+	$url_parts = parse_url( $url );
+
+	if ( false === array_search( mediatheque_get_root_slug(), explode( '/', wp_unslash( $url_parts['path'] ) ) ) ) {
+		return $args;
+	}
+
+	if ( empty( $url_parts['query'] ) ) {
+		return $args;
+	}
+
+	return wp_parse_args( $url_parts['query'], array(
+		'attached' => false,
+		'size'     => 'full',
+		'align'    => 'none',
+		'link'     => 'file'
+	) );
+}
+
 function mediatheque_oembed_user_media_id( $id = 0, $url = '' ) {
 	if ( ! $id ) {
 		return $id;
 	}
 
-	$url_parts = parse_url( str_replace( '&amp;', '&', $url ) );
+	$url_id = str_replace( '&amp;', '&', $url );
+	$args   = mediatheque_oembed_get_url_args( $url_id );
 
-	if ( false === array_search( mediatheque_get_root_slug(), explode( '/', wp_unslash( $url_parts['path'] ) ) ) ) {
-		return $pre;
-	}
-
-	$args = array(
-		'attached' => 0,
-		'size'     => 'full',
-		'align'    => 'none',
-		'link'     => 'file'
-	);
-
-	if ( ! empty( $url_parts['query'] ) ) {
-		$args = wp_parse_args( $url_parts['query'], $args );
-	}
-
-	if ( ! $args['attached'] ) {
+	if ( empty( $args['attached'] ) ) {
 		return $id;
 	}
 
@@ -1426,13 +1466,23 @@ function mediatheque_oembed_user_media_id( $id = 0, $url = '' ) {
 	$image = mediatheque_image_get_intermediate_size( $user_media, $args['size'] );
 
 	if ( ! empty( $image['url'] ) ) {
+		$height = '';
+		if ( ! empty( $image['height'] ) ) {
+			$height = sprintf( ' height="%d"', esc_attr( $image['height'] ) );
+		}
+
+		$width = '';
+		if ( ! empty( $image['width'] ) ) {
+			$width = sprintf( ' width="%d"', esc_attr( $image['width'] ) );
+		}
+
 		$output = sprintf(
-			'<img class="mediatheque-user-media size-%1$s align%2$s" src="%3$s" draggable="false" height="%4$s" width="%5$s" style="width: auto; height: auto">',
+			'<img class="mediatheque-user-media size-%1$s align%2$s" src="%3$s" draggable="false"%4$s%5$s style="width: auto; height: auto">',
 			esc_attr( $args['size'] ),
 			esc_attr( $args['align'] ),
 			esc_url_raw( $image['url'] ),
-			esc_attr( $image['height'] ),
-			esc_attr( $image['width'] )
+			$height,
+			$width
 		);
 
 		if ( 'post' === $args['link'] ) {
@@ -1452,5 +1502,92 @@ function mediatheque_oembed_user_media_id( $id = 0, $url = '' ) {
 		mediatheque()->user_media_oembeds[ $url ] = $output;
 	}
 
+	// Track cached user media.
+	if ( ! empty( $output ) ) {
+		$key_suffix = md5( $url_id . serialize( wp_embed_defaults( $url ) ) );
+		$cache_keys = array( '_oembed_' . $key_suffix, '_oembed_time_' . $key_suffix );
+
+		$cached_keys = get_post_meta( $user_media->ID, '_user_media_cached_keys', true );
+
+		// Defauts to an empty array.
+		if ( ! $cached_keys ) {
+			$cached_keys = array();
+		}
+
+		// Update cached keys, if needed.
+		if ( ! array_intersect( $cache_keys, $cached_keys ) ) {
+			update_post_meta( $user_media->ID, '_user_media_cached_keys', array_merge( $cached_keys, $cache_keys ) );
+		}
+	}
+
 	return $id;
+}
+
+/**
+ * Clear cached user media.
+ *
+ * @since  1.0.0
+ *
+ * @param  WP_Post $user_media The User Media Object.
+ * @return bool                True when the cached user media has been cleared.
+ *                             False otherwise.
+ */
+function mediatheque_clear_cached_media( $user_media = null ) {
+	global $wpdb;
+
+	if ( empty( $user_media->ID ) ) {
+		return false;
+	}
+
+	$cached_keys = get_post_meta( $user_media->ID, '_user_media_cached_keys', true );
+
+	if ( ! $cached_keys ) {
+		return false;
+	}
+
+	$in = array_map( 'esc_sql', $cached_keys );
+	$in = '"' . join( '","', $in ) . '"';
+
+	// Remove the list of cache meta keys that are about to be deleted.
+	delete_post_meta( $user_media->ID, '_user_media_cached_keys' );
+
+	// Delete cached meta keys so that the cache will be reset at next media load.
+	$return = $wpdb->query( "DELETE FROM {$wpdb->postmeta} WHERE meta_key IN ({$in})" );
+
+	if ( $return ) {
+		wp_cache_flush();
+	}
+
+	return (bool) $return;
+}
+
+/**
+ * Hide the vanished User Media or warn the Administrator of it.
+ *
+ * @since  1.0.0
+ *
+ * @param  string $link The oembed link output.
+ * @param  string $url  The requested URL.
+ * @return string       An empty string for regular users, a warning message for Admins
+ */
+function mediatheque_maybe_hide_link( $link = '', $url = '' ) {
+	if ( empty( $link ) || empty( $url ) ) {
+		return $link;
+	}
+
+	$mediatheque_url = mediatheque_oembed_get_url_args( $url );
+
+	if ( empty( $mediatheque_url['attached'] ) ) {
+		return $link;
+	}
+
+	if ( ! current_user_can( 'manage_options' ) ) {
+		return '';
+	}
+
+	return sprintf(
+		'<div class="mediatheque-vanished-media" style="border-left: solid 4px #dc3232; padding-left: 1em"><p>%1$s &lt; <em>%2$s</em></p></div>',
+		'¯\_(ツ)_/¯',
+		__( 'Hum hum, il semble que ce media ait mystérieusement disparu.', 'mediatheque' )
+	);
 }
