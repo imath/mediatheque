@@ -28,5 +28,5 @@
 [x] Make sure to take care of dead media of moved media
 [] Make sure private media cannot be attached but only embed.
 [] Make sure avatar UI is only fetching public images
-[] Make sure the media inserted has a line feed before and after.
+[x] Make sure the media inserted has a line feed before and after.
 [] Add a tool to clear vanished media log
