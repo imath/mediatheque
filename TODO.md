@@ -26,3 +26,5 @@
 [] Make sure the htaccess file is only added to the "private status" user dir and not in children
 [] Take care of folder display.
 [x] Make sure to take care of dead media of moved media
+[] Make sure the media inserted has a line feed before and after.
+[] Add a tool to clear vanished media log

@@ -1582,6 +1582,46 @@ function mediatheque_maybe_hide_link( $link = '', $url = '' ) {
 	}
 
 	if ( ! current_user_can( 'manage_options' ) ) {
+		$vanished_media_log = get_option( '_mediatheque_vanished_media', array() );
+		$query_vars = parse_url( $url, PHP_URL_QUERY );
+		$s          = str_replace( '?' . $query_vars, '', $url );
+
+		if ( ! in_array( $s, $vanished_media_log, true ) ) {
+			update_option( '_mediatheque_vanished_media', array_merge( $vanished_media_log, array( $s ) ) );
+
+			$search_posts   = new WP_Query;
+			$search_results = $search_posts->query( array(
+				'post_type' => 'any',
+				's'         => $s,
+			) );
+
+			if ( ! empty( $search_results ) ) {
+				$warning = _n(
+					'Ci-dessous le titre du contenu dans lequel le media est présent :',
+					'Ci-dessous la liste des titres de contenu dans lesquels le media est présent :',
+					count( $search_results ),
+					'mediatheque'
+				);
+
+				foreach ( $search_results as $p ) {
+					$post_type_object = get_post_type_object( $p->post_type );
+
+					$link = '';
+					if ( $post_type_object->_edit_link ) {
+						$link = ' ( ' . esc_url_raw( admin_url( sprintf( $post_type_object->_edit_link . '&action=edit', $p->ID ) ) ) . ' )';
+					}
+
+					$warning .= "\n " . sprintf( '- %1$s%2$s', esc_html( $p->post_title ), $link );
+				}
+
+				wp_mail(
+					get_option( 'admin_email' ),
+					"[ " . wp_specialchars_decode( get_option( 'blogname' ) ) . " ] " . __( 'Media disparu', 'mediatheque' ),
+					$warning
+				);
+			}
+		}
+
 		return '';
 	}
 
