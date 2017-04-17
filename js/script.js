@@ -302,7 +302,7 @@ window.mediaTheque = window.mediaTheque || _.extend( {}, _.pick( window.wp, 'Bac
 
 			model = _.first( selection.models );
 
-			if ( 'image' === model.get( 'media_type' ) ) {
+			if ( 'image' === model.get( 'media_type' ) || 'video' === model.get( 'media_type' ) ) {
 				mediaTheque.media.editor.insert( '<p>' +  model.get( 'link' ) + '?attached=true' + '</p>' );
 			}
 		},

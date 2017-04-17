@@ -1463,40 +1463,89 @@ function mediatheque_oembed_user_media_id( $id = 0, $url = '' ) {
 	}
 
 	$user_media = get_post( $id );
-	$image = mediatheque_image_get_intermediate_size( $user_media, $args['size'] );
 
-	if ( ! empty( $image['url'] ) ) {
-		$height = '';
-		if ( ! empty( $image['height'] ) ) {
-			$height = sprintf( ' height="%d"', esc_attr( $image['height'] ) );
+	// Take care of images
+	if ( wp_attachment_is( 'image', $user_media ) ) {
+		$image = mediatheque_image_get_intermediate_size( $user_media, $args['size'] );
+
+		if ( ! empty( $image['url'] ) ) {
+			$height = '';
+			if ( ! empty( $image['height'] ) ) {
+				$height = sprintf( ' height="%d"', esc_attr( $image['height'] ) );
+			}
+
+			$width = '';
+			if ( ! empty( $image['width'] ) ) {
+				$width = sprintf( ' width="%d"', esc_attr( $image['width'] ) );
+			}
+
+			$output = sprintf(
+				'<img class="mediatheque-user-media size-%1$s align%2$s" src="%3$s" draggable="false"%4$s%5$s style="width: auto; height: auto">',
+				esc_attr( $args['size'] ),
+				esc_attr( $args['align'] ),
+				esc_url_raw( $image['url'] ),
+				$height,
+				$width
+			);
+
+			if ( 'post' === $args['link'] ) {
+				$link = get_post_permalink( $user_media );
+			} elseif ( 'file' === $args['link'] ) {
+				$link = mediatheque_get_download_url( $user_media );
+			}
+
+			if ( ! empty( $link ) ) {
+				$output = sprintf(
+					'<a href="%1$s">%2$s</a>',
+					esc_url_raw( $link ),
+					$output
+				);
+			}
+
+			mediatheque()->user_media_oembeds[ $url ] = $output;
 		}
 
-		$width = '';
-		if ( ! empty( $image['width'] ) ) {
-			$width = sprintf( ' width="%d"', esc_attr( $image['width'] ) );
-		}
-
-		$output = sprintf(
-			'<img class="mediatheque-user-media size-%1$s align%2$s" src="%3$s" draggable="false"%4$s%5$s style="width: auto; height: auto">',
-			esc_attr( $args['size'] ),
-			esc_attr( $args['align'] ),
-			esc_url_raw( $image['url'] ),
-			$height,
-			$width
+	// Take care of videos
+	} elseif ( wp_attachment_is( 'video', $user_media ) ) {
+		$default_video_args = array(
+			'src'      => '',
+			'poster'   => '',
+			'loop'     => '',
+			'autoplay' => '',
+			'preload'  => 'metadata',
+			'class'    => 'wp-video-shortcode',
 		);
 
-		if ( 'post' === $args['link'] ) {
-			$link = get_post_permalink( $user_media );
-		} elseif ( 'file' === $args['link'] ) {
-			$link = mediatheque_get_download_url( $user_media );
+		$video_args = array_intersect_key( $args, $default_video_args );
+		$video_args = wp_parse_args( $video_args, $default_video_args );
+
+		if ( 'none' !== $args['align'] ) {
+			$video_args['class'] .= sprintf( ' align%s', $args['align'] );
 		}
 
-		if ( ! empty( $link ) ) {
-			$output = sprintf(
-				'<a href="%1$s">%2$s</a>',
-				esc_url_raw( $link ),
-				$output
-			);
+		$uploads           = mediatheque_get_upload_dir();
+		$video_args['src'] = trailingslashit( $uploads['baseurl'] ) . get_post_meta( $user_media->ID, '_wp_attached_file', true );
+
+		if ( ! $video_args['src'] ) {
+			return $id;
+		}
+
+		$size = wp_get_attachment_metadata( $user_media->ID );
+		if ( ! empty( $size['width'] ) && ! empty( $size['height'] ) ) {
+			$video_args['width']  = $size['width'];
+			$video_args['height'] = $size['height'];
+		}
+
+		// Check the Themes content width
+		if ( ! empty( $GLOBALS['content_width'] ) && $video_args['width'] > $GLOBALS['content_width'] ) {
+			$video_args['height'] = round( ( $video_args['height'] * $GLOBALS['content_width'] ) / $video_args['width'] );
+			$video_args['width']  = $GLOBALS['content_width'];
+		}
+
+		$output = wp_video_shortcode( $video_args );
+
+		if ( ! $output ) {
+			return $id;
 		}
 
 		mediatheque()->user_media_oembeds[ $url ] = $output;

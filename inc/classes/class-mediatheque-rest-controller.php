@@ -374,6 +374,14 @@ class MediaTheque_REST_Controller extends WP_REST_Attachments_Controller {
 			$filetype = wp_check_filetype( $filepath );
 			$type     = wp_ext2type( $filetype['ext'] );
 			$data['media_icon'] = wp_mime_type_icon( $type );
+
+			/**
+			 * The WP_REST_Attachments_Controller::prepare_item_for_response is only taking care of images
+			 * all other types are using a 'file' type.
+			 */
+			if ( 'video' === $type || 'audio' === $type ) {
+				$data['media_type'] = $type;
+			}
 		}
 
 		$data['parent'] = (int) $post->post_parent;
