@@ -142,7 +142,7 @@ window.mediaTheque = window.mediaTheque || _.extend( {}, _.pick( window.wp, 'Bac
 		}
 	} );
 
-	mediaTheque.media.view.customizeUserMedia = mediaTheque.media.view.EmbedImage.extend( {
+	mediaTheque.media.view.customizeImage = mediaTheque.media.view.EmbedImage.extend( {
 		className: 'user-media-preferences',
 		template : mediaTheque.template( 'image-details' ),
 
@@ -220,6 +220,61 @@ window.mediaTheque = window.mediaTheque || _.extend( {}, _.pick( window.wp, 'Bac
 			mediaTheque.media.view.EmbedImage.prototype.updateChanges.apply( this, arguments );
 
 			_.extend( this.queryString, _.pick( model.attributes, ['align', 'link', 'size'] ) );
+			this.model.metadata = {
+				url: this.model.get( 'base_url' ) + '?' + $.param( this.queryString )
+			};
+		}
+	} );
+
+	mediaTheque.media.view.customizeUserMedia = mediaTheque.media.view.Settings.extend( {
+		className: 'user-media-preferences',
+
+		initialize: function() {
+			var media = this.model.get( 'media' ), attr = {};
+
+			if ( 'video' === media.get( 'media_type' ) ) {
+				this.template = mediaTheque.template( 'video-details' );
+
+				_.extend( attr, _.pick( media.get( 'media_details'), ['width', 'height'] ) );
+			} else if ( 'audio' === media.get( 'media_type' ) ) {
+				/**
+				 * @todo  define audio attributes.
+				 */
+				this.template = mediaTheque.template( 'audio-details' );
+			}
+
+			_.defaults( attr, {
+				src:         media.get( 'guid' ).rendered,
+				'base_url' : media.get( 'link' )
+			} );
+
+			this.model.set( attr, { silent: true } );
+
+			this.queryString = _.defaults(
+				_.pick( this.model, ['align', 'preload'] ),
+				{
+					attached: true
+				}
+			);
+
+			mediaTheque.media.view.Settings.prototype.initialize.apply( this, arguments );
+
+			this.on( 'ready', this.setFormElements, this );
+		},
+
+		setFormElements: function() {
+			this.$el.find( '.wp-video-holder .setting' ).first().remove();
+			this.$el.find( '.setting' ).first().remove();
+			this.$el.find( '[data-setting="content"]' ).remove();
+
+			this.$el.find( '.embed-video-settings' ).append( '<div class="setting align"><span>Align</span><div class="button-group button-large" data-setting="align"><button class="button" value="left">Left</button><button class="button" value="center">Center</button><button class="button" value="right">Right</button><button class="button active" value="none">None</button></div></div>' );
+		},
+
+		updateChanges: function( model ) {
+			mediaTheque.media.view.Settings.prototype.updateChanges.apply( this, arguments );
+
+			_.extend( this.queryString, _.pick( model.attributes, ['align', 'preload', 'loop', 'autoplay'] ) );
+
 			this.model.metadata = {
 				url: this.model.get( 'base_url' ) + '?' + $.param( this.queryString )
 			};
@@ -317,20 +372,33 @@ window.mediaTheque = window.mediaTheque || _.extend( {}, _.pick( window.wp, 'Bac
 			media       = _.first( collection.models );
 			queryString = mediaTheque.App.getURLparams( state.props.get( 'url' ) );
 			media.set( _.pick( queryString, ['size', 'align'] ) );
+			state.set( { media: media } );
 
 			if ( 'image' === media.get( 'media_type' ) ) {
-				state.set( { media: media } );
-
+				this.customizeImageDisplay();
+			} else {
 				this.customizeUserMediaDisplay();
 			}
 		},
 
-		// Attach a specific view to let user choose some display preferences.
+		// Attach a specific view to let user choose some display preferences for images.
+		customizeImageDisplay: function() {
+			var state = this.state(),
+				view = new mediaTheque.media.view.customizeImage( {
+					model: state,
+					attachment: state.get( 'media' ),
+					controller: this,
+					priority: 40
+				} ).render();
+
+			this.content.set( view );
+		},
+
+		// Attach a specific view to let user choose some display preferences for audio and video.
 		customizeUserMediaDisplay: function() {
 			var state = this.state(),
 				view = new mediaTheque.media.view.customizeUserMedia( {
 					model: state,
-					attachment: state.get( 'media' ),
 					controller: this,
 					priority: 40
 				} ).render();

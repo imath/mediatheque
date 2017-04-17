@@ -337,15 +337,21 @@ p.drag-drop-buttons input[type="button"] {
 	top: 0;
 }
 
-.media-frame .user-media-preferences .embed-media-settings .column-image {
+.media-frame .user-media-preferences .embed-media-settings .column-image,
+.media-frame .user-media-preferences .embed-media-settings .wp-video-holder {
 	float: right;
 	margin-right: 1em;
 	width: 48%;
 }
 
-.media-frame .user-media-preferences .embed-media-settings .column-settings {
+.media-frame .user-media-preferences .embed-media-settings .column-settings,
+.media-frame .user-media-preferences .embed-video-settings .setting {
 	float: left;
 	margin-left: 1em;
 	overflow: hidden;
 	width: 48%;
+}
+
+.media-frame .user-media-preferences .embed-video-settings .setting {
+	clear: none;
 }
