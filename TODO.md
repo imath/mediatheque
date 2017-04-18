@@ -31,3 +31,4 @@
 [x] Make sure the media inserted has a line feed before and after.
 [] Add a tool to clear vanished media log
 [x] Instead of using wp_attachment_is() create a new function to get the type of a user media @see MediaTheque_REST_Controller->prepare_item_for_response().
+[] For the file output in the editor add KB infos.

@@ -430,7 +430,7 @@ function mediatheque_rest_avatar_sizes( $sizes = array() ) {
 	return array_merge( $sizes, $required );
 }
 
-function methiatheque_get_media_type( $user_media = null ) {
+function methiatheque_get_media_type( $user_media = null, $data = 'type' ) {
 	$user_media = get_post( $user_media );
 
 	if ( empty( $user_media->ID ) ) {
@@ -440,7 +440,17 @@ function methiatheque_get_media_type( $user_media = null ) {
 	$file     = get_attached_file( $user_media->ID );
 	$filedata = wp_check_filetype( $file );
 
-	return wp_ext2type( $filedata['ext'] );
+	if ( empty( $filedata['ext'] ) ) {
+		return false;
+	}
+
+	$filedata['media_type'] = wp_ext2type( $filedata['ext'] );
+
+	if ( 'type' === $data ) {
+		return $filedata['media_type'];
+	}
+
+	return $filedata;
 }
 
 /**
@@ -1540,7 +1550,7 @@ function mediatheque_oembed_user_media_id( $id = 0, $url = '' ) {
 		$av_args = array_intersect_key( $args, $default_av_args );
 		$av_args = wp_parse_args( $av_args, $default_av_args );
 
-		$uploads           = mediatheque_get_upload_dir();
+		$uploads        = mediatheque_get_upload_dir();
 		$av_args['src'] = trailingslashit( $uploads['baseurl'] ) . get_post_meta( $user_media->ID, '_wp_attached_file', true );
 
 		if ( ! $av_args['src'] ) {
@@ -1582,7 +1592,51 @@ function mediatheque_oembed_user_media_id( $id = 0, $url = '' ) {
 
 	// Take care of other files
 	} else {
-		// @todo
+		$filedata = methiatheque_get_media_type( $user_media, 'all' );
+
+		if ( empty( $filedata ) ) {
+			return $id;
+		}
+
+		$file_args = wp_parse_args( $args, array(
+			'icon'       => true,
+			'ext'        => true,
+			'media_type' => true,
+		) );
+
+		$download_link = mediatheque_get_download_url( $user_media );
+
+		$icon = '';
+		if ( $file_args['icon'] && ! empty( $filedata['media_type'] ) ) {
+			$icon = sprintf( '<a href="%1$s"><img src="%2$s" style="vertical-align:bottom" class="alignleft"></a>',
+				esc_url_raw( $download_link ),
+				esc_url_raw( wp_mime_type_icon( $filedata['media_type'] ) )
+			);
+		}
+
+		$title = sprintf( '<a href="%1$s"><strong>%2$s</strong></a>',
+			esc_url_raw( $download_link ),
+			esc_html( $user_media->post_title )
+		);
+
+
+		$file_type = '';
+		if ( $file_args['media_type'] && ! empty( $filedata['media_type'] ) ) {
+			$file_type = $filedata['media_type'];
+		}
+
+		$file_ext = '';
+		if ( $file_args['ext'] && ! empty( $filedata['ext'] ) ) {
+			$file_ext = ' (' . $filedata['ext'] . ')';
+		}
+
+		mediatheque()->user_media_oembeds[ $url ] = sprintf(
+			'<div class="mediatheque-file">%1$s<dl><dt>%2$s</dt><dd>%3$s%4$s</dd></dl></div>',
+			$icon,
+			$title,
+			$file_type,
+			$file_ext
+		);
 	}
 
 	// Track cached user media.

@@ -370,17 +370,15 @@ window.mediaTheque = window.mediaTheque || _.extend( {}, _.pick( window.wp, 'Bac
 
 		insertUserMedia: function() {
 			var selection = this.get( 'userMediaSelection' ),
-			    userMedia = {};
+			    userMedia;
 
 			if ( ! selection.length ) {
 				return false;
 			}
 
-			model = _.first( selection.models );
+			userMedia = _.first( selection.models );
 
-			if ( 'file' !== model.get( 'media_type' ) ) {
-				mediaTheque.media.editor.insert( '<p>' +  model.get( 'link' ) + '?attached=true' + '</p>' );
-			}
+			mediaTheque.media.editor.insert( '<p>' +  userMedia.get( 'link' ) + '?attached=true' + '</p>' );
 		},
 
 		editMedia: function( collection ) {
