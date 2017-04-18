@@ -263,11 +263,31 @@ window.mediaTheque = window.mediaTheque || _.extend( {}, _.pick( window.wp, 'Bac
 		},
 
 		setFormElements: function() {
+			var media = this.model.get( 'media' );
+
 			this.$el.find( '.wp-video-holder .setting' ).first().remove();
 			this.$el.find( '.setting' ).first().remove();
 			this.$el.find( '[data-setting="content"]' ).remove();
 
-			this.$el.find( '.embed-video-settings' ).append( '<div class="setting align"><span>Align</span><div class="button-group button-large" data-setting="align"><button class="button" value="left">Left</button><button class="button" value="center">Center</button><button class="button" value="right">Right</button><button class="button active" value="none">None</button></div></div>' );
+			if ( 'video' === media.get( 'media_type' ) ) {
+				var alignButtons = _.chain( mediaThequeSettings.common.alignBtns )
+					.map( function( label, value ) {
+						return $( '<button></button>' ).addClass( 'button' ).val( value ).html( label );
+					} )
+					.value();
+
+				this.$el.find( '.embed-video-settings' ).append(
+					$( '<div></div>' )
+						.addClass( 'setting align' )
+						.html(
+							$( '<div></div>' ).addClass( 'button-group button-large' ).attr( 'data-setting', 'align' ).html( _.each( alignButtons, function( button ) {
+									return $( button ).html();
+								} )
+							)
+						)
+						.prepend( $( '<span></span>' ).html( mediaThequeSettings.common.alignLabel ) )
+				);
+			}
 		},
 
 		updateChanges: function( model ) {
@@ -412,7 +432,7 @@ window.mediaTheque = window.mediaTheque || _.extend( {}, _.pick( window.wp, 'Bac
 			if ( state.props.get( 'isMediaTheque' ) ) {
 				userMediaSlug = _.first( _.map(
 					state.props.get( 'url' )
-						.replace( wp.api.utils.getRootUrl() + 'user-media/', '' )
+						.replace( mediaTheque.App.getRootURL(), '' )
 						.split( '?' ), function( part, i ) {
 							if ( 0 === i ) {
 								return part.replace( '/', '' );
@@ -619,7 +639,7 @@ window.mediaTheque = window.mediaTheque || _.extend( {}, _.pick( window.wp, 'Bac
 	$( mediaTheque.media.lightEditor.init );
 
 	mediaTheque.App = {
-		init: function( restUrl ) {
+		init: function( restUrl, rootUrl ) {
 			this.views        = new Backbone.Collection();
 			this.userMedia    = new wp.api.collections.UserMedia();
 			this.toolbarItems = new Backbone.Collection();
@@ -633,6 +653,8 @@ window.mediaTheque = window.mediaTheque || _.extend( {}, _.pick( window.wp, 'Bac
 					'X-WP-Nonce' : wpApiSettings.nonce
 				}
 			};
+
+			this.rootUrl = rootUrl.replace( 'wp-json', mediaThequeSettings.common.rootSlug );
 		},
 
 		getURLparams: function( url, param ) {
@@ -655,17 +677,22 @@ window.mediaTheque = window.mediaTheque || _.extend( {}, _.pick( window.wp, 'Bac
 			}
 
 			return params;
+		},
+
+		getRootURL: function() {
+			return this.rootUrl;
 		}
 	};
 
 	wp.api.loadPromise.done( function( api ) {
-		var restUrl;
+		var restUrl, rootUrl;
 
 		if ( api.get( 'apiRoot' ) && api.get( 'versionString' ) ) {
-			restUrl = api.get( 'apiRoot' ) + api.get( 'versionString' ) + 'user-media';
+			rootUrl = api.get( 'apiRoot' );
+			restUrl = rootUrl + api.get( 'versionString' ) + 'user-media';
 		}
 
-		mediaTheque.App.init( restUrl );
+		mediaTheque.App.init( restUrl, rootUrl );
 	} );
 
 } )( wp, jQuery );

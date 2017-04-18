@@ -686,6 +686,7 @@ function mediatheque_localize_script( $handle = 'mediatheque-views' ) {
 			'saveBtn' => __( 'Créer', 'mediatheque' ),
 		),
 		'common' => array(
+			'rootSlug'        => mediatheque_get_root_slug(),
 			'downloadSlug'    => mediatheque_get_download_rewrite_slug(),
 			'closeBtn'        => __( 'Fermer', 'mediatheque' ),
 			'noUserMedia'     => __( 'Aucun media utilisateur ne correspond à votre requête.', 'mediatheque' ),
@@ -695,6 +696,13 @@ function mediatheque_localize_script( $handle = 'mediatheque-views' ) {
 			'frameTitle'      => $post_type_object->labels->menu_name,
 			'embedTitle'      => __( 'Définissez vos préférences d\'affichage du media', 'mediatheque' ),
 			'embedBtn'        => __( 'Définir', 'mediatheque' ),
+			'alignLabel'      => __( 'Alignement', 'mediatheque' ),
+			'alignBtns'       => array(
+				'left'   => __( 'Gauche', 'mediatheque' ),
+				'center' => __( 'Centre', 'mediatheque' ),
+				'right'  => __( 'Right', 'mediatheque' ),
+				'none'   => __( 'None', 'mediatheque' ),
+			),
 		),
 	) );
 }
