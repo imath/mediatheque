@@ -171,7 +171,9 @@ class MediaTheque_REST_Controller extends WP_REST_Attachments_Controller {
 			} else {
 				$prepared_args['author'] = get_current_user_id();
 			}
-		} else {
+
+		// Makes sure it is possible to define display preferences for anyone.
+		} elseif ( 'display-preferences' !== $context ) {
 			$prepared_args['author'] = get_current_user_id();
 		}
 

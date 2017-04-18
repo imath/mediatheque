@@ -423,7 +423,7 @@ window.mediaTheque = window.mediaTheque || _.extend( {}, _.pick( window.wp, 'Bac
 				if ( userMediaSlug ) {
 					userMedia = new wp.api.collections.UserMedia();
 					userMedia.fetch( {
-						data: { slug: userMediaSlug },
+						data: { slug: userMediaSlug, 'user_media_context' : 'display-preferences' },
 						success: _.bind( this.editMedia, this )
 					} );
 				}
@@ -431,6 +431,16 @@ window.mediaTheque = window.mediaTheque || _.extend( {}, _.pick( window.wp, 'Bac
 				// Call 'embedContent' directly on the parent class.
 				mediaTheque.post.prototype.embedContent.apply( this, arguments );
 			}
+		},
+
+		mainEmbedToolbar: function( toolbar ) {
+			var params = { controller: this }, state = this.state();
+
+			if ( state.props.get( 'isMediaTheque' ) ) {
+				_.extend( params, { text: mediaThequeSettings.common.embedBtn } );
+			}
+
+			toolbar.view = new mediaTheque.media.view.Toolbar.Embed( params );
 		}
 	} );
 
