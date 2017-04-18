@@ -430,6 +430,19 @@ function mediatheque_rest_avatar_sizes( $sizes = array() ) {
 	return array_merge( $sizes, $required );
 }
 
+function methiatheque_get_media_type( $user_media = null ) {
+	$user_media = get_post( $user_media );
+
+	if ( empty( $user_media->ID ) ) {
+		return false;
+	}
+
+	$file     = get_attached_file( $user_media->ID );
+	$filedata = wp_check_filetype( $file );
+
+	return wp_ext2type( $filedata['ext'] );
+}
+
 /**
  * Get a specific (or nearest) intermediate size for a User Media.
  *
@@ -1471,9 +1484,10 @@ function mediatheque_oembed_user_media_id( $id = 0, $url = '' ) {
 	}
 
 	$user_media = get_post( $id );
+	$media_type = methiatheque_get_media_type( $user_media );
 
 	// Take care of images
-	if ( wp_attachment_is( 'image', $user_media ) ) {
+	if ( 'image' === $media_type ) {
 		$image = mediatheque_image_get_intermediate_size( $user_media, $args['size'] );
 
 		if ( ! empty( $image['url'] ) ) {
@@ -1513,50 +1527,62 @@ function mediatheque_oembed_user_media_id( $id = 0, $url = '' ) {
 			mediatheque()->user_media_oembeds[ $url ] = $output;
 		}
 
-	// Take care of videos
-	} elseif ( wp_attachment_is( 'video', $user_media ) ) {
-		$default_video_args = array(
+	// Take care of audios or videos
+	} elseif ( 'video' === $media_type || 'audio' === $media_type ) {
+		$default_av_args = array(
 			'src'      => '',
-			'poster'   => '',
 			'loop'     => '',
 			'autoplay' => '',
 			'preload'  => 'metadata',
 			'class'    => 'wp-video-shortcode',
 		);
 
-		$video_args = array_intersect_key( $args, $default_video_args );
-		$video_args = wp_parse_args( $video_args, $default_video_args );
-
-		if ( 'none' !== $args['align'] ) {
-			$video_args['class'] .= sprintf( ' align%s', $args['align'] );
-		}
+		$av_args = array_intersect_key( $args, $default_av_args );
+		$av_args = wp_parse_args( $av_args, $default_av_args );
 
 		$uploads           = mediatheque_get_upload_dir();
-		$video_args['src'] = trailingslashit( $uploads['baseurl'] ) . get_post_meta( $user_media->ID, '_wp_attached_file', true );
+		$av_args['src'] = trailingslashit( $uploads['baseurl'] ) . get_post_meta( $user_media->ID, '_wp_attached_file', true );
 
-		if ( ! $video_args['src'] ) {
+		if ( ! $av_args['src'] ) {
 			return $id;
 		}
 
-		$size = wp_get_attachment_metadata( $user_media->ID );
-		if ( ! empty( $size['width'] ) && ! empty( $size['height'] ) ) {
-			$video_args['width']  = $size['width'];
-			$video_args['height'] = $size['height'];
+		// Video Shortcode
+		if ( 'video' === $media_type ) {
+			if ( 'none' !== $args['align'] ) {
+				$av_args['class'] .= sprintf( ' align%s', $args['align'] );
+			}
+
+			$size = wp_get_attachment_metadata( $user_media->ID );
+			if ( ! empty( $size['width'] ) && ! empty( $size['height'] ) ) {
+				$av_args['width']  = $size['width'];
+				$av_args['height'] = $size['height'];
+			}
+
+			// Check the Themes content width
+			if ( ! empty( $GLOBALS['content_width'] ) && $av_args['width'] > $GLOBALS['content_width'] ) {
+				$av_args['height'] = round( ( $av_args['height'] * $GLOBALS['content_width'] ) / $av_args['width'] );
+				$av_args['width']  = $GLOBALS['content_width'];
+			}
+
+			$output = wp_video_shortcode( $av_args );
+
+		// Audio Shortcode
+		} else {
+			unset( $av_args['class'] );
+
+			$output = wp_audio_shortcode( $av_args );
 		}
 
-		// Check the Themes content width
-		if ( ! empty( $GLOBALS['content_width'] ) && $video_args['width'] > $GLOBALS['content_width'] ) {
-			$video_args['height'] = round( ( $video_args['height'] * $GLOBALS['content_width'] ) / $video_args['width'] );
-			$video_args['width']  = $GLOBALS['content_width'];
-		}
-
-		$output = wp_video_shortcode( $video_args );
-
-		if ( ! $output ) {
+		if ( empty( $output ) ) {
 			return $id;
 		}
 
 		mediatheque()->user_media_oembeds[ $url ] = $output;
+
+	// Take care of other files
+	} else {
+		// @todo
 	}
 
 	// Track cached user media.

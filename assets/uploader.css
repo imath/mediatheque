@@ -338,20 +338,31 @@ p.drag-drop-buttons input[type="button"] {
 }
 
 .media-frame .user-media-preferences .embed-media-settings .column-image,
-.media-frame .user-media-preferences .embed-media-settings .wp-video-holder {
+.media-frame .user-media-preferences .embed-media-settings .wp-video-holder,
+.media-frame .user-media-preferences .embed-audio-settings audio {
 	float: right;
 	margin-right: 1em;
 	width: 48%;
 }
 
+.media-frame .user-media-preferences .embed-audio-settings audio {
+	margin-top: 2em;
+}
+
 .media-frame .user-media-preferences .embed-media-settings .column-settings,
-.media-frame .user-media-preferences .embed-video-settings .setting {
+.media-frame .user-media-preferences .embed-video-settings .setting,
+.media-frame .user-media-preferences .embed-audio-settings .setting {
 	float: left;
 	margin-left: 1em;
 	overflow: hidden;
 	width: 48%;
 }
 
-.media-frame .user-media-preferences .embed-video-settings .setting {
+.media-frame .user-media-preferences .embed-audio-settings .setting {
+	width: calc( 100% - 430px );
+}
+
+.media-frame .user-media-preferences .embed-video-settings .setting,
+.media-frame .user-media-preferences .embed-audio-settings .setting {
 	clear: none;
 }

@@ -30,4 +30,4 @@
 [] Make sure avatar UI is only fetching public images
 [x] Make sure the media inserted has a line feed before and after.
 [] Add a tool to clear vanished media log
-[] Instead of using wp_attachment_is() create a new function to get the type of a user media @see MediaTheque_REST_Controller->prepare_item_for_response().
+[x] Instead of using wp_attachment_is() create a new function to get the type of a user media @see MediaTheque_REST_Controller->prepare_item_for_response().

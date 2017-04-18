@@ -232,14 +232,13 @@ window.mediaTheque = window.mediaTheque || _.extend( {}, _.pick( window.wp, 'Bac
 		initialize: function() {
 			var media = this.model.get( 'media' ), attr = {};
 
+			// Video Template
 			if ( 'video' === media.get( 'media_type' ) ) {
 				this.template = mediaTheque.template( 'video-details' );
-
 				_.extend( attr, _.pick( media.get( 'media_details'), ['width', 'height'] ) );
+
+			// Audio Template
 			} else if ( 'audio' === media.get( 'media_type' ) ) {
-				/**
-				 * @todo  define audio attributes.
-				 */
 				this.template = mediaTheque.template( 'audio-details' );
 			}
 
@@ -251,10 +250,8 @@ window.mediaTheque = window.mediaTheque || _.extend( {}, _.pick( window.wp, 'Bac
 			this.model.set( attr, { silent: true } );
 
 			this.queryString = _.defaults(
-				_.pick( this.model, ['align', 'preload'] ),
-				{
-					attached: true
-				}
+				_.pick( this.model, ['align', 'preload', 'autoplay', 'loop'] ),
+				{ attached: true }
 			);
 
 			mediaTheque.media.view.Settings.prototype.initialize.apply( this, arguments );
@@ -265,11 +262,11 @@ window.mediaTheque = window.mediaTheque || _.extend( {}, _.pick( window.wp, 'Bac
 		setFormElements: function() {
 			var media = this.model.get( 'media' );
 
-			this.$el.find( '.wp-video-holder .setting' ).first().remove();
-			this.$el.find( '.setting' ).first().remove();
-			this.$el.find( '[data-setting="content"]' ).remove();
-
 			if ( 'video' === media.get( 'media_type' ) ) {
+				this.$el.find( '.wp-video-holder .setting' ).first().remove();
+				this.$el.find( '[data-setting="content"]' ).remove();
+				this.$el.find( '.setting' ).first().remove();
+
 				var alignButtons = _.chain( mediaThequeSettings.common.alignBtns )
 					.map( function( label, value ) {
 						return $( '<button></button>' ).addClass( 'button' ).val( value ).html( label );
@@ -287,6 +284,10 @@ window.mediaTheque = window.mediaTheque || _.extend( {}, _.pick( window.wp, 'Bac
 						)
 						.prepend( $( '<span></span>' ).html( mediaThequeSettings.common.alignLabel ) )
 				);
+			} else {
+				this.$el.find( 'audio' ).css( { visibility: 'visible' } );
+				this.$el.find( '.embed-audio-settings label.setting' ).first().remove();
+				this.$el.find( '.embed-audio-settings div.setting' ).first().remove();
 			}
 		},
 
@@ -377,7 +378,7 @@ window.mediaTheque = window.mediaTheque || _.extend( {}, _.pick( window.wp, 'Bac
 
 			model = _.first( selection.models );
 
-			if ( 'image' === model.get( 'media_type' ) || 'video' === model.get( 'media_type' ) ) {
+			if ( 'file' !== model.get( 'media_type' ) ) {
 				mediaTheque.media.editor.insert( '<p>' +  model.get( 'link' ) + '?attached=true' + '</p>' );
 			}
 		},
