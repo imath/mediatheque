@@ -285,24 +285,14 @@ function mediatheque_meta_auth_personal_avatar( $auth = false, $meta_key = '', $
 	return ! empty( $object_id ) && ( (int) $object_id === (int) $user_id || is_super_admin() );
 }
 
-/**
- * Prepare the disk usage user meta for rest requests.
- *
- * @since 1.0.0
- *
- * @param  mixed           $value   Meta value to prepare.
- * @param  WP_REST_Request $request Rest request object.
- * @param  array           $args    Options for the field.
- * @return string          $value   The prepared value.
- */
-function mediatheque_disk_usage_prepare( $value, WP_REST_Request $request, $args ) {
+function mediatheque_format_file_size( $kb = 0 ) {
 	$unit = ' KB';
 
-	if ( empty( $value ) ) {
+	if ( empty( $kb ) ) {
 		return 0 . $unit;
 	}
 
-	$value     = absint( $value );
+	$value     = absint( $kb );
 	$megabytes = $value / 1000;
 	$gigabytes = $megabytes / 1000;
 
@@ -315,6 +305,20 @@ function mediatheque_disk_usage_prepare( $value, WP_REST_Request $request, $args
 	}
 
 	return number_format_i18n( $value, 2 ) . $unit;
+}
+
+/**
+ * Prepare the disk usage user meta for rest requests.
+ *
+ * @since 1.0.0
+ *
+ * @param  mixed           $value   Meta value to prepare.
+ * @param  WP_REST_Request $request Rest request object.
+ * @param  array           $args    Options for the field.
+ * @return string          $value   The prepared value.
+ */
+function mediatheque_disk_usage_prepare( $value, WP_REST_Request $request, $args ) {
+	return mediatheque_format_file_size( $value );
 }
 
 /**
@@ -430,7 +434,27 @@ function mediatheque_rest_avatar_sizes( $sizes = array() ) {
 	return array_merge( $sizes, $required );
 }
 
-function methiatheque_get_media_type( $user_media = null, $data = 'type' ) {
+function mediatheque_get_i18n_media_type( $media_type = '' ) {
+	$i18n_media_types = array(
+		'image'       => __( 'Image', 'mediatheque' ),
+		'audio'       => __( 'Son', 'mediatheque' ),
+		'video'       => __( 'Vidéo', 'mediatheque' ),
+		'document'    => __( 'Document', 'mediatheque' ),
+		'spreadsheet' => __( 'Tableur', 'mediatheque' ),
+		'interactive' => __( 'Présentation', 'mediatheque' ),
+		'text'        => __( 'Texte', 'mediatheque' ),
+		'archive'     => __( 'Archive', 'mediatheque' ),
+		'code'        => __( 'Code', 'mediatheque' ),
+	);
+
+	if ( isset( $i18n_media_types[ $media_type ] ) ) {
+		return $i18n_media_types[ $media_type ];
+	}
+
+	return $media_type;
+}
+
+function methiatheque_get_media_info( $user_media = null, $arg = 'media_type' ) {
 	$user_media = get_post( $user_media );
 
 	if ( empty( $user_media->ID ) ) {
@@ -445,9 +469,10 @@ function methiatheque_get_media_type( $user_media = null, $data = 'type' ) {
 	}
 
 	$filedata['media_type'] = wp_ext2type( $filedata['ext'] );
+	$filedata['size']       = filesize( $file );
 
-	if ( 'type' === $data ) {
-		return $filedata['media_type'];
+	if ( 'all' !== $arg ) {
+		return $filedata[ $arg ];
 	}
 
 	return $filedata;
@@ -1494,7 +1519,7 @@ function mediatheque_oembed_user_media_id( $id = 0, $url = '' ) {
 	}
 
 	$user_media = get_post( $id );
-	$media_type = methiatheque_get_media_type( $user_media );
+	$media_type = methiatheque_get_media_info( $user_media );
 
 	// Take care of images
 	if ( 'image' === $media_type ) {
@@ -1592,7 +1617,7 @@ function mediatheque_oembed_user_media_id( $id = 0, $url = '' ) {
 
 	// Take care of other files
 	} else {
-		$filedata = methiatheque_get_media_type( $user_media, 'all' );
+		$filedata = methiatheque_get_media_info( $user_media, 'all' );
 
 		if ( empty( $filedata ) ) {
 			return $id;
@@ -1602,13 +1627,14 @@ function mediatheque_oembed_user_media_id( $id = 0, $url = '' ) {
 			'icon'       => true,
 			'ext'        => true,
 			'media_type' => true,
+			'size'       => true,
 		) );
 
 		$download_link = mediatheque_get_download_url( $user_media );
 
 		$icon = '';
 		if ( $file_args['icon'] && ! empty( $filedata['media_type'] ) ) {
-			$icon = sprintf( '<a href="%1$s"><img src="%2$s" style="vertical-align:bottom" class="alignleft"></a>',
+			$icon = sprintf( '<a href="%1$s"><img src="%2$s" class="alignleft"></a>',
 				esc_url_raw( $download_link ),
 				esc_url_raw( wp_mime_type_icon( $filedata['media_type'] ) )
 			);
@@ -1622,7 +1648,7 @@ function mediatheque_oembed_user_media_id( $id = 0, $url = '' ) {
 
 		$file_type = '';
 		if ( $file_args['media_type'] && ! empty( $filedata['media_type'] ) ) {
-			$file_type = $filedata['media_type'];
+			$file_type = mediatheque_get_i18n_media_type( $filedata['media_type'] );
 		}
 
 		$file_ext = '';
@@ -1630,12 +1656,19 @@ function mediatheque_oembed_user_media_id( $id = 0, $url = '' ) {
 			$file_ext = ' (' . $filedata['ext'] . ')';
 		}
 
+		$file_size = '';
+		if ( $file_args['size'] && ! empty( $filedata['size'] ) ) {
+			$file_size = absint( $filedata['size'] ) / 1000; // Size in kylobytes
+			$file_size = '<dd><small>' . mediatheque_format_file_size( $file_size ) . '</small></dd>';
+		}
+
 		mediatheque()->user_media_oembeds[ $url ] = sprintf(
-			'<div class="mediatheque-file">%1$s<dl><dt>%2$s</dt><dd>%3$s%4$s</dd></dl></div>',
+			'<div class="mediatheque-file">%1$s<dl><dt>%2$s<br/><small>%3$s%4$s</small></dt>%5$s</dl></div>',
 			$icon,
 			$title,
 			$file_type,
-			$file_ext
+			$file_ext,
+			$file_size
 		);
 	}
 
