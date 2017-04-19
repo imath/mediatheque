@@ -345,7 +345,8 @@ p.drag-drop-buttons input[type="button"] {
 	width: 48%;
 }
 
-.media-frame .user-media-preferences .embed-audio-settings audio {
+.media-frame .user-media-preferences .embed-audio-settings audio,
+.media-frame #mediatheque-file-preferences .embed-media-settings {
 	margin-top: 2em;
 }
 

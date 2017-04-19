@@ -231,6 +231,7 @@ window.mediaTheque = window.mediaTheque || _.extend( {}, _.pick( window.wp, 'Bac
 
 		initialize: function() {
 			var media = this.model.get( 'media' ), attr = {};
+			this.options.query_keys = this.options.query_keys || ['align', 'preload', 'loop', 'autoplay'];
 
 			// Video Template
 			if ( 'video' === media.get( 'media_type' ) ) {
@@ -250,13 +251,15 @@ window.mediaTheque = window.mediaTheque || _.extend( {}, _.pick( window.wp, 'Bac
 			this.model.set( attr, { silent: true } );
 
 			this.queryString = _.defaults(
-				_.pick( this.model, ['align', 'preload', 'autoplay', 'loop'] ),
+				_.pick( this.model, this.options.query_keys ),
 				{ attached: true }
 			);
 
 			mediaTheque.media.view.Settings.prototype.initialize.apply( this, arguments );
 
-			this.on( 'ready', this.setFormElements, this );
+			if ( -1 !== _.indexOf( ['video', 'audio'], media.get( 'media_type' ) ) ) {
+				this.on( 'ready', this.setFormElements, this );
+			}
 		},
 
 		setFormElements: function() {
@@ -294,11 +297,52 @@ window.mediaTheque = window.mediaTheque || _.extend( {}, _.pick( window.wp, 'Bac
 		updateChanges: function( model ) {
 			mediaTheque.media.view.Settings.prototype.updateChanges.apply( this, arguments );
 
-			_.extend( this.queryString, _.pick( model.attributes, ['align', 'preload', 'loop', 'autoplay'] ) );
+			_.extend( this.queryString, _.pick( model.attributes, this.options.query_keys ) );
 
 			this.model.metadata = {
 				url: this.model.get( 'base_url' ) + '?' + $.param( this.queryString )
 			};
+		}
+	} );
+
+	mediaTheque.media.view.customizeFile = mediaTheque.media.view.customizeUserMedia.extend( {
+		initialize: function() {
+			var o = this.options || {}, position = 0,
+			    fields = this.options.fields || [];
+
+			this.options.query_keys = [];
+			this.collection = new Backbone.Collection();
+
+			this.views.add( new mediaTheque.View( {
+				id: 'mediatheque-file-preferences',
+				className: 'media-embed media-embed-details'
+			} ) );
+
+			this.views.add( '#mediatheque-file-preferences', new mediaTheque.View( { className: 'embed-media-settings' } ) );
+
+			_.each( fields, function( field, id ) {
+				position += 1;
+
+				this.collection.add( {
+					id:       id,
+					name:     field.name,
+					caption:  field.caption || '',
+					options:  field.options || [],
+					type:     field.type || '',
+					position: field.position || position,
+					classes : field.classes || [ 'setting', id ]
+				} );
+
+				this.options.query_keys.push( id );
+
+				this.addField( this.collection.get( id ) );
+			}, this );
+
+			mediaTheque.media.view.customizeUserMedia.prototype.initialize.apply( this, arguments );
+		},
+
+		addField: function( field ) {
+			this.views.add( '.embed-media-settings', new mediaTheque.Views.Field( { model: field }, { at: field.position } ) );
 		}
 	} );
 
@@ -415,12 +459,22 @@ window.mediaTheque = window.mediaTheque || _.extend( {}, _.pick( window.wp, 'Bac
 
 		// Attach a specific view to let user choose some display preferences for audio and video.
 		customizeUserMediaDisplay: function() {
-			var state = this.state(),
+			var state = this.state(), view, media = state.get( 'media' );
+
+			if ( -1 !== _.indexOf( ['video', 'audio'], media.get( 'media_type') ) ) {
 				view = new mediaTheque.media.view.customizeUserMedia( {
 					model: state,
 					controller: this,
 					priority: 40
 				} ).render();
+			} else {
+				view = new mediaTheque.media.view.customizeFile( {
+					model: state,
+					fields: mediaThequeSettings.fields,
+					controller: this,
+					priority: 40
+				} ).render();
+			}
 
 			this.content.set( view );
 		},

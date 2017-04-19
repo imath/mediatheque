@@ -1,0 +1,14 @@
+<# if ( 'textarea' === data.type ) { #>
+	<span>{{ data.name }}</span>
+	<textarea data-setting="{{ data.id }}"><# if ( data.value ) { {{ data.value }} } #></textarea>
+<# } else if ( 'text' === data.type ) { #>
+	<span>{{ data.name }}</span>
+	<input type="text" data-setting="{{ data.id }}" value="<# if ( data.value ) { {{ data.value }} } #>" />
+<# } else if ( 'checkbox' === data.type ) { #>
+	<# if ( data.name ) { #>
+		<span>{{ data.name }}</span>
+	<# } #>
+
+	<input type="checkbox" data-setting="{{ data.id }}" />
+	<span>{{ data.caption }}</span>
+<# } #>

@@ -1196,4 +1196,17 @@ window.mediaTheque = window.mediaTheque || _.extend( {}, _.pick( window.wp, 'Bac
 		}
 	} );
 
+	mediaTheque.Views.Field = mediaTheque.View.extend( {
+		tagName  : 'label',
+		template: mediaTheque.template( 'mediatheque-field-item' ),
+
+		initialize: function() {
+			var classes = this.model.get( 'classes' );
+
+			if ( _.isArray( classes ) ) {
+				this.el.className = classes.join( ' ' );
+			}
+		}
+	} );
+
 } )( jQuery );
