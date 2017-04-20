@@ -251,7 +251,7 @@ window.mediaTheque = window.mediaTheque || _.extend( {}, _.pick( window.wp, 'Bac
 			this.model.set( attr, { silent: true } );
 
 			this.queryString = _.defaults(
-				_.pick( this.model, this.options.query_keys ),
+				_.pick( this.model.attributes, this.options.query_keys ),
 				{ attached: true }
 			);
 
@@ -308,13 +308,19 @@ window.mediaTheque = window.mediaTheque || _.extend( {}, _.pick( window.wp, 'Bac
 	mediaTheque.media.view.customizeFile = mediaTheque.media.view.customizeUserMedia.extend( {
 		initialize: function() {
 			var o = this.options || {}, position = 0,
-			    fields = this.options.fields || [];
+			    fields = this.options.fields || [], query_vars = {};
 
 			this.options.query_keys = [];
 			this.collection = new Backbone.Collection();
 
+			mediaTheque.media.view.customizeUserMedia.prototype.initialize.apply( this, arguments );
+
+			if ( this.model.props && this.model.props.get( 'url' ) ) {
+				query_vars = mediaTheque.App.getURLparams( this.model.props.get( 'url' ) );
+			}
+
 			this.views.add( new mediaTheque.View( {
-				id: 'mediatheque-file-preferences',
+				id:        'mediatheque-file-preferences',
 				className: 'media-embed media-embed-details'
 			} ) );
 
@@ -330,19 +336,21 @@ window.mediaTheque = window.mediaTheque || _.extend( {}, _.pick( window.wp, 'Bac
 					options:  field.options || [],
 					type:     field.type || '',
 					position: field.position || position,
-					classes : field.classes || [ 'setting', id ]
+					classes : field.classes || [ 'setting', id ],
+					value   : ! _.isUndefined( query_vars[ id ] ) ? JSON.parse( query_vars[ id ] ) : false
 				} );
 
 				this.options.query_keys.push( id );
 
 				this.addField( this.collection.get( id ) );
 			}, this );
-
-			mediaTheque.media.view.customizeUserMedia.prototype.initialize.apply( this, arguments );
 		},
 
 		addField: function( field ) {
-			this.views.add( '.embed-media-settings', new mediaTheque.Views.Field( { model: field }, { at: field.position } ) );
+			this.views.add( '.embed-media-settings', new mediaTheque.Views.Field(
+				{ model: field },
+				{ at: field.position }
+			) );
 		}
 	} );
 

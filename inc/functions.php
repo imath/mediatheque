@@ -1660,7 +1660,7 @@ function mediatheque_oembed_user_media_id( $id = 0, $url = '' ) {
 		$download_link = mediatheque_get_download_url( $user_media );
 
 		$icon = '';
-		if ( false === (bool) $file_args['icon'] && ! empty( $filedata['media_type'] ) ) {
+		if ( ( false === (bool) $file_args['icon'] || 'false' === $file_args['icon'] ) && ! empty( $filedata['media_type'] ) ) {
 			$icon = sprintf( '<a href="%1$s"><img src="%2$s" class="alignleft"></a>',
 				esc_url_raw( $download_link ),
 				esc_url_raw( wp_mime_type_icon( $filedata['media_type'] ) )
@@ -1674,17 +1674,17 @@ function mediatheque_oembed_user_media_id( $id = 0, $url = '' ) {
 
 
 		$file_type = '';
-		if ( false === (bool) $file_args['media_type'] && ! empty( $filedata['media_type'] ) ) {
+		if ( ( false === (bool) $file_args['media_type'] || 'false' === $file_args['media_type'] )  && ! empty( $filedata['media_type'] ) ) {
 			$file_type = mediatheque_get_i18n_media_type( $filedata['media_type'] );
 		}
 
 		$file_ext = '';
-		if ( false === (bool) $file_args['ext'] && ! empty( $filedata['ext'] ) ) {
+		if ( ( false === (bool) $file_args['ext'] || 'false' === $file_args['ext'] ) && ! empty( $filedata['ext'] ) ) {
 			$file_ext = ' (' . $filedata['ext'] . ')';
 		}
 
 		$file_size = '';
-		if ( false === (bool) $file_args['file_size'] && ! empty( $filedata['size'] ) ) {
+		if ( ( false === (bool) $file_args['file_size'] || 'false' === $file_args['file_size'] ) && ! empty( $filedata['size'] ) ) {
 			$file_size = absint( $filedata['size'] ) / 1000; // Size in kylobytes
 			$file_size = '<dd><small>' . mediatheque_format_file_size( $file_size ) . '</small></dd>';
 		}

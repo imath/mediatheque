@@ -9,6 +9,6 @@
 		<span>{{ data.name }}</span>
 	<# } #>
 
-	<input type="checkbox" data-setting="{{ data.id }}" />
+	<input type="checkbox" data-setting="{{ data.id }}"<# if ( data.value ) { #> checked="checked"<# } #>/>
 	<span>{{ data.caption }}</span>
 <# } #>
