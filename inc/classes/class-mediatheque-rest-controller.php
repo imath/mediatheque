@@ -60,16 +60,16 @@ class MediaTheque_REST_Controller extends WP_REST_Attachments_Controller {
 		}
 
 		if ( ! isset( $this->user_media_type_ids[ $type ] ) ) {
-			$user_media_type = get_term_by( 'slug', $type, 'user_media_types' );
+			$user_media_type_id = mediatheque_get_user_media_type_id( $type );
 
-			if ( empty( $user_media_type->term_id ) ) {
+			if ( ! $user_media_type_id ) {
 				return false;
 			}
 
-			$user_media_type_ids[ $type ] = $user_media_type->term_id;
+			$this->user_media_type_ids[ $type ] = $user_media_type_id;
 		}
 
-		return (int) $user_media_type_ids[ $type ];
+		return $this->user_media_type_ids[ $type ];
 	}
 
 	/**

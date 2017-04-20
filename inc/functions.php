@@ -1040,28 +1040,18 @@ function mediatheque_embed_style() {
 	);
 }
 
-/**
- * Retrieve the path of the highest priority template file that exists.
- *
- * @since  1.0.0
- *
- * @param  string  $template The template file name.
- * @param  string  $name     The Undersore template ID.
- * @param  bool    $load     Whether to load or return the found template.
- * @return string            The template path.
- */
-function mediatheque_get_template_part( $template = '', $id = '', $load = true ) {
-	if ( empty( $template ) || empty( $id ) ) {
-		return '';
+function mediatheque_locate_template_part( $template = '', $type = 'html' ) {
+	if ( empty( $template ) ) {
+		return false;
 	}
 
-	$template = str_replace( '.html', '', $template );
+	$template = str_replace( ".{$type}", '', $template );
 	$located  = '';
 
-	$template_locations = (array) apply_filters( 'mediatheque_get_template_part', array(
-		trailingslashit( get_stylesheet_directory() ) . 'mediatheque/' . $template . '.html',
-		trailingslashit( get_template_directory() ) . 'mediatheque/' . $template . '.html',
-		mediatheque_templates() . $template . '.html',
+	$template_locations = (array) apply_filters( 'mediatheque_locate_template_part', array(
+		trailingslashit( get_stylesheet_directory() ) . 'mediatheque/' . $template . '.' . $type,
+		trailingslashit( get_template_directory() ) . 'mediatheque/' . $template . '.' . $type,
+		mediatheque_templates() . $template . '.' . $type,
 	) );
 
 	foreach ( $template_locations as $template_location ) {
@@ -1075,7 +1065,28 @@ function mediatheque_get_template_part( $template = '', $id = '', $load = true )
 		}
 	}
 
-	if ( $load && $located ) {
+	return $located;
+}
+
+/**
+ * Retrieve the path of the highest priority template file that exists.
+ *
+ * @since  1.0.0
+ *
+ * @param  string  $template The template file name.
+ * @param  string  $name     The Undersore template ID.
+ * @param  bool    $load     Whether to load or return the found template.
+ * @param  string  $type     The template type (php or html).
+ * @return string            The template path.
+ */
+function mediatheque_get_template_part( $template = '', $id = '', $load = true, $type = 'html' ) {
+	if ( empty( $template ) || empty( $id ) ) {
+		return '';
+	}
+
+	$located = mediatheque_locate_template_part( $template );
+
+	if ( $load && $located && 'html' === $type ) {
 		printf( '<script type="text/html" id="tmpl-%1$s">%2$s', esc_attr( $id ), "\n" );
 
 		load_template( $located, true );
@@ -1143,6 +1154,32 @@ function mediatheque_parse_query( WP_Query $query ) {
 	add_filter( 'the_content', 'mediatheque_prepend_user_media', 11 );
 }
 
+function mediatheque_get_user_media_type_id( $slug = '' ) {
+	$user_media_type = get_term_by( 'slug', $slug, 'user_media_types' );
+
+	if ( empty( $user_media_type->term_id ) ) {
+		return false;
+	}
+
+	return (int) $user_media_type->term_id;
+}
+
+function mediatheque_append_directory_content( $content = '' ) {
+	$template = mediatheque_locate_template_part( 'directory', 'php' );
+
+	if ( $template ) {
+		ob_start();
+
+		load_template( $template, true );
+
+		$directory_content = ob_get_clean();
+
+		$content .= "\n" . $directory_content;
+	}
+
+	return $content;
+}
+
 /**
  * Make sure the User Media file is prepended to its description.
  *
@@ -1154,6 +1191,13 @@ function mediatheque_parse_query( WP_Query $query ) {
 function mediatheque_prepend_user_media( $content = '' ) {
 	if ( 'user_media' !== get_post_type() || empty( $GLOBALS['post'] ) ) {
 		return $content;
+	}
+
+	$term_ids     = wp_get_object_terms(  $GLOBALS['post']->ID, 'user_media_types', array( 'fields' => 'ids' ) );
+	$directory_id = mediatheque_get_user_media_type_id( 'mediatheque-directory' );
+
+	if ( in_array( $directory_id, $term_ids, true ) ) {
+		return mediatheque_append_directory_content( $content );
 	}
 
 	mediatheque()->user_media_link = mediatheque_get_download_url( $GLOBALS['post'] );
