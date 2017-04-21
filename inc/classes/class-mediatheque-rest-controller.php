@@ -173,7 +173,18 @@ class MediaTheque_REST_Controller extends WP_REST_Attachments_Controller {
 			}
 
 		// Makes sure it is possible to define display preferences for anyone.
-		} elseif ( 'display-preferences' !== $context ) {
+		} elseif ( 'display-preferences' === $context ) {
+			unset( $prepared_args['author'] );
+
+		// Make sure the content of a directory is fetched when requested.
+		} elseif ( 'display' === $context && ! empty( $prepared_args['post_parent__in'] ) ) {
+			$post_parent   = reset( $prepared_args['post_parent__in'] );
+			$parent_status = get_post_status( $post_parent );
+
+			if ( ! in_array( $parent_status, $prepared_args['post_status'], true ) ) {
+				$prepared_args['post_status'][] = $parent_status;
+			}
+		} else {
 			$prepared_args['author'] = get_current_user_id();
 		}
 
@@ -276,11 +287,14 @@ class MediaTheque_REST_Controller extends WP_REST_Attachments_Controller {
 			return new WP_Error( 'rest_upload_unknown_error', $file['error'], array( 'status' => 500 ) );
 		}
 
+		/**
+		 * Add an .htaccess file to the private root dir if not set.
+		 */
 		if ( 'private' === $this->user_media_status && ! empty( $GLOBALS['is_apache'] ) ) {
-			$upload_dir = $this->upload_dir_filter();
-			$up_parent_dir = dirname( $upload_dir['path'] );
+			$upload_dir  = mediatheque_get_upload_dir();
+			$private_dir = trailingslashit( $upload_dir['path'] ) . 'private';
 
-			if ( ! file_exists( $up_parent_dir .'/.htaccess' ) ) {
+			if ( ! file_exists( $private_dir .'/.htaccess' ) ) {
 				// Include admin functions to get access to insert_with_markers().
 				require_once ABSPATH . 'wp-admin/includes/misc.php';
 
@@ -298,7 +312,7 @@ class MediaTheque_REST_Controller extends WP_REST_Attachments_Controller {
 				);
 
 				// creating the .htaccess file
-				insert_with_markers( $up_parent_dir .'/.htaccess', 'WP User Status', $rules );
+				insert_with_markers( $private_dir .'/.htaccess', 'WP User Status', $rules );
 			}
 		}
 

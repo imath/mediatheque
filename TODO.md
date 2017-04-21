@@ -20,11 +20,10 @@
 [x] When a User Media is moved inside a Directory the Modified Date of the Directory should be updated.
 [x] Make sure User Media are listed by modified date DESC.
 [] Work on capabilities making sure cap is publish for others when current user id is not author id
-[] Change "ghost" for "selection" ?
 [x] Find way to avoid the wpUploader to listen to drag and drop inside the WP Media Editor.
 [x] Find a way to deal with Media insterted into content when its parent directory has been changed 'embed?'
-[] Make sure the htaccess file is only added to the "private status" user dir and not in children
-[] Take care of folder display.
+[x] Make sure the htaccess file is only added to the "private status" user dir and not in children
+[x] Take care of folder display.
 [x] Make sure to take care of dead media of moved media
 [] Make sure private media cannot be attached but only embed.
 [] Make sure avatar UI is only fetching public images
@@ -32,3 +31,6 @@
 [] Add a tool to clear vanished media log
 [x] Instead of using wp_attachment_is() create a new function to get the type of a user media @see MediaTheque_REST_Controller->prepare_item_for_response().
 [x] For the file output in the editor add KB infos.
+[] Implement the Download action
+[] Add a view to edit title and content of user media
+[] Check the attachment navigation
