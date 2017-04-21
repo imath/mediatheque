@@ -709,6 +709,8 @@ function mediatheque_get_post_statuses( $status = '' ) {
 }
 
 function mediatheque_localize_script( $handle = 'mediatheque-views' ) {
+	$mediatheque = mediatheque();
+
 	$post_type_object = get_post_type_object( 'user_media' );
 
 	wp_localize_script( $handle, 'mediaThequeSettings', array(
@@ -751,6 +753,7 @@ function mediatheque_localize_script( $handle = 'mediatheque-views' ) {
 				'right'  => __( 'Right', 'mediatheque' ),
 				'none'   => __( 'None', 'mediatheque' ),
 			),
+			'directory'       => isset( $mediatheque->current_directory ) ? $mediatheque->current_directory : 0,
 		),
 		'fields' => array(
 			'icon' => array(
@@ -803,6 +806,10 @@ function mediatheque_register_scripts() {
 			'location' => sprintf( '%1$smanage%2$s.js', $url, $min ),
 			'deps'     => array( 'mediatheque-uploader', 'mediatheque-views' ),
 		),
+		'mediatheque-display' => array(
+			'location' => sprintf( '%1$sdisplay%2$s.js', $url, $min ),
+			'deps'     => array( 'mediatheque-views' ),
+		),
 	);
 
 	foreach ( $scripts as $handle => $script ) {
@@ -812,7 +819,7 @@ function mediatheque_register_scripts() {
 	wp_register_style(
 		'mediatheque-uploader',
 		sprintf( '%1$suploader%2$s.css', mediatheque_assets_url(), $min ),
-		array(),
+		array( 'dashicons' ),
 		$v
 	);
 }
@@ -1168,6 +1175,11 @@ function mediatheque_append_directory_content( $content = '' ) {
 	$template = mediatheque_locate_template_part( 'directory', 'php' );
 
 	if ( $template ) {
+		wp_enqueue_script( 'mediatheque-display' );
+		mediatheque_localize_script();
+
+		wp_enqueue_style( 'mediatheque-uploader' );
+
 		ob_start();
 
 		load_template( $template, true );
@@ -1193,14 +1205,17 @@ function mediatheque_prepend_user_media( $content = '' ) {
 		return $content;
 	}
 
-	$term_ids     = wp_get_object_terms(  $GLOBALS['post']->ID, 'user_media_types', array( 'fields' => 'ids' ) );
+	$mediatheque  = mediatheque();
+	$term_ids     = wp_get_object_terms( $GLOBALS['post']->ID, 'user_media_types', array( 'fields' => 'ids' ) );
 	$directory_id = mediatheque_get_user_media_type_id( 'mediatheque-directory' );
 
 	if ( in_array( $directory_id, $term_ids, true ) ) {
+		$mediatheque->current_directory = $GLOBALS['post']->ID;
+
 		return mediatheque_append_directory_content( $content );
 	}
 
-	mediatheque()->user_media_link = mediatheque_get_download_url( $GLOBALS['post'] );
+	$mediatheque->user_media_link = mediatheque_get_download_url( $GLOBALS['post'] );
 
 	// Overrides
 	$reset_post = clone $GLOBALS['post'];
@@ -1216,7 +1231,7 @@ function mediatheque_prepend_user_media( $content = '' ) {
 	remove_filter( 'the_content',            'mediatheque_prepend_user_media', 11    );
 	remove_filter( 'wp_get_attachment_link', 'mediatheque_attachment_link',    10, 1 );
 
-	unset( mediatheque()->user_media_link );
+	unset( $mediatheque->user_media_link );
 
 	return $content;
 }

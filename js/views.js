@@ -68,6 +68,10 @@ window.mediaTheque = window.mediaTheque || _.extend( {}, _.pick( window.wp, 'Bac
 
 			if ( $( '.media-frame-content' ).length ) {
 				this.scrollingElement = $( '.media-frame-content' );
+
+			// We should use this for any case
+			} else if ( this.options.scrollingElement ) {
+				this.scrollingElement = $( this.options.scrollingElement );
 			}
 
 			this.scrollingElement.on( 'scroll', _.bind( this.scroll, this ) );
@@ -269,7 +273,7 @@ window.mediaTheque = window.mediaTheque || _.extend( {}, _.pick( window.wp, 'Bac
 			} else if ( 'dir' === this.model.get( 'media_type' ) ) {
 				this.el.className += ' dir droppable';
 
-				if ( 'wp-editor' !== o.uiType ) {
+				if ( 'wp-editor' !== o.uiType && 'display' !== o.uiType ) {
 					mediaTheque.Views.Droppable.prototype.initialize.apply( this, arguments );
 				} else {
 					this.$el.attr( 'data-id',   this.model.get( 'id' ) );
@@ -285,7 +289,7 @@ window.mediaTheque = window.mediaTheque || _.extend( {}, _.pick( window.wp, 'Bac
 		setMediaProps: function() {
 			var o = this.options || {};
 
-			if ( 'wp-editor' !== o.uiType ) {
+			if ( 'wp-editor' !== o.uiType && 'display' !== o.uiType ) {
 				this.$el.prop( 'draggable', true );
 			} else {
 				this.el.className += ' selectable';
@@ -594,6 +598,23 @@ window.mediaTheque = window.mediaTheque || _.extend( {}, _.pick( window.wp, 'Bac
 			}
 
 			e.dataTransfer.setData( 'modelId', $( event.currentTarget ).data( 'id' ) );
+		}
+	} );
+
+	mediaTheque.Views.displayUserMedias = mediaTheque.Views.UserMedias.extend( {
+		events: {},
+
+		initialize: function() {
+			var o = this.options || {}, qv = { 'user_media_context': 'display' };
+
+			mediaTheque.Views.Users.prototype.initialize.apply( this, arguments );
+
+			if ( mediaThequeSettings.common.directory ) {
+				qv.parent = parseInt( mediaThequeSettings.common.directory, 10 );
+			}
+
+			// Init the view with default Query Vars.
+			this.queryUserMedia( qv );
 		}
 	} );
 
@@ -1193,6 +1214,23 @@ window.mediaTheque = window.mediaTheque || _.extend( {}, _.pick( window.wp, 'Bac
 					}
 				} );
 			}
+		}
+	} );
+
+	mediaTheque.Views.Display = mediaTheque.View.extend( {
+
+		initialize: function() {
+			var o = this.options || {};
+
+			this.ghost = new Backbone.Collection();
+
+			// Add the media view
+			this.views.set( '#media', new mediaTheque.Views.displayUserMedias( {
+				collection: o.media,
+				ghost:      this.ghost,
+				queryVars:  o.queryVars,
+				scrollingElement: '#mediatheque-container'
+			} ) );
 		}
 	} );
 

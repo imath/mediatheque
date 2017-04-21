@@ -228,6 +228,8 @@ p.drag-drop-buttons input[type="button"] {
 	margin: 0 0.5em;
 	text-decoration: none;
 	border: none;
+	box-shadow: none;
+	-webkit-box-shadow: none;
 }
 
 #mediatheque-container #trail ul {
@@ -366,4 +368,17 @@ p.drag-drop-buttons input[type="button"] {
 .media-frame .user-media-preferences .embed-video-settings .setting,
 .media-frame .user-media-preferences .embed-audio-settings .setting {
 	clear: none;
+}
+
+/* Front-end */
+body:not( .wp-admin ) #mediatheque-container {
+	background-color: #f1f1f1;
+	height: 450px;
+	overflow-y: scroll;
+	padding: 1em;
+}
+
+body:not( .wp-admin ) #mediatheque-container #media {
+	width: 100%;
+	margin: 0 auto;
 }
