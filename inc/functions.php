@@ -133,7 +133,14 @@ function mediatheque_attachment_link( $link = '' ) {
 	$user_media_link = mediatheque_get_download_url( null );
 
 	if ( '#' !== $user_media_link ) {
-		$link = preg_replace( '/(?<=href=\').+(?=\')/', $user_media_link, $link );
+		$link = preg_replace( '/(width|height)="\d*"\s/', '', $link, 2, $count );
+
+		// It's not an image.
+		if ( empty( $count ) ) {
+			$link = mediatheque_file_shortcode( null, array( 'use_file_name' => true ) );
+		} else {
+			$link = preg_replace( '/(?<=href=\').+(?=\')/', $user_media_link, $link );
+		}
 	}
 
 	return $link;
@@ -1592,6 +1599,77 @@ function mediatheque_oembed_get_url_args( $url = '' ) {
 	) );
 }
 
+function mediatheque_file_shortcode( $user_media = null, $args = array() ) {
+	if ( empty( $user_media->post_type ) || 'user_media' !== $user_media->post_type ) {
+		$user_media = get_post();
+	}
+
+	$filedata = methiatheque_get_media_info( $user_media, 'all' );
+
+	if ( empty( $filedata ) ) {
+		return '';
+	}
+
+	$mediatheque = mediatheque();
+	if ( isset( $mediatheque->user_media_link ) ) {
+		$download_link = $mediatheque->user_media_link;
+	} else {
+		$download_link = mediatheque_get_download_url( $user_media );
+	}
+
+	$file_args = wp_parse_args( $args, array(
+		'icon'          => false,
+		'ext'           => false,
+		'media_type'    => false,
+		'file_size'     => false,
+		'use_file_name' => false,
+	) );
+
+	$icon = '';
+	if ( ( false === (bool) $file_args['icon'] || 'false' === $file_args['icon'] ) && ! empty( $filedata['media_type'] ) ) {
+		$icon = sprintf( '<a href="%1$s"><img src="%2$s" class="alignleft"></a>',
+			esc_url_raw( $download_link ),
+			esc_url_raw( wp_mime_type_icon( $filedata['media_type'] ) )
+		);
+	}
+
+	$title = $user_media->post_title;
+
+	if ( true === $file_args['use_file_name'] ) {
+		$title = basename( $user_media->guid );
+	}
+
+	$title = sprintf( '<a href="%1$s"><strong>%2$s</strong></a>',
+		esc_url_raw( $download_link ),
+		esc_html( $title )
+	);
+
+	$file_type = '';
+	if ( ( false === (bool) $file_args['media_type'] || 'false' === $file_args['media_type'] )  && ! empty( $filedata['media_type'] ) ) {
+		$file_type = mediatheque_get_i18n_media_type( $filedata['media_type'] );
+	}
+
+	$file_ext = '';
+	if ( ( false === (bool) $file_args['ext'] || 'false' === $file_args['ext'] ) && ! empty( $filedata['ext'] ) ) {
+		$file_ext = ' (' . $filedata['ext'] . ')';
+	}
+
+	$file_size = '';
+	if ( ( false === (bool) $file_args['file_size'] || 'false' === $file_args['file_size'] ) && ! empty( $filedata['size'] ) ) {
+		$file_size = absint( $filedata['size'] ) / 1000; // Size in kylobytes
+		$file_size = '<dd><small>' . mediatheque_format_file_size( $file_size ) . '</small></dd>';
+	}
+
+	return sprintf(
+		'<div class="mediatheque-file">%1$s<dl><dt>%2$s<br/><small>%3$s%4$s</small></dt>%5$s</dl></div>',
+		$icon,
+		$title,
+		$file_type,
+		$file_ext,
+		$file_size
+	);
+}
+
 function mediatheque_oembed_user_media_id( $id = 0, $url = '' ) {
 	if ( ! $id ) {
 		return $id;
@@ -1703,59 +1781,13 @@ function mediatheque_oembed_user_media_id( $id = 0, $url = '' ) {
 
 	// Take care of other files
 	} else {
-		$filedata = methiatheque_get_media_info( $user_media, 'all' );
+		$output = mediatheque_file_shortcode( $user_media, $args );
 
-		if ( empty( $filedata ) ) {
+		if ( empty( $output ) ) {
 			return $id;
 		}
 
-		$file_args = wp_parse_args( $args, array(
-			'icon'       => false,
-			'ext'        => false,
-			'media_type' => false,
-			'file_size'  => false,
-		) );
-
-		$download_link = mediatheque_get_download_url( $user_media );
-
-		$icon = '';
-		if ( ( false === (bool) $file_args['icon'] || 'false' === $file_args['icon'] ) && ! empty( $filedata['media_type'] ) ) {
-			$icon = sprintf( '<a href="%1$s"><img src="%2$s" class="alignleft"></a>',
-				esc_url_raw( $download_link ),
-				esc_url_raw( wp_mime_type_icon( $filedata['media_type'] ) )
-			);
-		}
-
-		$title = sprintf( '<a href="%1$s"><strong>%2$s</strong></a>',
-			esc_url_raw( $download_link ),
-			esc_html( $user_media->post_title )
-		);
-
-
-		$file_type = '';
-		if ( ( false === (bool) $file_args['media_type'] || 'false' === $file_args['media_type'] )  && ! empty( $filedata['media_type'] ) ) {
-			$file_type = mediatheque_get_i18n_media_type( $filedata['media_type'] );
-		}
-
-		$file_ext = '';
-		if ( ( false === (bool) $file_args['ext'] || 'false' === $file_args['ext'] ) && ! empty( $filedata['ext'] ) ) {
-			$file_ext = ' (' . $filedata['ext'] . ')';
-		}
-
-		$file_size = '';
-		if ( ( false === (bool) $file_args['file_size'] || 'false' === $file_args['file_size'] ) && ! empty( $filedata['size'] ) ) {
-			$file_size = absint( $filedata['size'] ) / 1000; // Size in kylobytes
-			$file_size = '<dd><small>' . mediatheque_format_file_size( $file_size ) . '</small></dd>';
-		}
-
-		mediatheque()->user_media_oembeds[ $url ] = sprintf(
-			'<div class="mediatheque-file">%1$s<dl><dt>%2$s<br/><small>%3$s%4$s</small></dt>%5$s</dl></div>',
-			$icon,
-			$title,
-			$file_type,
-			$file_ext,
-			$file_size
-		);
+		mediatheque()->user_media_oembeds[ $url ] = $output;
 	}
 
 	// Track cached user media.

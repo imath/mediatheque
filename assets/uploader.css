@@ -202,6 +202,8 @@ p.drag-drop-buttons input[type="button"] {
 	position: absolute;
 	bottom: 0;
 	width: 100%;
+	font-size: 13px;
+	font-weight: 600;
 }
 
 #mediatheque-container #media ul li.user-media div.user-media-content div.bg-img {
