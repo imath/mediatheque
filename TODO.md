@@ -33,4 +33,4 @@
 [x] For the file output in the editor add KB infos.
 [] Implement the Download action
 [] Add a view to edit title and content of user media
-[] Check the attachment navigation
+[x] Check the attachment navigation

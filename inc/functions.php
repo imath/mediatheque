@@ -1196,6 +1196,8 @@ function mediatheque_append_directory_content( $content = '' ) {
 		$content .= "\n" . $directory_content;
 	}
 
+	$GLOBALS['wp_query']->is_attachment = false;
+
 	return $content;
 }
 
@@ -1239,6 +1241,8 @@ function mediatheque_prepend_user_media( $content = '' ) {
 	remove_filter( 'wp_get_attachment_link', 'mediatheque_attachment_link',    10, 1 );
 
 	unset( $mediatheque->user_media_link );
+
+	$GLOBALS['wp_query']->is_attachment = false;
 
 	return $content;
 }
