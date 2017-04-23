@@ -192,6 +192,25 @@ class MediaTheque_REST_Controller extends WP_REST_Attachments_Controller {
 	}
 
 	/**
+	 * Retrieves a single User Media.
+	 *
+	 * @since 1.0.0
+	 * @access public
+	 *
+	 * @param WP_REST_Request $request Full details about the request.
+	 * @return WP_REST_Response|WP_Error Response object on success, or WP_Error object on failure.
+	 */
+	public function get_item( $request ) {
+		$this->register_post_type_only_metas();
+
+		$response = parent::get_item( $request );
+
+		$this->unregister_post_type_only_metas();
+
+		return $response;
+	}
+
+	/**
 	 * Retrieves a collection of User Media.
 	 *
 	 * @since 1.0.0
@@ -341,6 +360,11 @@ class MediaTheque_REST_Controller extends WP_REST_Attachments_Controller {
 			$prepared_user_media->post_author = $this->user_id;
 		}
 
+		// Remove all tags for now.
+		if ( ! empty( $prepared_user_media->post_content ) ) {
+			$prepared_user_media->post_content = wp_kses( $prepared_user_media->post_content, array() );
+		}
+
 		return $prepared_user_media;
 	}
 
@@ -399,6 +423,23 @@ class MediaTheque_REST_Controller extends WP_REST_Attachments_Controller {
 		}
 
 		$data['parent'] = (int) $post->post_parent;
+		$is_edit        = $request->get_param( 'user_media_edit' );
+
+		if ( $is_edit ) {
+			$embed_link     = esc_url_raw( get_post_permalink( $post ) );
+			$attached_posts = mediatheque_get_attached_post( $embed_link );
+
+			foreach ( $attached_posts as $index => $attached_post ) {
+				$attached_posts[ $index ] = array(
+					'id'        => $attached_post->ID,
+					'title'     => esc_html( $attached_post->post_title ),
+					'edit_link' => esc_url_raw( get_edit_post_link( $attached_post ) ),
+				);
+			}
+
+			$data['attached_posts'] = $attached_posts;
+		}
+
 		$response = rest_ensure_response( $data );
 
 		/**

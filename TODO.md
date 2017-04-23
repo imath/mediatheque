@@ -32,5 +32,6 @@
 [x] Instead of using wp_attachment_is() create a new function to get the type of a user media @see MediaTheque_REST_Controller->prepare_item_for_response().
 [x] For the file output in the editor add KB infos.
 [] Implement the Download action
-[] Add a view to edit title and content of user media
+[x] Add a view to edit title and content of user media
 [x] Check the attachment navigation
+[] Take care of Directory embed template

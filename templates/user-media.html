@@ -21,16 +21,21 @@
 
 	<# if ( 'wp-editor' !== data.uiType ) { #>
 		<div class="user-media-actions">
-			<# if ( 'dir' === data.media_type && 'display' !== data.uiType ) { #>
+			<# if ( 'display' !== data.uiType ) { #>
 				<a href="#/name/{{data.slug}}" class="edit"><span class="dashicons dashicons-edit"></span></a>
+				<a href="{{data.link}}" class="view"><span class="dashicons dashicons-visibility"></span></a>
+
 			<# } else if ( data.download ) { #>
 				<a href="{{data.download}}" class="download"><span class="dashicons dashicons-download"></span></a>
 			<# } #>
-			<a href="{{data.link}}" class="view"><span class="dashicons dashicons-visibility"></span></a>
 
 			<# if ( 'display' !== data.uiType ) { #>
 				<a href="#/delete/{{data.slug}}" class="delete"><span class="dashicons dashicons-trash"></span></a>
 			<# } #>
 		</div>
+	<# } #>
+
+	<# if ( 'admin' === data.uiType ) { #>
+		<form class="user-media-edit-container"></form>
 	<# } #>
 <# } #>

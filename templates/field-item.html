@@ -1,9 +1,12 @@
 <# if ( 'textarea' === data.type ) { #>
 	<span>{{ data.name }}</span>
-	<textarea data-setting="{{ data.id }}"><# if ( data.value ) { {{ data.value }} } #></textarea>
+	<textarea data-setting="{{ data.id }}"><# if ( data.value ) { #>{{ data.value }}<# } #></textarea>
+<# } else if ( 'contenteditable' === data.type ) { #>
+	<span>{{ data.name }}</span>
+	<div contenteditable="true" data-setting="{{ data.id }}"><# if ( data.value ) { #>{{{ data.value }}}<# } #></div>
 <# } else if ( 'text' === data.type ) { #>
 	<span>{{ data.name }}</span>
-	<input type="text" data-setting="{{ data.id }}" value="<# if ( data.value ) { {{ data.value }} } #>" />
+	<input type="text" data-setting="{{ data.id }}" value="<# if ( data.value ) { #>{{ data.value }}<# } #>" />
 <# } else if ( 'checkbox' === data.type ) { #>
 	<# if ( data.name ) { #>
 		<span>{{ data.name }}</span>
@@ -11,4 +14,20 @@
 
 	<input type="checkbox" data-setting="{{ data.id }}"<# if ( data.value ) { #> checked="checked"<# } #>/>
 	<span>{{ data.caption }}</span>
+<# } else if ( 'list' === data.type && _.isArray( data.value ) && 0 < data.value.length ) { #>
+	<span>{{ data.name }}</span>
+	<table>
+		<tbody>
+			<# for ( i in data.value ) { #>
+				<tr>
+					<td>{{{data.value[i].title}}}</td>
+					<td><a href="{{{data.value[i].edit_link}}}"><span class="dashicons dashicons-edit"></span></a></td>
+				</tr>
+			<# } #>
+		</tbody>
+	</table>
+<# } else if ( 'submit' === data.type || 'reset' === data.type ) { #>
+	<button class="button<# if ( data.classes ) { #> {{ data.classes.join( ' ' ) }}<# } #>" type="{{data.type}}">
+		{{ data.caption }}
+	</button>
 <# } #>

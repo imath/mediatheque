@@ -234,6 +234,116 @@ p.drag-drop-buttons input[type="button"] {
 	-webkit-box-shadow: none;
 }
 
+#mediatheque-container #media ul li.user-media.editing {
+	width: 83%;
+	z-index: 160000;
+	position: fixed;
+	margin: auto auto;
+}
+
+#mediatheque-container #media ul li.user-media.editing div.user-media-content {
+	float: left;
+	width: 200px;
+}
+
+#mediatheque-container #media ul li.user-media.dir.editing {
+	background: #fff;
+	background-image: 'none';
+}
+
+#mediatheque-container #media ul li.user-media.dir.editing div.user-media-content {
+	background-image: url( 'folder.svg' );
+	background-size: cover;
+	background-repeat: no-repeat;
+	background-color: #ddd;
+}
+
+#mediatheque-container #media ul li.user-media.editing div.user-media-actions {
+	display: none;
+}
+
+#mediatheque-container #media ul li.user-media.editing form.user-media-edit-container .media-edit {
+	text-align: left;
+	margin: 1em;
+	margin-left: 210px;
+	overflow: hidden;
+	cursor: auto;
+}
+
+#mediatheque-container #media ul li.user-media.editing form.user-media-edit-container label {
+	display: block;
+	margin-bottom: 1em;
+	cursor: auto;
+}
+
+#mediatheque-container #media ul li.user-media.editing form.user-media-edit-container table a {
+	text-decoration: none;
+	border: none;
+}
+
+#mediatheque-container #media ul li.user-media.editing form.user-media-edit-container label.submit,
+#mediatheque-container #media ul li.user-media.editing form.user-media-edit-container label.reset {
+	padding: 0;
+	margin: 0 0.5em;
+	display: inline-block;
+	float: right;
+}
+
+#mediatheque-container #media ul li.user-media.editing form.user-media-edit-container label span {
+	font-weight: bold;
+}
+
+#mediatheque-container #media ul li.user-media.editing form.user-media-edit-container label input[type="text"],
+#mediatheque-container #media ul li.user-media.editing form.user-media-edit-container label textarea {
+	width: 98%;
+}
+
+#mediatheque-container #media ul li.user-media.editing form.user-media-edit-container [data-setting="description"] {
+	min-height: 3em;
+	border: 1px solid #ddd;
+	margin: 1px;
+	padding: 3px 5px;
+	box-sizing: border-box;
+	-webkit-box-shadow: inset 0 1px 2px rgba( 0, 0, 0, 0.07 );
+	box-shadow: inset 0 1px 2px rgba( 0, 0, 0, 0.07 );
+	background-color: #fff;
+	color: #32373c;
+	outline: none;
+	width: 98%;
+}
+
+#mediatheque-container #media ul li.user-media.editing form.user-media-edit-container [data-setting="description"]:focus {
+ 	border-color: #5b9dd9;
+	-webkit-box-shadow: 0 0 2px rgba( 30, 140, 190, 0.8 );
+	box-shadow: 0 0 2px rgba( 30, 140, 190, 0.8 );
+}
+
+#mediatheque-container #media ul li.user-media.editing form.user-media-edit-container [data-setting="description"] p {
+	margin: auto;
+	padding: auto;
+}
+
+#mediatheque-backdrop {
+	display:none;
+	position: fixed;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	min-height: 360px;
+	background: #000;
+	opacity: 0.7;
+	z-index: 159900;
+}
+
+#mediatheque-backdrop.editing {
+	display: block;
+}
+
+#mediatheque-container #media ul li.user-media.editing:after {
+	clear:both;
+}
+
 #mediatheque-container #trail ul {
 	list-style: none;
 	overflow: hidden;
@@ -383,4 +493,8 @@ body:not( .wp-admin ) #mediatheque-container {
 body:not( .wp-admin ) #mediatheque-container #media {
 	width: 100%;
 	margin: 0 auto;
+}
+
+body:not( .wp-admin ) #mediatheque-container #media .selectable .user-media-content:hover {
+	cursor: pointer;
 }

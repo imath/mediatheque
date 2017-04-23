@@ -248,13 +248,97 @@ window.mediaTheque = window.mediaTheque || _.extend( {}, _.pick( window.wp, 'Bac
 		}
 	} );
 
+	mediaTheque.Views.editUserMedia = mediaTheque.View.extend( {
+		className: 'media-edit',
+
+		events: {
+			'click button.reset'  : 'removeView',
+			'click button.submit' : 'updateUserMedia'
+		},
+
+		initialize: function() {
+			this.userMedia = new wp.api.models.UserMedia( { id: this.model.get( 'id' ) } );
+
+			this.userMedia.fetch( {
+				data: { 'user_media_edit': true },
+				success : _.bind( this.setEditFields, this )
+			} );
+		},
+
+		setEditFields: function( model ) {
+			var fields = mediaThequeSettings.editFields;
+
+			_.each( fields, function( field, id ) {
+				var userMediaAttribute = model.get( id );
+
+				if ( userMediaAttribute ) {
+					if ( ! _.isUndefined( userMediaAttribute.rendered ) ) {
+						field.value = userMediaAttribute.rendered;
+					} else {
+						field.value = userMediaAttribute;
+					}
+
+					field.id = id;
+				}
+
+				this.views.add( new mediaTheque.Views.Field(
+					{ model: new Backbone.Model( field ) },
+					{ at: field.position }
+				) );
+			}, this );
+		},
+
+		removeView: function( event ) {
+			event.preventDefault();
+
+			$( event.currentTarget ).closest( 'li.user-media' ).removeClass( 'editing' );
+			$( '#mediatheque-backdrop' ).removeClass( 'editing' );
+			this.remove();
+		},
+
+		updateUserMedia: function( event ) {
+			event.preventDefault();
+
+			var elements = $( event.currentTarget ).closest( 'form' ).find( '[data-setting]' ), edits = {};
+
+			_.each( elements, function( e ) {
+				var attribute = $( e ).data( 'setting' ), userMediaAttribute = this.model.get( attribute ),
+					val;
+
+				if ( 'DIV' === $( e ).prop( 'tagName') ) {
+					val = $( e ).text();
+				} else {
+					val = $( e ).val();
+				}
+
+				if ( userMediaAttribute ) {
+					if ( ! _.isUndefined( userMediaAttribute.rendered ) ) {
+						userMediaAttribute = userMediaAttribute.rendered;
+					}
+
+					if ( userMediaAttribute !== val ) {
+						edits[ attribute ] = val;
+					}
+				}
+			}, this );
+
+			if ( ! _.isEmpty( edits ) ) {
+				this.userMedia.save( edits );
+				this.model.set( { edited: edits } );
+			}
+
+			this.removeView( event );
+		}
+	} );
+
 	mediaTheque.Views.UserMedia = mediaTheque.Views.Droppable.extend( {
 		tagName:    'li',
 		className:  'user-media',
 		template: mediaTheque.template( 'mediatheque-media' ),
 
 		events: {
-			'click .delete' : 'deleteUserMedia'
+			'click .delete' : 'deleteUserMedia',
+			'click .edit'   : 'editUserMedia'
 		},
 
 		initialize: function() {
@@ -276,14 +360,17 @@ window.mediaTheque = window.mediaTheque || _.extend( {}, _.pick( window.wp, 'Bac
 				if ( 'wp-editor' !== o.uiType && 'display' !== o.uiType ) {
 					mediaTheque.Views.Droppable.prototype.initialize.apply( this, arguments );
 				} else {
-					this.$el.attr( 'data-id',   this.model.get( 'id' ) );
-					this.model.set( { uiType: o.uiType }, { silent: true } );
+					this.$el.attr( 'data-id', this.model.get( 'id' ) );
 				}
+
+				this.model.set( { uiType: o.uiType }, { silent: true } );
 
 			// Set additionnal properties
 			} else {
 				this.setMediaProps();
 			}
+
+			this.model.on( 'change:edited', this.update, this );
 		},
 
 		setMediaProps: function() {
@@ -326,10 +413,14 @@ window.mediaTheque = window.mediaTheque || _.extend( {}, _.pick( window.wp, 'Bac
 			}
 		},
 
-		update: function( file ) {
-			_.each( ['date', 'filename', 'uploading', 'subtype' ], function( attribute ) {
-				file.unset( attribute, { silent: true } );
-			} );
+		update: function( file, changed ) {
+			if ( ! _.isUndefined( file.filename ) ) {
+				_.each( ['date', 'filename', 'uploading', 'subtype' ], function( attribute ) {
+					file.unset( attribute, { silent: true } );
+				} );
+			} else if ( ! _.isUndefined( changed.title ) && changed.title && changed.title !== this.model.get( 'title' ).rendered ) {
+				this.model.set( { title: { rendered: changed.title }, edited: {} }, { silent: true } );
+			}
 
 			this.setMediaProps();
 			this.render();
@@ -357,6 +448,14 @@ window.mediaTheque = window.mediaTheque || _.extend( {}, _.pick( window.wp, 'Bac
 
 			// Remove the model.
 			this.options.ghost.remove( model );
+		},
+
+		editUserMedia: function( event ) {
+			event.preventDefault();
+
+			this.views.set( '.user-media-edit-container', new mediaTheque.Views.editUserMedia( { model: this.model } ) );
+			this.$el.addClass( 'editing' );
+			$( '#mediatheque-backdrop' ).addClass( 'editing' );
 		}
 	} );
 
@@ -366,7 +465,6 @@ window.mediaTheque = window.mediaTheque || _.extend( {}, _.pick( window.wp, 'Bac
 
 		events: {
 			'click .dir .user-media-content'        : 'openDir',
-			'click .dir .user-media-actions a.edit' : 'openDir',
 			'click .selectable'                     : 'selectMedia',
 			'dragstart [draggable=true]'            : 'setDragData'
 		},
@@ -602,7 +700,9 @@ window.mediaTheque = window.mediaTheque || _.extend( {}, _.pick( window.wp, 'Bac
 	} );
 
 	mediaTheque.Views.displayUserMedias = mediaTheque.Views.UserMedias.extend( {
-		events: {},
+		events: {
+			'click .selectable' : 'selectMedia'
+		},
 
 		initialize: function() {
 			var o = this.options || {}, qv = { 'user_media_context': 'display' };
@@ -615,6 +715,22 @@ window.mediaTheque = window.mediaTheque || _.extend( {}, _.pick( window.wp, 'Bac
 
 			// Init the view with default Query Vars.
 			this.queryUserMedia( qv );
+		},
+
+		selectMedia: function( event ) {
+			var o = this.options;
+
+			event.preventDefault();
+
+			var media = event.currentTarget, id = $( media ).data( 'id' ), current;
+
+			if ( id ) {
+				current = o.ghost.get( id );
+
+				if ( current.get( 'link' ) ) {
+					document.location.href = current.get( 'link' );
+				}
+			}
 		}
 	} );
 
@@ -1241,7 +1357,10 @@ window.mediaTheque = window.mediaTheque || _.extend( {}, _.pick( window.wp, 'Bac
 		initialize: function() {
 			var classes = this.model.get( 'classes' );
 
-			if ( _.isArray( classes ) ) {
+			if ( -1 !== _.indexOf( ['submit', 'reset' ], this.model.get( 'type' ) ) ) {
+				this.el.className = this.model.get( 'type' );
+
+			} else if ( _.isArray( classes ) ) {
 				this.el.className = classes.join( ' ' );
 			}
 		}

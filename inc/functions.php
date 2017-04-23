@@ -788,6 +788,38 @@ function mediatheque_localize_script( $handle = 'mediatheque-views' ) {
 				'classes'  => array( 'setting', 'checkbox-setting' ),
 			),
 		),
+		'editFields' => array(
+			'title' => array(
+				'name'  => __( 'Titre', 'mediatheque' ),
+				'position' => 0,
+				'type'     => 'text',
+				'classes'  => array( 'title' ),
+			),
+			'description' => array(
+				'name'  => __( 'Description', 'mediatheque' ),
+				'position' => 1,
+				'type'     => 'contenteditable',
+				'classes'  => array( 'description' ),
+			),
+			'attached_posts' => array(
+				'name'     => __( 'Attaché au(x) Contenu(s) :', 'mediatheque' ),
+				'position' => 2,
+				'type'     => 'list',
+				'classes'  => array( 'posts' ),
+			),
+			'reset' => array(
+				'caption'  => __( 'Annuler', 'mediatheque' ),
+				'position' => 3,
+				'type'     => 'reset',
+				'classes'  => array( 'button-secondary', 'reset' ),
+			),
+			'submit' => array(
+				'caption'  => __( 'Modifier', 'mediatheque' ),
+				'position' => 4,
+				'type'     => 'submit',
+				'classes'  => array( 'button-primary', 'submit' ),
+			),
+		),
 	) );
 }
 
@@ -1196,8 +1228,6 @@ function mediatheque_append_directory_content( $content = '' ) {
 		$content .= "\n" . $directory_content;
 	}
 
-	$GLOBALS['wp_query']->is_attachment = false;
-
 	return $content;
 }
 
@@ -1218,29 +1248,32 @@ function mediatheque_prepend_user_media( $content = '' ) {
 	$term_ids     = wp_get_object_terms( $GLOBALS['post']->ID, 'user_media_types', array( 'fields' => 'ids' ) );
 	$directory_id = mediatheque_get_user_media_type_id( 'mediatheque-directory' );
 
+	// Single Directory display
 	if ( in_array( $directory_id, $term_ids, true ) ) {
 		$mediatheque->current_directory = $GLOBALS['post']->ID;
 
-		return mediatheque_append_directory_content( $content );
+		$content = mediatheque_append_directory_content( $content );
+
+	// Single User Media display
+	} else {
+		$mediatheque->user_media_link = mediatheque_get_download_url( $GLOBALS['post'] );
+
+		// Overrides
+		$reset_post = clone $GLOBALS['post'];
+		$GLOBALS['post']->post_type = 'attachment';
+		wp_cache_set( $reset_post->ID, $GLOBALS['post'], 'posts' );
+		add_filter( 'wp_get_attachment_link', 'mediatheque_attachment_link', 10, 1 );
+
+		$content = prepend_attachment( $content );
+
+		// Resets
+		$GLOBALS['post'] = $reset_post;
+		wp_cache_set( $reset_post->ID, $reset_post, 'posts' );
+		remove_filter( 'the_content',            'mediatheque_prepend_user_media', 11    );
+		remove_filter( 'wp_get_attachment_link', 'mediatheque_attachment_link',    10, 1 );
+
+		unset( $mediatheque->user_media_link );
 	}
-
-	$mediatheque->user_media_link = mediatheque_get_download_url( $GLOBALS['post'] );
-
-	// Overrides
-	$reset_post = clone $GLOBALS['post'];
-	$GLOBALS['post']->post_type = 'attachment';
-	wp_cache_set( $reset_post->ID, $GLOBALS['post'], 'posts' );
-	add_filter( 'wp_get_attachment_link', 'mediatheque_attachment_link', 10, 1 );
-
-	$content = prepend_attachment( $content );
-
-	// Resets
-	$GLOBALS['post'] = $reset_post;
-	wp_cache_set( $reset_post->ID, $reset_post, 'posts' );
-	remove_filter( 'the_content',            'mediatheque_prepend_user_media', 11    );
-	remove_filter( 'wp_get_attachment_link', 'mediatheque_attachment_link',    10, 1 );
-
-	unset( $mediatheque->user_media_link );
 
 	$GLOBALS['wp_query']->is_attachment = false;
 
@@ -1853,6 +1886,18 @@ function mediatheque_clear_cached_media( $user_media = null ) {
 	return (bool) $return;
 }
 
+function mediatheque_get_attached_post( $s = '' ) {
+	if ( ! $s ) {
+		return array();
+	}
+
+	$search_posts   = new WP_Query;
+	return $search_posts->query( array(
+		'post_type' => 'any',
+		's'         => $s,
+	) );
+}
+
 /**
  * Hide the vanished User Media or warn the Administrator of it.
  *
@@ -1882,10 +1927,7 @@ function mediatheque_maybe_hide_link( $link = '', $url = '' ) {
 			update_option( '_mediatheque_vanished_media', array_merge( $vanished_media_log, array( $s ) ) );
 
 			$search_posts   = new WP_Query;
-			$search_results = $search_posts->query( array(
-				'post_type' => 'any',
-				's'         => $s,
-			) );
+			$search_results = mediatheque_get_attached_post( $s );
 
 			if ( ! empty( $search_results ) ) {
 				$warning = _n(

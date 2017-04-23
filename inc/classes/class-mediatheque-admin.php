@@ -347,6 +347,7 @@ location ~* /(?:uploads|files)/mediatheque/private/.* {
 		printf( '
 			<div class="wrap">
 				<h1 id="mediatheque-title">%1$s</h1>
+				<div id="mediatheque-backdrop"></div>
 				%2$s
 			</div>
 		', esc_html( $this->title ), $this->template( false ) );
