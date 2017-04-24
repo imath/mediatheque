@@ -102,6 +102,10 @@ class MediaTheque_REST_Controller extends WP_REST_Attachments_Controller {
 	public function get_collection_params() {
 		$params = parent::get_collection_params();
 
+		if ( isset( $params['per_page']['default'] ) ) {
+			$params['per_page']['default'] = 20;
+		}
+
 		$params['parent'] = array(
 			'description'       => __( 'Limite les résultats en fonction du répertoire parent.', 'mediatheque' ),
 			'type'              => 'array',
