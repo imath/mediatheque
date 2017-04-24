@@ -34,4 +34,4 @@
 [] Implement the Download action
 [x] Add a view to edit title and content of user media
 [x] Check the attachment navigation
-[] Take care of Directory embed template
+[x] Take care of Directory embed template

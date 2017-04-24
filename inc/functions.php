@@ -1061,16 +1061,28 @@ function mediatheque_embed_download_button() {
 		return;
 	}
 
+	if ( ! empty( mediatheque()->current_directory ) ) {
+		$dashicon = 'files';
+		$url      = get_post_permalink();
+		$text     = __( 'Afficher', 'mediatheque' );
+	} else {
+		$dashicon = 'download';
+		$url      = mediatheque_get_download_url();
+		$text     = __( 'Télécharger', 'mediatheque' );
+	}
+
 	printf(
-		'<div class="wp-embed-download">
-			<a href="%1$s" target="_top">
-				<span class="dashicons dashicons-download"></span>
-				%2$s
+		'<div class="wp-embed-%1$s">
+			<a href="%2$s" target="_top">
+				<span class="dashicons dashicons-%1$s"></span>
+				%3$s
 			</a>
 		</div>',
-		esc_url( mediatheque_get_download_url() ),
+		esc_attr( $dashicon ),
+		esc_url( $url ),
 		sprintf(
-			__( 'Télécharger<span class="screen-reader-text"> %s</span>', 'mediatheque' ),
+			'%1$s<span class="screen-reader-text"> %2$s</span>',
+			esc_html( $text ),
 			esc_html( get_the_title() )
 		)
 	);
@@ -1235,6 +1247,72 @@ function mediatheque_append_directory_content( $content = '' ) {
 	return $content;
 }
 
+function mediatheque_prepend_embed_thumbnail( $excerpt = '', $user_media = null, $type = 'user-media' ) {
+	$user_media = get_post( $user_media );
+
+	if ( empty( $user_media->ID ) ) {
+		return $excerpt;
+	}
+
+	$pattern = '<div style="background: #f1f1f1 url( %1$s ) no-repeat; background-size: %2$s; background-position:%3$s; width:150px; height:150px"></div>';
+
+	$media_icon = '';
+	if ( 'directory' === $type ) {
+		$media_icon = sprintf(
+			$pattern,
+			esc_url_raw( mediatheque_assets_url() . 'folder.svg' ),
+			'50%',
+			'50%'
+		);
+	} else {
+		$filedata = mediatheque_get_media_info( $user_media, 'all' );
+
+		if ( isset( $filedata['media_type'] ) ) {
+			if ( 'image' === $filedata['media_type'] ) {
+				$thumb_data = mediatheque_image_get_intermediate_size( $user_media, 'thumbnail' );
+
+				if ( isset( $thumb_data['url'] ) ) {
+					$media_icon = sprintf(
+						'<img src="%s" width="150" height="150">',
+						esc_url_raw( $thumb_data['url'] )
+					);
+				}
+
+			} else {
+				$media_icon = sprintf(
+					$pattern,
+					esc_url_raw( wp_mime_type_icon( $filedata['media_type'] ) ),
+					'48px 64px',
+					'50%'
+				);
+			}
+		}
+	}
+
+	if ( ! $excerpt && 'user-media' === $type ) {
+		$media_type  = mediatheque_get_i18n_media_type( $filedata['media_type'] );
+		$media_title = basename( $user_media->guid );
+		$media_size  = mediatheque_format_file_size( $filedata['size'] / 1000 );
+
+		$excerpt = sprintf( '<dl>
+				<dt><strong>%1$s</strong><dt>
+				<dd><small>%2$s (%3$s)</small></dd>
+			</dl>',
+			esc_html( $media_title ),
+			esc_html( $media_type ),
+			esc_html( $media_size )
+		);
+	}
+
+	$thumbnail = sprintf( '<div class="wp-embed-featured-image square">
+		<a href="%1$s" target="_top">
+			%2$s
+		</a>
+	</div>', get_post_permalink( $user_media ), $media_icon );
+
+	return $thumbnail . "\n" . $excerpt;
+}
+
 /**
  * Make sure the User Media file is prepended to its description.
  *
@@ -1256,27 +1334,35 @@ function mediatheque_prepend_user_media( $content = '' ) {
 	if ( in_array( $directory_id, $term_ids, true ) ) {
 		$mediatheque->current_directory = $GLOBALS['post']->ID;
 
-		$content = mediatheque_append_directory_content( $content );
+		if ( ! is_embed() ){
+			$content = mediatheque_append_directory_content( $content );
+		} else {
+			$content = mediatheque_prepend_embed_thumbnail( $content, $GLOBALS['post'], 'directory' );
+		}
 
 	// Single User Media display
 	} else {
-		$mediatheque->user_media_link = mediatheque_get_download_url( $GLOBALS['post'] );
+		if ( ! is_embed() ){
+			$mediatheque->user_media_link = mediatheque_get_download_url( $GLOBALS['post'] );
 
-		// Overrides
-		$reset_post = clone $GLOBALS['post'];
-		$GLOBALS['post']->post_type = 'attachment';
-		wp_cache_set( $reset_post->ID, $GLOBALS['post'], 'posts' );
-		add_filter( 'wp_get_attachment_link', 'mediatheque_attachment_link', 10, 1 );
+			// Overrides
+			$reset_post = clone $GLOBALS['post'];
+			$GLOBALS['post']->post_type = 'attachment';
+			wp_cache_set( $reset_post->ID, $GLOBALS['post'], 'posts' );
+			add_filter( 'wp_get_attachment_link', 'mediatheque_attachment_link', 10, 1 );
 
-		$content = prepend_attachment( $content );
+			$content = prepend_attachment( $content );
 
-		// Resets
-		$GLOBALS['post'] = $reset_post;
-		wp_cache_set( $reset_post->ID, $reset_post, 'posts' );
-		remove_filter( 'the_content',            'mediatheque_prepend_user_media', 11    );
-		remove_filter( 'wp_get_attachment_link', 'mediatheque_attachment_link',    10, 1 );
+			// Resets
+			$GLOBALS['post'] = $reset_post;
+			wp_cache_set( $reset_post->ID, $reset_post, 'posts' );
+			remove_filter( 'the_content',            'mediatheque_prepend_user_media', 11    );
+			remove_filter( 'wp_get_attachment_link', 'mediatheque_attachment_link',    10, 1 );
 
-		unset( $mediatheque->user_media_link );
+			unset( $mediatheque->user_media_link );
+		} else {
+			$content = mediatheque_prepend_embed_thumbnail( $content, $GLOBALS['post'], 'user-media' );
+		}
 	}
 
 	$GLOBALS['wp_query']->is_attachment = false;
