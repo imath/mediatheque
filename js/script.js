@@ -592,7 +592,7 @@ window.mediaTheque = window.mediaTheque || _.extend( {}, _.pick( window.wp, 'Bac
 				states: [ new mediaTheque.media.controller.UserMedia() ]
 			} );
 
-			this.activeEditor = editor || 'peronal_avatar';
+			this.activeEditor = editor || 'personal_avatar';
 
 			this._frame.on( 'toolbar:create:main-user-media', function( toolbar ) {
 				toolbar.view = new mediaTheque.media.view.Toolbar.UserMedia( {
@@ -603,7 +603,7 @@ window.mediaTheque = window.mediaTheque || _.extend( {}, _.pick( window.wp, 'Bac
 
 			this._frame.on( 'content:render:user-media', function() {
 				var selection = this.state( 'user-media' ).get( 'selection' ),
-					view = new mediaTheque.media.view.mainUserMedia({
+					view = new mediaTheque.media.view.mainUserMedia( {
 						controller: this,
 						model:      this.state()
 					} ).render();

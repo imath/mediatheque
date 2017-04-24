@@ -461,7 +461,7 @@ function mediatheque_get_i18n_media_type( $media_type = '' ) {
 	return $media_type;
 }
 
-function methiatheque_get_media_info( $user_media = null, $arg = 'media_type' ) {
+function mediatheque_get_media_info( $user_media = null, $arg = 'media_type' ) {
 	$user_media = get_post( $user_media );
 
 	if ( empty( $user_media->ID ) ) {
@@ -718,7 +718,11 @@ function mediatheque_get_post_statuses( $status = '' ) {
 function mediatheque_localize_script( $handle = 'mediatheque-views' ) {
 	$mediatheque = mediatheque();
 
-	$post_type_object = get_post_type_object( 'user_media' );
+	$post_type_object     = get_post_type_object( 'user_media' );
+	$mediatheque_statuses = apply_filters( 'mediatheque_media_statuses',
+		wp_list_pluck( mediatheque_get_post_statuses( 'all' ), 'label', 'name' ),
+		$handle
+	);
 
 	wp_localize_script( $handle, 'mediaThequeSettings', array(
 		'params' => array(
@@ -732,7 +736,7 @@ function mediatheque_localize_script( $handle = 'mediatheque-views' ) {
 		'toolbarItems' => array_merge( array(
 				'users'    => __( 'Choisissez un utilisateur', 'mediatheque' )
 			),
-			wp_list_pluck( mediatheque_get_post_statuses( 'all' ), 'label', 'name' ),
+			$mediatheque_statuses,
 			array(
 				'upload'    => __( 'Nouveau(x) fichier(s)', 'mediatheque' ),
 				'directory' => __( 'Nouveau répertoire', 'mediatheque' ),
@@ -1490,7 +1494,7 @@ function mediatheque_move( $media = null, $parent = null ) {
 	return $new_file;
 }
 
-function medialibrary_button( $args = array() ) {
+function mediatheque_button( $args = array() ) {
 	static $instance = 0;
 	$instance++;
 
@@ -1500,6 +1504,7 @@ function medialibrary_button( $args = array() ) {
 		'editor_btn_text'     => __( 'Ajouter un media', 'mediatheque' ),
 		'editor_btn_dashicon' => 'dashicons-format-image',
 		'echo'                => true,
+		'media_type'          => '',
 	) );
 
 	$post = get_post();
@@ -1510,6 +1515,14 @@ function medialibrary_button( $args = array() ) {
 	wp_enqueue_media( array(
 		'post' => $post
 	) );
+
+	if ( ! empty( $r['media_type'] ) ) {
+		wp_add_inline_script( 'mediatheque-views', sprintf( '
+				var mediaThequeCustoms = %s;
+			',
+			json_encode( array( 'mediaType' => $r['media_type'] ) )
+		) );
+	}
 
 	$img = '';
 	$output = '<a href="#"%s class="%s" data-editor="%s">%s</a>';
@@ -1581,7 +1594,7 @@ function mediatheque_the_editor( $editor = '' ) {
 
 	return sprintf( '<div id="wp-%1$s-media-buttons" class="wp-media-buttons mediatheque-buttons" data-editor="%1$s">%2$s</div>%3$s',
 		esc_attr( $mediatheque->editor_id ),
-		medialibrary_button( array(
+		mediatheque_button( array(
 			'editor_id'           => $mediatheque->editor_id,
 			'editor_btn_classes'  => array( 'mediatheque-insert' ),
 			'echo'                => false,
@@ -1641,7 +1654,7 @@ function mediatheque_file_shortcode( $user_media = null, $args = array() ) {
 		$user_media = get_post();
 	}
 
-	$filedata = methiatheque_get_media_info( $user_media, 'all' );
+	$filedata = mediatheque_get_media_info( $user_media, 'all' );
 
 	if ( empty( $filedata ) ) {
 		return '';
@@ -1720,7 +1733,7 @@ function mediatheque_oembed_user_media_id( $id = 0, $url = '' ) {
 	}
 
 	$user_media = get_post( $id );
-	$media_type = methiatheque_get_media_info( $user_media );
+	$media_type = mediatheque_get_media_info( $user_media );
 
 	// Take care of images
 	if ( 'image' === $media_type ) {

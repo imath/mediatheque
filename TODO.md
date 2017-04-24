@@ -26,7 +26,7 @@
 [x] Take care of folder display.
 [x] Make sure to take care of dead media of moved media
 [x] Make sure private media cannot be attached but only linked (as WordPress is not allowing private posts embeds).
-[] Make sure avatar UI is only fetching public images
+[x] Make sure avatar UI is only fetching public images
 [x] Make sure the media inserted has a line feed before and after.
 [] Add a tool to clear vanished media log
 [x] Instead of using wp_attachment_is() create a new function to get the type of a user media @see MediaTheque_REST_Controller->prepare_item_for_response().

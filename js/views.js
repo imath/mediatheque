@@ -555,6 +555,17 @@ window.mediaTheque = window.mediaTheque || _.extend( {}, _.pick( window.wp, 'Bac
 				} );
 			}
 
+			// Eventually restrict the query to a media type
+			if ( 'undefined' != typeof mediaThequeCustoms && mediaThequeCustoms.mediaType ) {
+
+				// In this case, we need to get all user media for the given media type
+				if ( 0 === o.queryVars.get( 'parent' ) ) {
+					o.queryVars.unset( 'parent', { silent: true } );
+				}
+
+				o.queryVars.set( { 'media_type' : mediaThequeCustoms.mediaType }, { silent: true } );
+			}
+
 			this.collection.reset();
 			this.collection.fetch( {
 				data : o.queryVars.attributes,

@@ -373,21 +373,29 @@ location ~* /(?:uploads|files)/mediatheque/private/.* {
 				sprintf( '<a href="#" class="mediabrary-remove">%s</a>', __( 'cliquer ici', 'mediatheque' ) )
 			);
 		}
+
+		add_filter( 'mediatheque_media_statuses', array( $this, 'avatar_user_media_statuses' ), 10, 1 );
 		?>
 		<div id="personal-avatar-editor">
 			<p class="description"><?php printf(
 				__( 'Vous pouvez également utiliser une des images de votre %1$s comme avatar pour ce site. %2$s', 'mediatheque' ),
-				medialibrary_button( array(
+				mediatheque_button( array(
 					'editor_id'           => 'personal_avatar',
 					'editor_btn_classes'  => array( 'mediabrary-insert' ),
 					'editor_btn_text'     => __( 'MediaThèque', 'mediatheque' ),
 					'editor_btn_dashicon' => false,
 					'echo'                => false,
+					'media_type'          => 'image',
 				) ),
 				'<span id="mediabrary-remove-message">' . $message . '</span>'
 			); ?></p>
 
 		</div>
 		<?php
+		remove_filter( 'mediatheque_media_statuses', array( $this, 'avatar_user_media_statuses' ), 10, 1 );
+	}
+
+	public function avatar_user_media_statuses( $statuses = array() ) {
+		return array_intersect_key( $statuses, array( 'publish' => true ) );
 	}
 }

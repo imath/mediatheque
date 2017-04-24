@@ -410,7 +410,7 @@ class MediaTheque_REST_Controller extends WP_REST_Attachments_Controller {
 		if ( in_array( $this->get_user_media_type_id( 'mediatheque-directory' ), $data['user_media_types'], true ) ) {
 			$data['media_type'] = 'dir';
 		} elseif ( 'image' !== $data['media_type'] ) {
-			$type = methiatheque_get_media_info( $post );
+			$type = mediatheque_get_media_info( $post );
 			$data['media_icon'] = wp_mime_type_icon( $type );
 
 			/**
