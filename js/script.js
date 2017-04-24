@@ -422,15 +422,26 @@ window.mediaTheque = window.mediaTheque || _.extend( {}, _.pick( window.wp, 'Bac
 
 		insertUserMedia: function() {
 			var selection = this.get( 'userMediaSelection' ),
-			    userMedia;
+			    userMedia, link;
 
 			if ( ! selection.length ) {
 				return false;
 			}
 
 			userMedia = _.first( selection.models );
+			link      = userMedia.get( 'link' );
 
-			mediaTheque.media.editor.insert( '<p>' +  userMedia.get( 'link' ) + '?attached=true' + '</p>' );
+			if ( 'publish' === userMedia.get( 'status' ) ) {
+				link = '<p>' + link + '?attached=true'+ '</p>';
+
+			} else {
+				link = wp.media.string.link( {
+					linkUrl: link,
+					title: userMedia.get( 'title' ).rendered
+				} );
+			}
+
+			mediaTheque.media.editor.insert( link );
 		},
 
 		editMedia: function( collection ) {

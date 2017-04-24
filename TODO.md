@@ -25,7 +25,7 @@
 [x] Make sure the htaccess file is only added to the "private status" user dir and not in children
 [x] Take care of folder display.
 [x] Make sure to take care of dead media of moved media
-[] Make sure private media cannot be attached but only embed.
+[x] Make sure private media cannot be attached but only linked (as WordPress is not allowing private posts embeds).
 [] Make sure avatar UI is only fetching public images
 [x] Make sure the media inserted has a line feed before and after.
 [] Add a tool to clear vanished media log
