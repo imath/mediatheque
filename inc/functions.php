@@ -764,7 +764,7 @@ function mediatheque_localize_script( $handle = 'mediatheque-views' ) {
 				'right'  => __( 'Right', 'mediatheque' ),
 				'none'   => __( 'None', 'mediatheque' ),
 			),
-			'directory'       => isset( $mediatheque->current_directory ) ? $mediatheque->current_directory : 0,
+			'directory'       => mediatheque_get_displayed_directory(),
 		),
 		'fields' => array(
 			'icon' => array(
@@ -1061,7 +1061,7 @@ function mediatheque_embed_download_button() {
 		return;
 	}
 
-	if ( ! empty( mediatheque()->current_directory ) ) {
+	if ( mediatheque_get_displayed_directory() ) {
 		$dashicon = 'files';
 		$url      = get_post_permalink();
 		$text     = __( 'Afficher', 'mediatheque' );
@@ -1226,8 +1226,59 @@ function mediatheque_get_user_media_type_id( $slug = '' ) {
 	return (int) $user_media_type->term_id;
 }
 
-function mediatheque_append_directory_content( $content = '' ) {
-	$template = mediatheque_locate_template_part( 'directory', 'php' );
+function mediatheque_set_displayed_directory( $id = 0 ) {
+	mediatheque()->template_tags->directory = $id;
+}
+
+function mediatheque_set_template_tags( $tags = array() ) {
+	if ( empty( $tags ) || ! is_array( $tags ) ) {
+		return;
+	}
+
+	$mediatheque = mediatheque();
+
+	foreach ( $tags as $kt => $vt ) {
+		$mediatheque->template_tags->{$kt} = $vt;
+	}
+}
+
+function mediatheque_get_displayed_directory() {
+	return (int) mediatheque_get_tag( 'directory' );
+}
+
+function mediatheque_get_tag( $tag = '' ) {
+	$content_tag = 0;
+
+	if ( ! $tag ) {
+		return $content_tag;
+	}
+
+	$mediatheque = mediatheque();
+
+	if ( isset( $mediatheque->template_tags->{$tag} ) ) {
+		$content_tag = $mediatheque->template_tags->{$tag};
+	}
+
+	return apply_filters( 'mediatheque_get_displayed_' . $tag , $content_tag );
+}
+
+function mediatheque_get_display_content( $attr ) {
+	$content = '';
+
+	if ( did_action( 'mediatheque_display_content' ) ) {
+		return $content;
+	}
+
+	$atts = shortcode_atts( array(
+		'directory' => 0,
+		'width'     => '100%',
+		'height'    => '450px',
+	), $attr, 'mediatheque' );
+
+	// Globalize template tags
+	mediatheque_set_template_tags( $atts );
+
+	$template = mediatheque_locate_template_part( 'display', 'php' );
 
 	if ( $template ) {
 		wp_enqueue_script( 'mediatheque-display' );
@@ -1239,13 +1290,14 @@ function mediatheque_append_directory_content( $content = '' ) {
 
 		load_template( $template, true );
 
-		$directory_content = ob_get_clean();
-
-		$content .= "\n" . $directory_content;
+		$content = ob_get_clean();
 	}
+
+	do_action( 'mediatheque_display_content' );
 
 	return $content;
 }
+add_shortcode( 'mediatheque', 'mediatheque_get_display_content' );
 
 function mediatheque_prepend_embed_thumbnail( $excerpt = '', $user_media = null, $type = 'user-media' ) {
 	$user_media = get_post( $user_media );
@@ -1258,6 +1310,9 @@ function mediatheque_prepend_embed_thumbnail( $excerpt = '', $user_media = null,
 
 	$media_icon = '';
 	if ( 'directory' === $type ) {
+		// Set the displayed directory.
+		mediatheque_set_displayed_directory( $user_media->ID );
+
 		$media_icon = sprintf(
 			$pattern,
 			esc_url_raw( mediatheque_assets_url() . 'folder.svg' ),
@@ -1332,10 +1387,10 @@ function mediatheque_prepend_user_media( $content = '' ) {
 
 	// Single Directory display
 	if ( in_array( $directory_id, $term_ids, true ) ) {
-		$mediatheque->current_directory = $GLOBALS['post']->ID;
-
 		if ( ! is_embed() ){
-			$content = mediatheque_append_directory_content( $content );
+			$content .= "\n" . mediatheque_get_display_content( array(
+				'directory' => $GLOBALS['post']->ID,
+			) );
 		} else {
 			$content = mediatheque_prepend_embed_thumbnail( $content, $GLOBALS['post'], 'directory' );
 		}

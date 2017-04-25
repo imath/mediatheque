@@ -1,8 +1,8 @@
 <?php
-// Directory template
+// Display template
 ?>
 
-<div id="mediatheque-container">
+<div id="mediatheque-container" style="height: <?php echo esc_attr( mediatheque_get_tag( 'height' ) ); ?>; width: <?php echo esc_attr( mediatheque_get_tag( 'width' ) ); ?>;">
 	<div id="media"></div>
 </div>
 

@@ -23,9 +23,13 @@
 		<div class="user-media-actions">
 			<# if ( 'display' !== data.uiType ) { #>
 				<a href="#/name/{{data.slug}}" class="edit"><span class="dashicons dashicons-edit"></span></a>
-				<a href="{{data.link}}" class="view"><span class="dashicons dashicons-visibility"></span></a>
+			<# } #>
 
-			<# } else if ( data.download ) { #>
+			<# if ( 'dir' === data.media_type || 'admin' === data.uiType ) { #>
+				<a href="{{data.link}}" class="view"><span class="dashicons dashicons-visibility"></span></a>
+			<# } #>
+
+			<# if ( data.download && 'display' === data.uiType ) { #>
 				<a href="{{data.download}}" class="download"><span class="dashicons dashicons-download"></span></a>
 			<# } #>
 

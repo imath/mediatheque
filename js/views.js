@@ -712,7 +712,8 @@ window.mediaTheque = window.mediaTheque || _.extend( {}, _.pick( window.wp, 'Bac
 
 	mediaTheque.Views.displayUserMedias = mediaTheque.Views.UserMedias.extend( {
 		events: {
-			'click .selectable' : 'selectMedia'
+			'click .selectable' : 'selectMedia',
+			'click .dir'        : 'selectMedia',
 		},
 
 		initialize: function() {

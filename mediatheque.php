@@ -86,6 +86,7 @@ final class MediaTheque {
 		$this->templates          = trailingslashit( $this->dir . 'templates' );
 		$this->personal_avatars   = array();
 		$this->user_media_oembeds = array();
+		$this->template_tags      = new stdClass;
 	}
 
 	/**

@@ -485,7 +485,6 @@ p.drag-drop-buttons input[type="button"] {
 /* Front-end */
 body:not( .wp-admin ) #mediatheque-container {
 	background-color: #f1f1f1;
-	height: 450px;
 	overflow-y: scroll;
 	padding: 1em;
 }

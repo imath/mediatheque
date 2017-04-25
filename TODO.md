@@ -3,7 +3,7 @@
 [x] When deleting a User Media Post type, if it's not a folder, the corresponding file should be deleted.
 [x] When deleting a folder, make sure filesys is also edited.
 [x] The Disk usage should be updated when a file is deleted.
-[] Add a shortcode to load the UI anywhere.
+[x] Add a shortcode to load the UI anywhere.
 [x] Make sure the create_item() method can handle folders.
 [] Make sure to switch_to_blog() before saving the User Media metadata.
 [x] The way the embed template is filter is not right. I should check the post type first.

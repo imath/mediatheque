@@ -181,13 +181,16 @@ class MediaTheque_REST_Controller extends WP_REST_Attachments_Controller {
 			unset( $prepared_args['author'] );
 
 		// Make sure the content of a directory is fetched when requested.
-		} elseif ( 'display' === $context && ! empty( $prepared_args['post_parent__in'] ) ) {
-			$post_parent   = reset( $prepared_args['post_parent__in'] );
-			$parent_status = get_post_status( $post_parent );
+		} elseif ( 'display' === $context ) {
+			if ( ! empty( $prepared_args['post_parent__in'] ) ) {
+				$post_parent   = reset( $prepared_args['post_parent__in'] );
+				$parent_status = get_post_status( $post_parent );
 
-			if ( ! in_array( $parent_status, $prepared_args['post_status'], true ) ) {
-				$prepared_args['post_status'][] = $parent_status;
+				if ( ! in_array( $parent_status, $prepared_args['post_status'], true ) ) {
+					$prepared_args['post_status'][] = $parent_status;
+				}
 			}
+
 		} else {
 			$prepared_args['author'] = get_current_user_id();
 		}
