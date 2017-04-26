@@ -367,11 +367,6 @@ class MediaTheque_REST_Controller extends WP_REST_Attachments_Controller {
 			$prepared_user_media->post_author = $this->user_id;
 		}
 
-		// Remove all tags for now.
-		if ( ! empty( $prepared_user_media->post_content ) ) {
-			$prepared_user_media->post_content = wp_kses( $prepared_user_media->post_content, array() );
-		}
-
 		return $prepared_user_media;
 	}
 

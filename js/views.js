@@ -306,7 +306,7 @@ window.mediaTheque = window.mediaTheque || _.extend( {}, _.pick( window.wp, 'Bac
 					val;
 
 				if ( 'DIV' === $( e ).prop( 'tagName') ) {
-					val = $( e ).text();
+					val = $( e ).html();
 				} else {
 					val = $( e ).val();
 				}
