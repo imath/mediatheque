@@ -142,8 +142,9 @@ final class MediaTheque {
 		add_filter( 'embed_maybe_make_link',  'mediatheque_maybe_hide_link',         10, 2 );
 
 		// Check if we need to add a specific The User Media UI
-		add_filter( 'wp_editor_settings', 'mediatheque_editor_settings', 10, 2 );
-		add_filter( 'the_editor',         'mediatheque_the_editor',      10, 1 );
+		add_filter( 'wp_editor_settings', 'mediatheque_editor_settings',    10, 2 );
+		add_filter( 'the_editor',         'mediatheque_the_editor',         10, 1 );
+		add_filter( 'wp_link_query_args', 'mediatheque_wp_link_query_args', 10, 1 );
 
 		// Clear cached user media.
 		add_action( 'mediatheque_delete_media', 'mediatheque_clear_cached_media', 10, 1 );

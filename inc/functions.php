@@ -1744,6 +1744,14 @@ function mediatheque_the_editor( $editor = '' ) {
 	);
 }
 
+function mediatheque_wp_link_query_args( $args = array() ) {
+	if ( is_array( $args['post_type'] ) && in_array( 'user_media', $args['post_type'], true ) ) {
+		$args['post_type'] = array_diff( $args['post_type'], array( 'user_media' ) );
+	}
+
+	return $args;
+}
+
 function mediatheque_oembed_pre_dataparse( $result = null, $data = null, $url = '' ) {
 	$mediatheque = mediatheque();
 
