@@ -17,7 +17,7 @@ window.mediaTheque = window.mediaTheque || _.extend( {}, _.pick( window.wp, 'Bac
 			if ( options.metadata && ! _.isUndefined( options.metadata.url ) ) {
 				match = options.metadata.url.match( /user-media\/(.*?)\/\?attached=true/ );
 
-				if ( match.length && match[1] ) {
+				if ( ! _.isNull( match ) && ! _.isUndefined( match[1] ) ) {
 					isMediaTheque = true;
 
 					var params = options.metadata || { url: '' };
