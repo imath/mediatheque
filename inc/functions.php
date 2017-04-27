@@ -1186,6 +1186,35 @@ function mediatheque_get_template_parts( $list = array() ) {
 	return $template_parts;
 }
 
+function mediatheque_download( $user_media = null ) {
+	if ( empty( $user_media->mediatheque_file ) || ! file_exists( $user_media->mediatheque_file ) ) {
+		return false;
+	}
+
+	$file_info = mediatheque_get_media_info( $user_media, 'all' );
+	$filename = basename( $user_media->mediatheque_file );
+
+	/**
+	 * Hook here to run custom actions before download.
+	 */
+	do_action( 'mediatheque_download', $user_media, $file_info );
+
+	status_header( 200 );
+	header( 'Cache-Control: cache, must-revalidate' );
+	header( 'Pragma: public' );
+	header( 'Content-Description: File Transfer' );
+	header( 'Content-Length: ' . $file_info['size'] );
+	header( 'Content-Disposition: attachment; filename=' . $filename );
+	header( 'Content-Type: ' . $file_info['type'] );
+
+	while ( ob_get_level() > 0 ) {
+		ob_end_flush();
+	}
+
+	readfile( $user_media->mediatheque_file );
+	die();
+}
+
 /**
  * Set some WP_Query parameters so that the Attachment template is used.
  *
@@ -1208,8 +1237,35 @@ function mediatheque_parse_query( WP_Query $query ) {
 		return;
 	}
 
-	if ( 'user_media' !== $query->get( 'post_type' ) || 1 === (int) $query->get( mediatheque_get_download_rewrite_tag() ) || true === $query->is_embed ) {
+	if ( 'user_media' !== $query->get( 'post_type' ) || true === $query->is_embed ) {
 		return;
+	}
+
+	if ( 1 === (int) $query->get( mediatheque_get_download_rewrite_tag() ) ) {
+		$user_media = get_posts( array(
+			'name'      => $query->get( 'mediatheque' ),
+			'post_type' => 'user_media',
+		) );
+
+		if ( ! is_array( $user_media ) || 1 !== count( $user_media ) ) {
+			$query->set_404();
+			return;
+		}
+
+		$user_media = reset( $user_media );
+		$media_file = get_attached_file( $user_media->ID );
+
+		if ( ! $media_file ) {
+			$query->set_404();
+			return;
+		} else {
+			$user_media->mediatheque_file = $media_file;
+
+			if ( ! mediatheque_download( $user_media ) ) {
+				$query->set_404();
+				return;
+			}
+		}
 	}
 
 	$query->is_attachment = true;
