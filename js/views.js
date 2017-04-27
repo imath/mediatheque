@@ -712,8 +712,7 @@ window.mediaTheque = window.mediaTheque || _.extend( {}, _.pick( window.wp, 'Bac
 
 	mediaTheque.Views.displayUserMedias = mediaTheque.Views.UserMedias.extend( {
 		events: {
-			'click .selectable' : 'selectMedia',
-			'click .dir'        : 'selectMedia',
+			'click .user-media-content' : 'selectMedia',
 		},
 
 		initialize: function() {
@@ -734,7 +733,7 @@ window.mediaTheque = window.mediaTheque || _.extend( {}, _.pick( window.wp, 'Bac
 
 			event.preventDefault();
 
-			var media = event.currentTarget, id = $( media ).data( 'id' ), current;
+			var media = $( event.currentTarget ).closest( 'li' ), id = $( media ).data( 'id' ), current;
 
 			if ( id ) {
 				current = o.ghost.get( id );
