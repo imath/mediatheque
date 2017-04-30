@@ -65,6 +65,16 @@ function mediatheque_upgrade() {
 			wp_insert_term( $term, 'user_media_types' );
 		}
 
+		// Add default options.
+		$default_options = array(
+			'mediatheque_capability' => 'exist',
+			'mediatheque_mime_types' => mediatheque_get_default_mime_types(),
+		);
+
+		foreach ( $default_options as $option_name => $option_value ) {
+			add_option( $option_name, $option_value );
+		}
+
 		/**
 		 * Trigger the 'mediatheque_install' action.
 		 *

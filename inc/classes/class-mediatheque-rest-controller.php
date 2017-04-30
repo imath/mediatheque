@@ -293,11 +293,16 @@ class MediaTheque_REST_Controller extends WP_REST_Attachments_Controller {
 
 		// Pass off to WP to handle the actual upload.
 		$overrides = array(
-			'action' => 'upload_user_media',
+			'action'               => 'upload_user_media',
+			'upload_error_handler' => 'mediatheque_upload_error_handler',
 		);
 
 		if ( $action ) {
 			$overrides['action'] = $action;
+		}
+
+		if ( ! is_super_admin() ) {
+			$overrides['mimes'] = mediatheque_get_allowed_mime_types();
 		}
 
 		/** Include admin functions to get access to wp_handle_upload() */

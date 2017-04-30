@@ -456,6 +456,10 @@ function mediatheque_get_i18n_media_type( $media_type = '' ) {
 		'code'        => __( 'Code', 'mediatheque' ),
 	);
 
+	if ( is_array( $media_type ) ) {
+		return array_intersect_key( $i18n_media_types, $media_type );
+	}
+
 	if ( isset( $i18n_media_types[ $media_type ] ) ) {
 		return $i18n_media_types[ $media_type ];
 	}
@@ -2216,4 +2220,88 @@ function mediatheque_settings_field_capability() {
 	</select>
 	<p class="description"><?php esc_html_e( 'Sélectionner les capacités du rôle qu\'il faut à minima détenir pour pouvoir utiliser la MediaThèque.', 'mediatheque' ); ?></p>
 	<?php
+}
+
+function mediatheque_get_mime_types() {
+	return array_diff_key( wp_get_mime_types(), array(
+		'swf'      => false,
+		'exe'      => false,
+		'htm|html' => false,
+		'js'       => false,
+		'css'      => false,
+	) );
+}
+
+function mediatheque_get_default_mime_types() {
+	$mime_types = array_intersect_key( mediatheque_get_mime_types(), array(
+		'jpg|jpeg|jpe' => true,
+		'gif'          => true,
+		'png'          => true,
+		'mp4|m4v'      => true,
+		'mp3|m4a|m4b'  => true,
+		'pdf'          => true,
+		'rtf'          => true,
+	) );
+
+	return array_values( $mime_types );
+}
+
+function mediatheque_get_allowed_mime_types() {
+	$mime_types = get_option( 'mediatheque_mime_types', array() );
+	$mime_types = array_intersect( mediatheque_get_mime_types(), $mime_types );
+
+	return (array) apply_filters( 'mediatheque_get_allowed_mime_types', $mime_types );
+}
+
+function mediatheque_settings_field_mime_types() {
+	$types            = wp_get_ext_types();
+	$translated_types = mediatheque_get_i18n_media_type( $types );
+	$setting          = mediatheque_get_allowed_mime_types();
+	$mimes            = mediatheque_get_mime_types();
+	$printed_mime     = array();
+
+	foreach ( $translated_types as $k_type => $translated_type ) {
+		if ( 'code' === $k_type ) {
+			continue;
+		}
+		?>
+		<fieldset style="border: solid 1px #ccc; margin-bottom: 1em">
+			<legend style="padding: 0 1em">
+				<input type="checkbox" class="mediatheque-selectall" data-mime-type="<?php echo esc_attr( $k_type ); ?>"> <?php echo esc_html( $translated_type ); ?>
+			</legend>
+
+			<ul style="margin: 1em 2em 1em;">
+
+			<?php foreach ( $types[ $k_type ] as $wp_type ) {
+				$ext_mime = wp_check_filetype( '.' . $wp_type, $mimes );
+
+				if ( $ext_mime['type'] && ! in_array( $ext_mime['type'], $printed_mime, true ) ) {
+					array_push( $printed_mime, $ext_mime['type'] );
+					?>
+					<li>
+						<input type="checkbox" name="mediatheque_mime_types[]" data-mime-type="<?php echo esc_attr( $k_type );?>" value="<?php echo esc_attr( $ext_mime['type'] );?>" <?php checked( true, in_array( $ext_mime['type'], $setting, true ) );?>> <?php echo esc_html( $ext_mime['type'] ) ;?>
+					</li>
+					<?php
+				}
+			} ?>
+
+		</fieldset>
+		<?php
+	}
+}
+
+function mediatheque_sanitize_mime_types( $mime_types ) {
+	if ( ! is_array( $mime_types ) ) {
+		return array();
+	}
+
+	return array_map( 'sanitize_text_field', $mime_types );
+}
+
+function mediatheque_upload_error_handler( $file = array(), $message = '' ) {
+	if ( __( 'Sorry, this file type is not permitted for security reasons.', 'default' ) === $message ) {
+		$message = __( 'Désolé, vous n\'êtes pas autorisé à télécharger ce type de fichier', 'mediatheque' );
+	}
+
+	return array( 'error' => $message );
 }

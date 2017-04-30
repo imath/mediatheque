@@ -50,6 +50,11 @@ class MediaTheque_Settings {
 					'callback'          => 'mediatheque_settings_field_capability',
 					'sanitize_callback' => 'sanitize_text_field',
 				),
+				'mediatheque_mime_types' => array(
+					'title'             => __( 'Types de fichier autorisés.', 'mediatheque' ),
+					'callback'          => 'mediatheque_settings_field_mime_types',
+					'sanitize_callback' => 'mediatheque_sanitize_mime_types',
+				),
 			),
 		) );
 

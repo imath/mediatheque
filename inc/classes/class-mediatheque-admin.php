@@ -147,7 +147,7 @@ class MediaTheque_Admin {
 				),
 			);
 
-			$inline_scripts['media-tabs']= sprintf( '
+			$inline_scripts['media-tabs'] = sprintf( '
 				$( \'.wrap h1\' ).first().after( $( \'<div></div>\' )
 					.addClass( \'wp-filter\')
 					.html(
@@ -158,6 +158,20 @@ class MediaTheque_Admin {
 						)
 					)
 				);', '\'<li>' . join( '</li><li>', $links ) . '</li>\'' );
+
+			if ( 'settings_page_user-media-options' === $screen->id ) {
+				$inline_scripts['select-unselect-all'] = '
+					$( \'.mediatheque-selectall\' ).on( \'click\', function( e ) {
+						$.each( $( \'[data-mime-type="\' + $( e.currentTarget ).data( \'mime-type\') + \'"]\' ), function( i, cb ) {
+							if ( 0 === i ) {
+								return;
+							}
+
+							$( cb ).prop( \'checked\', $( e.currentTarget ).prop( \'checked\' ) );
+						} );
+					} );
+				';
+			}
 		}
 
 		$pointer = '';
