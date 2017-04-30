@@ -261,7 +261,9 @@ function mediatheque_get_all_caps() {
  */
 function mediatheque_map_meta_caps( $caps = array(), $cap = '', $user_id = 0, $args = array() ) {
 	if ( in_array( $cap, mediatheque_get_all_caps(), true ) ) {
-		$caps = array( 'read' );
+		$required_cap = get_option( 'mediatheque_capability', 'exist' );
+
+		$caps = array( $required_cap );
 	}
 
 	return $caps;
@@ -2182,4 +2184,36 @@ function mediatheque_maybe_hide_link( $link = '', $url = '' ) {
 		'¯\_(ツ)_/¯',
 		__( 'Hum hum, il semble que ce media ait mystérieusement disparu.', 'mediatheque' )
 	);
+}
+
+function mediatheque_settings_section_callback() {}
+
+function mediatheque_settings_field_capability() {
+	$role_names = wp_roles()->role_names;
+	$setting    = get_option( 'mediatheque_capability', 'exist' );
+
+	$caps = array(
+		'exist' => __( 'Utilisateur connecté', 'mediatheque' ),
+	);
+
+	if ( isset( $role_names['subscriber'] ) ) {
+		$caps['read'] = translate_user_role( $role_names['subscriber'] );
+	}
+
+	if ( isset( $role_names['contributor'] ) ) {
+		$caps['edit_posts'] = translate_user_role( $role_names['contributor'] );
+	}
+	?>
+
+	<select name="mediatheque_capability" id="mediatheque_capability">
+
+		<?php foreach ( (array) apply_filters( 'mediatheque_caps', $caps ) as $cap => $role ) : ?>
+			<option value="<?php echo esc_attr( $cap ); ?>" <?php selected( $setting, $cap ); ?>>
+				<?php echo esc_html( $role ); ?>
+			</option>
+		<?php endforeach; ?>
+
+	</select>
+	<p class="description"><?php esc_html_e( 'Sélectionner les capacités du rôle qu\'il faut à minima détenir pour pouvoir utiliser la MediaThèque.', 'mediatheque' ); ?></p>
+	<?php
 }

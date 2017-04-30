@@ -32,11 +32,22 @@ class MediaTheque_Admin {
 	public $post_type_object = null;
 
 	/**
+	 * The MediaThèque settings
+	 *
+	 * @var MediaTheque_Settings
+	 */
+	public $settings = null;
+
+	/**
 	 * The class constructor.
 	 *
 	 * @since  1.0.0
 	 */
 	public function __construct() {
+		if ( ! $this->settings ) {
+			$this->settings = new MediaTheque_Settings();
+		}
+
 		$this->hooks();
 	}
 
@@ -258,7 +269,7 @@ class MediaTheque_Admin {
 			add_menu_page(
 				$this->title,
 				$this->title,
-				'exist',
+				'edit_user_uploads',
 				'user-media',
 				array( $this, 'media_grid' ),
 				'dashicons-admin-media',
@@ -310,9 +321,22 @@ class MediaTheque_Admin {
 	 * @since 1.0.0
 	 */
 	function do_settings() {
+		$form_url      = self_admin_url( 'options.php' );
+		$setting_section = get_current_screen()->id;
 		?>
 		<div class="wrap">
 			<h1><?php esc_html_e( 'Réglages de la MediaThèque', 'mediatheque' ); ?></h1>
+
+			<form action="<?php echo esc_url( $form_url ); ?>" method="post">
+
+				<?php settings_fields( $setting_section ); ?>
+
+				<?php do_settings_sections( $setting_section ); ?>
+
+				<p class="submit">
+					<input type="submit" name="mediatheque_settings" class="button-primary" value="<?php esc_attr_e( 'Enregistrer les modifications', 'mediatheque' ); ?>" />
+				</p>
+			</form>
 
 			<?php if ( ! empty( $GLOBALS['is_nginx'] ) ) {
 
