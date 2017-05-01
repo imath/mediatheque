@@ -109,20 +109,24 @@ add_action( 'admin_init', 'mediatheque_upgrade', 999 );
 function mediatheque_get_pointers() {
 	return array(
 		'user-media-permalinks' => array(
-			'title'   => __( 'Modifiez la structure de vos permaliens.', 'mediatheque' ),
-			'content' => __( 'MediaThèque nécessite que la structure de vos permaliens soit différente que celle définie par défaut.', 'mediatheque' ),
+			'title'    => __( 'Modifiez la structure de vos permaliens.', 'mediatheque' ),
+			'content'  => __( 'MediaThèque nécessite que la structure de vos permaliens soit différente que celle définie par défaut.', 'mediatheque' ),
+			'position' => 'bottom',
 		),
 		'menu-settings' => array(
-			'title'   => __( 'Options des media utilisateurs', 'mediatheque' ),
-			'content' => __( 'Personnalisez les options des media utilisateurs depuis les réglages des media.', 'mediatheque' ),
+			'title'    => __( 'Options des media utilisateurs', 'mediatheque' ),
+			'content'  => __( 'Personnalisez les options des media utilisateurs depuis les réglages des media.', 'mediatheque' ),
+			'position' => 'bottom',
 		),
 		'menu-media' => array(
-			'title'   => __( 'Gestion des media utilisateurs', 'mediatheque' ),
-			'content' => __( 'Vous pouvez gérer les media utilisateurs depuis le sous-menu de la bibliothèque de media correspondant.', 'mediatheque' ),
+			'title'    => __( 'Gestion des media utilisateurs', 'mediatheque' ),
+			'content'  => __( 'Vous pouvez gérer les media utilisateurs depuis le sous-menu de la bibliothèque de media correspondant.', 'mediatheque' ),
+			'position' => 'top',
 		),
 		'toplevel_page_user-media' => array(
-			'title'   => __( 'Accédez à votre MediaThèque', 'mediatheque' ),
-			'content' => __( 'Vous pouvez ajouter, organiser et supprimer vos media utilisateurs depuis ce menu.', 'mediatheque' ),
+			'title'    => __( 'Accédez à votre MediaThèque', 'mediatheque' ),
+			'content'  => __( 'Vous pouvez ajouter, organiser et supprimer vos media utilisateurs depuis ce menu.', 'mediatheque' ),
+			'position' => 'top',
 		),
 	);
 }

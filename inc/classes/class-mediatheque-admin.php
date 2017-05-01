@@ -180,8 +180,8 @@ class MediaTheque_Admin {
 				$( \'#%1$s\' ).pointer( {
 					content: \'<h3>%2$s</h3><p>%3$s</p>\',
 					position: {
-						my: \'left top\',
-						at: \'center bottom\',
+						edge: \'%5$s\',
+						align: \'center\',
 						offset: \'-25 0\'
 					},
 					close: function() {
@@ -221,7 +221,8 @@ class MediaTheque_Admin {
 						$selector_id,
 						$p['title'],
 						$p['content'],
-						$setting
+						$setting,
+						$p['position']
 					);
 					break;
 				}
