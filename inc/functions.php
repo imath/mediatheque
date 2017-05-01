@@ -217,7 +217,7 @@ function mediatheque_capabilities() {
 		'delete_others_posts'    => 'delete_others_user_uploads',
 		'edit_private_posts'     => 'edit_private_user_uploads',
 		'edit_published_posts'   => 'edit_published_user_uploads',
-		'create_posts'           => 'edit_user_uploads',
+		'create_posts'           => 'create_user_uploads',
 	);
 }
 
@@ -261,10 +261,38 @@ function mediatheque_get_all_caps() {
  */
 function mediatheque_map_meta_caps( $caps = array(), $cap = '', $user_id = 0, $args = array() ) {
 	if ( in_array( $cap, mediatheque_get_all_caps(), true ) ) {
-		$required_cap = get_option( 'mediatheque_capability', 'exist' );
-
 		if ( $user_id ) {
-			$caps = array( $required_cap );
+			$required_cap = get_option( 'mediatheque_capability', 'exist' );
+			$admin_caps   = array_diff_key( mediatheque_types_capabilities(), array( 'assign_terms' => false ) );
+			$admin_caps   = array_merge( $admin_caps, array(
+				'edit_user_uploads',
+				'edit_others_user_uploads',
+				'delete_user_uploads',
+				'delete_private_user_uploads',
+				'delete_published_user_uploads',
+				'delete_others_user_uploads',
+				'edit_private_user_uploads',
+				'edit_published_user_uploads',
+			) );
+
+			if ( in_array( $cap, $admin_caps, true ) ) {
+				$caps = array( 'manage_options' );
+			} else {
+				$caps = array( $required_cap );
+				$manage_caps = array(
+					'edit_user_upload',
+					'delete_user_upload',
+				);
+
+				$author = 0;
+				if ( ! empty( $args[0] ) ) {
+					$author = get_post_field( 'post_author', $args[0] );
+				}
+
+				if ( in_array( $cap, $manage_caps, true ) && ( ! $author || (int) $author !== (int) $user_id ) ) {
+					$caps = array( 'manage_options' );
+				}
+			}
 		}
 	}
 

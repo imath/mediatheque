@@ -284,7 +284,7 @@ class MediaTheque_Admin {
 			add_menu_page(
 				$this->title,
 				$this->title,
-				'edit_user_uploads',
+				'create_user_uploads',
 				'user-media',
 				array( $this, 'media_grid' ),
 				'dashicons-admin-media',

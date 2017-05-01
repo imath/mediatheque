@@ -105,7 +105,7 @@ class MediaTheque_Rest_Tests extends WP_Test_REST_Controller_Testcase {
 		remove_filter( 'mediatheque_map_meta_caps', array( $this, 'get_cap' ), 10, 2 );
 
 		$this->assertErrorResponse( 'rest_cannot_create', $check, 401 );
-		$this->assertTrue( 'edit_user_uploads' === $this->cap );
+		$this->assertTrue( 'create_user_uploads' === $this->cap );
 	}
 
 	public function test_context_param() {}
@@ -213,9 +213,150 @@ class MediaTheque_Rest_Tests extends WP_Test_REST_Controller_Testcase {
 		mediatheque_delete_dir( $user_media['id'] );
 	}
 
-	public function test_update_item() {}
+	public function test_update_item() {
+		wp_set_current_user( $this->user_id );
 
-	public function test_delete_item() {}
+		add_filter( 'mediatheque_map_meta_caps', array( $this, 'get_cap' ), 10, 2 );
+
+		$request = new WP_REST_Request( 'PUT', '/wp/v2/' . $this->rb . '/' . $this->user_media_ids[1] );
+		$request->add_header( 'content-type', 'application/x-www-form-urlencoded' );
+		$params = $this->set_post_data( array(
+			'status' => 'private',
+			'title'  => 'Edited User Media',
+		) );
+
+		$request->set_body_params( $params );
+		$response = $this->server->dispatch( $request );
+
+		remove_filter( 'mediatheque_map_meta_caps', array( $this, 'get_cap' ), 10, 2 );
+
+		$this->assertNotInstanceOf( 'WP_Error', $response );
+		$response = rest_ensure_response( $response );
+		$this->assertEquals( 200, $response->get_status() );
+
+		$edited = $response->get_data();
+		$this->assertTrue( 'Edited User Media' === $edited['title']['raw'] );
+		$this->assertTrue( 'publish_user_uploads' === $this->cap );
+	}
+
+	public function test_update_item_cant() {
+		wp_set_current_user( $this->user_id );
+
+		add_filter( 'mediatheque_map_meta_caps', array( $this, 'get_cap' ), 10, 2 );
+
+		$request = new WP_REST_Request( 'PUT', '/wp/v2/' . $this->rb . '/' . $this->user_media_ids[0] );
+		$request->add_header( 'content-type', 'application/x-www-form-urlencoded' );
+		$params = $this->set_post_data( array(
+			'title'  => 'Edited User Media',
+		) );
+
+		$request->set_body_params( $params );
+		$response = $this->server->dispatch( $request );
+
+		remove_filter( 'mediatheque_map_meta_caps', array( $this, 'get_cap' ), 10, 2 );
+
+		$this->assertErrorResponse( 'rest_cannot_edit', $response, 403 );
+		$this->assertTrue( 'edit_user_upload' === $this->cap );
+	}
+
+	public function test_update_item_can() {
+		wp_set_current_user( $this->admin_id );
+
+		add_filter( 'mediatheque_map_meta_caps', array( $this, 'get_cap' ), 10, 2 );
+
+		$request = new WP_REST_Request( 'PUT', '/wp/v2/' . $this->rb . '/' . $this->user_media_ids[1] );
+		$request->add_header( 'content-type', 'application/x-www-form-urlencoded' );
+		$params = $this->set_post_data( array(
+			'status' => 'private',
+			'title'  => 'Edited by admin User Media',
+		) );
+
+		$request->set_body_params( $params );
+		$response = $this->server->dispatch( $request );
+
+		remove_filter( 'mediatheque_map_meta_caps', array( $this, 'get_cap' ), 10, 2 );
+
+		$this->assertNotInstanceOf( 'WP_Error', $response );
+		$response = rest_ensure_response( $response );
+		$this->assertEquals( 200, $response->get_status() );
+
+		$edited = $response->get_data();
+		$this->assertTrue( 'Edited by admin User Media' === $edited['title']['raw'] );
+		$this->assertTrue( 'publish_user_uploads' === $this->cap );
+	}
+
+	public function test_delete_item() {
+		$user_media_id = $this->factory->post->create( array(
+			'post_author' => $this->user_id,
+			'post_status' => 'publish',
+			'post_title'  => 'Deleted directory',
+			'post_type'   => 'user_media',
+		) );
+
+		wp_set_post_terms( $user_media_id, array( $this->term_id ), 'user_media_types' );
+
+		add_filter( 'mediatheque_map_meta_caps', array( $this, 'get_cap' ), 10, 2 );
+
+		wp_set_current_user( $this->user_id );
+
+		$request = new WP_REST_Request( 'DELETE', '/wp/v2/' . $this->rb . '/' . $user_media_id );
+		$response = $this->server->dispatch( $request );
+		$data = $response->get_data();
+
+		remove_filter( 'mediatheque_map_meta_caps', array( $this, 'get_cap' ), 10, 2 );
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertTrue( $data['deleted'] );
+		$this->assertTrue( 'delete_user_upload' === $this->cap );
+	}
+
+	public function test_delete_item_cant() {
+		$user_media_id = $this->factory->post->create( array(
+			'post_author' => $this->admin_id,
+			'post_status' => 'publish',
+			'post_title'  => 'Deleted directory',
+			'post_type'   => 'user_media',
+		) );
+
+		wp_set_post_terms( $user_media_id, array( $this->term_id ), 'user_media_types' );
+
+		add_filter( 'mediatheque_map_meta_caps', array( $this, 'get_cap' ), 10, 2 );
+
+		wp_set_current_user( $this->user_id );
+
+		$request = new WP_REST_Request( 'DELETE', '/wp/v2/' . $this->rb . '/' . $user_media_id );
+		$response = $this->server->dispatch( $request );
+
+		remove_filter( 'mediatheque_map_meta_caps', array( $this, 'get_cap' ), 10, 2 );
+
+		$this->assertErrorResponse( 'rest_cannot_delete', $response, 403 );
+		$this->assertTrue( 'delete_user_upload' === $this->cap );
+	}
+
+	public function test_delete_item_can() {
+		$user_media_id = $this->factory->post->create( array(
+			'post_author' => $this->user_id,
+			'post_status' => 'publish',
+			'post_title'  => 'Deleted directory',
+			'post_type'   => 'user_media',
+		) );
+
+		wp_set_post_terms( $user_media_id, array( $this->term_id ), 'user_media_types' );
+
+		add_filter( 'mediatheque_map_meta_caps', array( $this, 'get_cap' ), 10, 2 );
+
+		wp_set_current_user( $this->admin_id );
+
+		$request = new WP_REST_Request( 'DELETE', '/wp/v2/' . $this->rb . '/' . $user_media_id );
+		$response = $this->server->dispatch( $request );
+		$data = $response->get_data();
+
+		remove_filter( 'mediatheque_map_meta_caps', array( $this, 'get_cap' ), 10, 2 );
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertTrue( $data['deleted'] );
+		$this->assertTrue( 'delete_user_upload' === $this->cap );
+	}
 
 	public function test_prepare_item() {}
 
