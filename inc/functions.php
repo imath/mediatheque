@@ -263,10 +263,12 @@ function mediatheque_map_meta_caps( $caps = array(), $cap = '', $user_id = 0, $a
 	if ( in_array( $cap, mediatheque_get_all_caps(), true ) ) {
 		$required_cap = get_option( 'mediatheque_capability', 'exist' );
 
-		$caps = array( $required_cap );
+		if ( $user_id ) {
+			$caps = array( $required_cap );
+		}
 	}
 
-	return $caps;
+	return apply_filters( 'mediatheque_map_meta_caps', $caps, $cap, $user_id, $args );
 }
 
 /**
