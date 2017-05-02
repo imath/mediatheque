@@ -39,6 +39,13 @@ class MediaTheque_Admin {
 	public $settings = null;
 
 	/**
+	 * The MediaThèque vanished user media logs
+	 *
+	 * @var array
+	 */
+	public $vanished_logs = array();
+
+	/**
 	 * The class constructor.
 	 *
 	 * @since  1.0.0
@@ -48,6 +55,7 @@ class MediaTheque_Admin {
 			$this->settings = new MediaTheque_Settings();
 		}
 
+		$this->vanished_logs = get_option( '_mediatheque_vanished_media', array() );
 		$this->hooks();
 	}
 
@@ -310,6 +318,20 @@ class MediaTheque_Admin {
 			'user-media-options',
 			array( $this, 'do_settings' )
 		);
+
+		$count_vanished = count( $this->vanished_logs );
+
+		if ( $count_vanished > 0 ) {
+			add_management_page(
+				$this->title,
+				$this->title,
+				'manage_options',
+				'user-media-tools',
+				array( $this, 'do_tools' )
+			);
+
+			add_action( 'tool_box', array( $this, 'tools_card' ), 100 );
+		}
 	}
 
 	/**
@@ -436,5 +458,69 @@ location ~* /(?:uploads|files)/mediatheque/private/.* {
 
 	public function avatar_user_media_statuses( $statuses = array() ) {
 		return array_intersect_key( $statuses, array( 'publish' => true ) );
+	}
+
+	public function tools_card() {
+		$page = add_query_arg( 'page', 'user-media-tools', self_admin_url( 'tools.php' ) );
+		?>
+		<div class="card">
+			<h2 class="title"><?php esc_html_e( 'Outils de la MediaThèque', 'mediatheque' ) ?></h2>
+			<p><?php printf( __( 'Vous pouvez gérer les media d\'utilisateur qui sont attachés à vos contenus et qui ont disparu depuis cet <a href="%s">outil</a>.', 'mediatheque' ), esc_url( $page ) ); ?></p>
+		</div>
+		<?php
+	}
+
+	public function do_tools() {
+		$page = add_query_arg( array(
+			'page'  => 'user-media-tools',
+			'reset' => 1,
+		) , self_admin_url( 'tools.php' ) );
+
+		if ( ! empty( $_GET['reset'] ) ) {
+			delete_option( '_mediatheque_vanished_media' );
+			$this->vanished_logs = array();
+		}
+		?>
+		<div class="wrap">
+			<h1><?php esc_html_e( 'Outils de la MediaThèque', 'mediatheque' ); ?></h1>
+
+			<hr class="wp-header-end">
+
+			<p class="description"><?php esc_html_e( 'Ci-dessous la liste des media d\'utilisateur qui ont tenté de s\'afficher pour vos visiteurs. Utilisez leur adresse pour identifier les contenus les intégrant toujours. Utilisez le bouton &quot;Vider&quot; pour supprimer ces adresses une fois vos contenus modifiés.', 'mediatheque' ); ?></p>
+
+			<table class="widefat" id="mediatheque-vanished-logs">
+				<thead>
+					<tr>
+						<th><?php esc_html_e( 'Ancienne adresse du media', 'mediatheque' ); ?></th>
+					</tr>
+				</thead>
+				<tfoot>
+					<tr>
+						<th><?php esc_html_e( 'Ancienne adresse du media', 'mediatheque' ); ?></th>
+					</tr>
+				</tfoot>
+				<tbody>
+					<?php if ( ! $this->vanished_logs ) : ?>
+
+						<tr>
+							<td colspan="2"><?php esc_html_e( 'Aucun media disparu n\'a tenté de s\'afficher à vos visiteurs', 'mediatheque' ); ?></td>
+						</tr>
+
+					<?php else : foreach ( $this->vanished_logs as $url ) : ?>
+
+						<tr>
+							<td><code><?php echo esc_html( $url ) ;?></code></td>
+						</tr>
+
+					<?php endforeach; endif; ?>
+
+				</tbody>
+			</table>
+
+			<div class="submit">
+				<a href="<?php echo esc_url( $page ); ?>" class="button button-primary large"><?php esc_html_e( 'Vider', 'mediatheque' ); ?></a>
+			</div>
+		</div>
+		<?php
 	}
 }
