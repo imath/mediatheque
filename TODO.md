@@ -28,11 +28,11 @@
 [x] Make sure private media cannot be attached but only linked (as WordPress is not allowing private posts embeds).
 [x] Make sure avatar UI is only fetching public images
 [x] Make sure the media inserted has a line feed before and after.
-[] Add a tool to clear vanished media log
+[] Add a tool to clear vanished media log and display the posts where media were added.
 [x] Instead of using wp_attachment_is() create a new function to get the type of a user media @see MediaTheque_REST_Controller->prepare_item_for_response().
 [x] For the file output in the editor add KB infos.
 [x] Implement the Download action
 [x] Add a view to edit title and content of user media
 [x] Check the attachment navigation
 [x] Take care of Directory embed template
-[] Handle user deletion
+[x] Handle user deletion

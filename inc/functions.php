@@ -947,7 +947,7 @@ function mediatheque_register_objects() {
 		'taxonomies'            => array( 'user_media_type' ),
 		'capability_type'       => array( 'user_upload', 'user_uploads' ),
 		'capabilities'          => mediatheque_capabilities(),
-		'delete_with_user'      => true,
+		'delete_with_user'      => false,
 		'can_export'            => true,
 		'show_in_rest'          => true,
 		'rest_controller_class' => 'MediaTheque_REST_Controller',
@@ -1058,7 +1058,7 @@ function mediatheque_embed_template( $template = '' ) {
 	$object = get_queried_object();
 
 	// Only Apply the template override on Embedded User Media
-	if ( 'user_media' !== $object->post_type ) {
+	if ( empty( $object->post_type ) || 'user_media' !== $object->post_type ) {
 		return $template;
 	}
 
@@ -2334,4 +2334,64 @@ function mediatheque_upload_error_handler( $file = array(), $message = '' ) {
 	}
 
 	return array( 'error' => $message );
+}
+
+/**
+ * Remove all user's data when removed from the site.
+ *
+ * NB: No reassign is performed for now, it would require to move files and directories
+ * and to regenerate all user media metadata. A hook is available if you want to build
+ * this reassign.
+ *
+ * @since 1.0.0
+ *
+ * @param integer $user_id  The deleted user's ID.
+ * @param integer $reassign The reassigned user's ID.
+ */
+function mediatheque_delete_user_data( $user_id = 0, $reassign = 0 ) {
+	if ( ! $user_id ) {
+		return;
+	}
+
+	$mediatheque_statuses = wp_list_pluck( mediatheque_get_post_statuses( 'all' ), 'name' );
+
+	$d_user_media = get_posts( array(
+		'post_type'   => 'user_media',
+		'author'      => $user_id,
+		'numberposts' => -1,
+		'post_status' => $mediatheque_statuses,
+	) );
+
+	/**
+	 * Hook here to use your own way of dealing with user deletion.
+	 *
+	 * NB: $d_user_media is passed by reference, setting it to an empty array
+	 * within your function will shortcircuit the rest of the function.
+	 *
+	 * @param integer $user_id      The deleted user's ID.
+	 * @param integer $reassign     The reassigned user's ID.
+	 * @param array   $d_user_media The User Media to delete.
+	 */
+	do_action_ref_array( 'mediatheque_before_delete_user_data', array( $user_id, $reassign, &$d_user_media ) );
+
+	if ( empty( $d_user_media ) ) {
+		return;
+	}
+
+	foreach ( $d_user_media as $user_media ) {
+		mediatheque_delete_media( $user_media );
+	}
+
+	$mediatheque_upload_dir = mediatheque_get_upload_dir();
+
+	foreach ( $mediatheque_statuses as $status ) {
+		$dirpath = $mediatheque_upload_dir['path'] . '/' . $status . '/' . $user_id;
+
+		if ( ! is_dir( $dirpath ) ) {
+			continue;
+		}
+
+		// Remove the empty directory
+		@ rmdir( $dirpath );
+	}
 }

@@ -149,6 +149,9 @@ final class MediaTheque {
 		// Clear cached user media.
 		add_action( 'mediatheque_delete_media', 'mediatheque_clear_cached_media', 10, 1 );
 		add_action( 'mediatheque_move_media',   'mediatheque_clear_cached_media', 10, 1 );
+
+		// Remove all user's data on when the user is removed from the site.
+		add_action( 'delete_user', 'mediatheque_delete_user_data', 10, 2 );
 	}
 
 	/**
