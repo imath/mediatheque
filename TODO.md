@@ -35,3 +35,4 @@
 [x] Add a view to edit title and content of user media
 [x] Check the attachment navigation
 [x] Take care of Directory embed template
+[] Handle user deletion

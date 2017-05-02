@@ -16,13 +16,55 @@ defined( 'ABSPATH' ) || exit;
  * @since  1.0.0
  */
 class MediaTheque_REST_Controller extends WP_REST_Attachments_Controller {
-	public $user_media_status        = 'publish';
-	public $user_media_type_ids      = array();
-	public $user_media_parent        = 0;
-	public $user_media_parent_dir    = '';
-	public $user_media_guid          = '';
+
+	/**
+	 * The default User Media Status
+	 *
+	 * @var string
+	 */
+	public $user_media_status = 'publish';
+
+	/**
+	 * The User Media Types term ids.
+	 *
+	 * @var array
+	 */
+	public $user_media_type_ids = array();
+
+	/**
+	 * The User Media Parent id.
+	 *
+	 * @var integer
+	 */
+	public $user_media_parent = 0;
+
+	/**
+	 * The User Media Parent dir relative path.
+	 *
+	 * @var string
+	 */
+	public $user_media_parent_dir = '';
+
+	/**
+	 * The User Media permalink of $wpdb->posts table.
+	 *
+	 * @var string
+	 */
+	public $user_media_guid = '';
+
+	/**
+	 * The user's deleted space in KB.
+	 *
+	 * @var integer
+	 */
 	public $user_media_deleted_space = 0;
-	public $user_id                  = 0;
+
+	/**
+	 * The current user's ID.
+	 *
+	 * @var integer
+	 */
+	public $user_id = 0;
 
 	/**
 	 * Temporarly Adds specific User Media metas to the registered post metas.
@@ -54,22 +96,31 @@ class MediaTheque_REST_Controller extends WP_REST_Attachments_Controller {
 		}
 	}
 
-	public function get_user_media_type_id( $type = '' ) {
-		if ( ! $type ) {
+	/**
+	 * Get the User Media Type according to its slug.
+	 *
+	 * @since 1.0.0
+	 * @access public
+	 *
+	 * @param  string  $slug The Term Slug
+	 * @return integer       The Term ID
+	 */
+	public function get_user_media_type_id( $slug = '' ) {
+		if ( ! $slug ) {
 			return false;
 		}
 
-		if ( ! isset( $this->user_media_type_ids[ $type ] ) ) {
-			$user_media_type_id = mediatheque_get_user_media_type_id( $type );
+		if ( ! isset( $this->user_media_type_ids[ $slug ] ) ) {
+			$user_media_type_id = mediatheque_get_user_media_type_id( $slug );
 
 			if ( ! $user_media_type_id ) {
 				return false;
 			}
 
-			$this->user_media_type_ids[ $type ] = $user_media_type_id;
+			$this->user_media_type_ids[ $slug ] = $user_media_type_id;
 		}
 
-		return $this->user_media_type_ids[ $type ];
+		return $this->user_media_type_ids[ $slug ];
 	}
 
 	/**
@@ -240,6 +291,7 @@ class MediaTheque_REST_Controller extends WP_REST_Attachments_Controller {
 	 * Temporarly set the WordPress Uploads dir to be the User Media one.
 	 *
 	 * @since  1.0.0
+	 * @access public
 	 *
 	 * @return array The Uploads dir data.
 	 */
@@ -378,7 +430,8 @@ class MediaTheque_REST_Controller extends WP_REST_Attachments_Controller {
 	/**
 	 * Temporarly remove the Private prefix from User Media titles.
 	 *
-	 * @since
+	 * @since 1.0.0
+	 * @access public
 	 *
 	 * @param string  $prefixed_title The User Media prefixed title.
 	 * @param WP_Post $user_media     The User Media object.
@@ -650,6 +703,7 @@ class MediaTheque_REST_Controller extends WP_REST_Attachments_Controller {
 	 * It avoids updating multiple times the same user meta.
 	 *
 	 * @since 1.0.0
+	 * @access public
 	 *
 	 * @param WP_Post $media The User Media Object.
 	 * @param string  $file  The absolute path to the file.
@@ -723,6 +777,15 @@ class MediaTheque_REST_Controller extends WP_REST_Attachments_Controller {
 		return $response;
 	}
 
+	/**
+	 * Makes sure the permalink is updated in DB.
+	 *
+	 * @since 1.0.0
+	 * @access public
+	 *
+	 * @param  string $guid The User Media permalink.
+	 * @return string       The User Media permalink.
+	 */
 	public function force_guid( $guid = '' ) {
 		if ( ! empty( $this->user_media_guid ) ) {
 			$guid = $this->user_media_guid;
