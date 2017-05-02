@@ -483,6 +483,10 @@ p.drag-drop-buttons input[type="button"] {
 	clear: none;
 }
 
+.media-frame #mediatheque-container #media ul li.user-media div.user-media-content h4 {
+	background: none;
+}
+
 /* Front-end */
 body:not( .wp-admin ) #mediatheque-container {
 	background-color: #f1f1f1;

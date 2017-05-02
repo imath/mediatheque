@@ -1278,9 +1278,12 @@ function mediatheque_parse_query( WP_Query $query ) {
 	}
 
 	if ( 1 === (int) $query->get( mediatheque_get_download_rewrite_tag() ) ) {
+		$mediatheque_statuses = wp_list_pluck( mediatheque_get_post_statuses( 'all' ), 'name' );
+
 		$user_media = get_posts( array(
-			'name'      => $query->get( 'mediatheque' ),
-			'post_type' => 'user_media',
+			'name'        => $query->get( 'mediatheque' ),
+			'post_type'   => 'user_media',
+			'post_status' => $mediatheque_statuses,
 		) );
 
 		if ( ! is_array( $user_media ) || 1 !== count( $user_media ) ) {
@@ -1289,6 +1292,12 @@ function mediatheque_parse_query( WP_Query $query ) {
 		}
 
 		$user_media = reset( $user_media );
+
+		if ( 'publish' !== get_post_status( $user_media ) && ! current_user_can( 'read_private_user_uploads' ) ) {
+			$query->set_404();
+			return;
+		}
+
 		$media_file = get_attached_file( $user_media->ID );
 
 		if ( ! $media_file ) {
