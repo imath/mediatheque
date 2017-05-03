@@ -1082,7 +1082,7 @@ window.mediaTheque = window.mediaTheque || _.extend( {}, _.pick( window.wp, 'Bac
 			// Using the App into the WordPress Editor
 			if ( 'wp-editor' === o.uiType ) {
 				o.users = [];
-				this.setToolbar();
+				this.setToolbar( { models: o.users } );
 
 			// Using the App elsewhere.
 			} else {
@@ -1102,9 +1102,8 @@ window.mediaTheque = window.mediaTheque || _.extend( {}, _.pick( window.wp, 'Bac
 			var o = this.options || {};
 
 			o.users.fetch( {
-				data: { 'has_disk_usage' : true },
-				success : _.bind( this.displayToolbar, this ),
-				error   : _.bind( this.setToolbar, this )
+				data   : { 'has_disk_usage' : true },
+				success: _.bind( this.setToolbar, this )
 			} );
 		},
 
@@ -1129,6 +1128,12 @@ window.mediaTheque = window.mediaTheque || _.extend( {}, _.pick( window.wp, 'Bac
 		 */
 		setToolbar: function( model, changed ) {
 			var o = this.options || {}, currentStatus, form;
+
+			// Init the view for an admin who has not yet selected a user.
+			if ( ! _.isUndefined( model.models ) && model.models.length ) {
+				this.displayToolbar();
+				return;
+			}
 
 			if ( ! _.isUndefined( changed ) && false === changed ) {
 				return;

@@ -152,7 +152,11 @@ final class MediaTheque {
 		add_action( 'mediatheque_move_media',   'mediatheque_clear_cached_media', 10, 1 );
 
 		// Remove all user's data on when the user is removed from the site.
-		add_action( 'delete_user', 'mediatheque_delete_user_data', 10, 2 );
+		if ( is_multisite() ) {
+			add_action( 'wpmu_delete_user', 'mediatheque_delete_user_data', 10, 2 );
+		} else {
+			add_action( 'delete_user', 'mediatheque_delete_user_data', 10, 2 );
+		}
 	}
 
 	/**
