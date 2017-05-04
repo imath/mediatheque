@@ -840,6 +840,11 @@ function mediatheque_localize_script( $handle = 'mediatheque-views' ) {
 		$handle
 	);
 
+	$network_root_url = '';
+	if ( ! mediatheque_is_main_site() ) {
+		$network_root_url = trailingslashit( network_site_url() ) . mediatheque_get_root_slug();
+	}
+
 	wp_localize_script( $handle, 'mediaThequeSettings', array(
 		'params' => array(
 			'container' => 'mediatheque-ui',
@@ -864,6 +869,7 @@ function mediatheque_localize_script( $handle = 'mediatheque-views' ) {
 		),
 		'common' => array(
 			'rootSlug'        => mediatheque_get_root_slug(),
+			'networkRootUrl'  => $network_root_url,
 			'downloadSlug'    => mediatheque_get_download_rewrite_slug(),
 			'closeBtn'        => __( 'Fermer', 'mediatheque' ),
 			'noUserMedia'     => __( 'Aucun media utilisateur ne correspond à votre requête.', 'mediatheque' ),
@@ -1331,6 +1337,36 @@ function mediatheque_download( $user_media = null ) {
 	die();
 }
 
+function mediatheque_get_post_by_slug( $slug = '' ) {
+	if ( ! $slug ) {
+		return false;
+	}
+
+	$is_main_site = mediatheque_is_main_site();
+
+	if ( ! $is_main_site ) {
+		switch_to_blog( get_current_network_id() );
+	}
+
+	$mediatheque_statuses = wp_list_pluck( mediatheque_get_post_statuses( 'all' ), 'name' );
+
+	$posts = get_posts( array(
+		'name'        => $slug,
+		'post_type'   => 'user_media',
+		'post_status' => $mediatheque_statuses,
+	) );
+
+	if ( ! $is_main_site ) {
+		restore_current_blog();
+	}
+
+	if ( ! is_array( $posts ) || 1 !== count( $posts ) ) {
+		return false;
+	}
+
+	return apply_filters( 'mediatheque_get_post_by_slug', reset( $posts ), $slug, $mediatheque_statuses );
+}
+
 /**
  * Set some WP_Query parameters so that the Attachment template is used.
  *
@@ -1362,20 +1398,12 @@ function mediatheque_parse_query( WP_Query $query ) {
 	}
 
 	if ( 1 === (int) $query->get( mediatheque_get_download_rewrite_tag() ) ) {
-		$mediatheque_statuses = wp_list_pluck( mediatheque_get_post_statuses( 'all' ), 'name' );
+		$user_media = mediatheque_get_post_by_slug( $query->get( 'mediatheque' ) );
 
-		$user_media = get_posts( array(
-			'name'        => $query->get( 'mediatheque' ),
-			'post_type'   => 'user_media',
-			'post_status' => $mediatheque_statuses,
-		) );
-
-		if ( ! is_array( $user_media ) || 1 !== count( $user_media ) ) {
+		if ( false === $user_media ) {
 			$query->set_404();
 			return;
 		}
-
-		$user_media = reset( $user_media );
 
 		if ( 'publish' !== get_post_status( $user_media ) && ! current_user_can( 'read_private_user_uploads' ) ) {
 			$query->set_404();
@@ -1996,7 +2024,13 @@ function mediatheque_oembed_dataparse( $result = null, $data = null, $url = '' )
 		return $result;
 	}
 
-	return $mediatheque->user_media_oembeds[ $url ];
+	$return = $mediatheque->user_media_oembeds[ $url ];
+
+	if ( is_multisite() && ms_is_switched() ) {
+		restore_current_blog();
+	}
+
+	return $return;
 }
 
 function mediatheque_oembed_get_url_args( $url = '' ) {
@@ -2097,8 +2131,27 @@ function mediatheque_file_shortcode( $user_media = null, $args = array() ) {
 }
 
 function mediatheque_oembed_user_media_id( $id = 0, $url = '' ) {
-	if ( ! $id ) {
+	$_id = $id;
+
+	// On Multisite embedding an URL of the main site in a subsite fails to fetch the embed html.
+	if ( ! $id && is_multisite() ) {
+		$network_url = trailingslashit( network_site_url() ) . mediatheque_get_root_slug();
+
+		$network_url = addcslashes( $network_url, '/' );
+		preg_match( "/$network_url\/(.*?)\?/", $url, $matches );
+
+		if ( empty( $matches[1] ) ) {
+			return $id;
+		}
+
+		$slug = trim( $matches[1], '/' );
+		$_id = mediatheque_get_post_by_slug( $slug );
+	}
+
+	if ( ! $_id ) {
 		return $id;
+	} elseif ( is_a( $_id, 'WP_Post' ) ) {
+		$id = $_id->ID;
 	}
 
 	$url_id = str_replace( '&amp;', '&', $url );
@@ -2114,7 +2167,7 @@ function mediatheque_oembed_user_media_id( $id = 0, $url = '' ) {
 		switch_to_blog( get_current_network_id() );
 	}
 
-	$user_media = get_post( $id );
+	$user_media = get_post( $_id );
 	$media_type = mediatheque_get_media_info( $user_media );
 
 	// Take care of images
@@ -2238,10 +2291,10 @@ function mediatheque_oembed_user_media_id( $id = 0, $url = '' ) {
 		if ( ! array_intersect( $cache_keys, $cached_keys ) ) {
 			update_post_meta( $user_media->ID, '_user_media_cached_keys', array_merge( $cached_keys, $cache_keys ) );
 		}
-	}
-
-	if ( ! $is_main_site ) {
-		restore_current_blog();
+	} else {
+		if ( ! $is_main_site ) {
+			restore_current_blog();
+		}
 	}
 
 	return $id;
@@ -2263,12 +2316,6 @@ function mediatheque_clear_cached_media( $user_media = null ) {
 		return false;
 	}
 
-	$is_main_site = mediatheque_is_main_site();
-
-	if ( ! $is_main_site ) {
-		switch_to_blog( get_current_network_id() );
-	}
-
 	$cached_keys = get_post_meta( $user_media->ID, '_user_media_cached_keys', true );
 
 	if ( ! $cached_keys ) {
@@ -2280,10 +2327,6 @@ function mediatheque_clear_cached_media( $user_media = null ) {
 
 	// Remove the list of cache meta keys that are about to be deleted.
 	delete_post_meta( $user_media->ID, '_user_media_cached_keys' );
-
-	if ( ! $is_main_site ) {
-		restore_current_blog();
-	}
 
 	// Delete cached meta keys so that the cache will be reset at next media load.
 	$return = $wpdb->query( "DELETE FROM {$wpdb->postmeta} WHERE meta_key IN ({$in})" );

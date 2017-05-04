@@ -752,6 +752,10 @@ window.mediaTheque = window.mediaTheque || _.extend( {}, _.pick( window.wp, 'Bac
 		},
 
 		getRootURL: function() {
+			if ( mediaThequeSettings.common.networkRootUrl ) {
+				this.rootUrl = mediaThequeSettings.common.networkRootUrl;
+			}
+
 			return this.rootUrl;
 		}
 	};
