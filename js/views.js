@@ -774,6 +774,8 @@ window.mediaTheque = window.mediaTheque || _.extend( {}, _.pick( window.wp, 'Bac
 
 		initialize: function() {
 			this.model.set( _.pick( mediaThequeSettings.common, 'closeBtn' ), { silent: true } );
+
+			this.on( 'ready', this.setFocus, this );
 		},
 
 		removeSelf: function( event ) {
@@ -819,6 +821,10 @@ window.mediaTheque = window.mediaTheque || _.extend( {}, _.pick( window.wp, 'Bac
 
 		mkdirError: function( error ) {
 			console.log( error );
+		},
+
+		setFocus: function() {
+			this.$el.find( '#dir-name' ).focus();
 		}
 	} );
 

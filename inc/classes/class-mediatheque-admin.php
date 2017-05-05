@@ -242,7 +242,7 @@ class MediaTheque_Admin {
 		if ( $pointers ) {
 			$can_manage_options  = current_user_can( $this->capability );
 
-			if ( is_multisite() ) {
+			if ( ! is_multisite() ) {
 				$permalink_structure = get_option( 'permalink_structure' );
 			}
 
