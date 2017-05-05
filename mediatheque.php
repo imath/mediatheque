@@ -1,17 +1,18 @@
 <?php
-/*
-Plugin Name: MediaThèque
-Plugin URI: https://imathi.eu/tag/mediatheque/
-Description: Une gestion alternative des media dans WordPress, pour tous.
-Version: 1.0.0
-Requires at least: 4.7
-Tested up to: 4.7
-License: GNU/GPL 2
-Author: imath
-Author URI: https://imathi.eu/
-Text Domain: mediatheque
-Domain Path: /languages/
-*/
+/**
+ * Plugin Name: MediaThèque
+ * Plugin URI: https://imathi.eu/tag/mediatheque/
+ * Description: Une gestion alternative des media dans WordPress, pour tous.
+ * Version: 1.0.0
+ * Requires at least: 4.7
+ * Tested up to: 4.7
+ * License: GNU/GPL 2
+ * Author: imath
+ * Author URI: https://imathi.eu/
+ * Text Domain: mediatheque
+ * Domain Path: /languages/
+ * Network: True
+ */
 
 // Exit if accessed directly.
 defined( 'ABSPATH' ) || exit;
@@ -151,7 +152,11 @@ final class MediaTheque {
 		add_action( 'mediatheque_move_media',   'mediatheque_clear_cached_media', 10, 1 );
 
 		// Remove all user's data on when the user is removed from the site.
-		add_action( 'delete_user', 'mediatheque_delete_user_data', 10, 2 );
+		if ( is_multisite() ) {
+			add_action( 'wpmu_delete_user', 'mediatheque_delete_user_data', 10, 2 );
+		} else {
+			add_action( 'delete_user', 'mediatheque_delete_user_data', 10, 2 );
+		}
 	}
 
 	/**

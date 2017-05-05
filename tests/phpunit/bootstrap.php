@@ -11,9 +11,9 @@ function _bootstrap_mediatheque() {
 tests_add_filter( 'muplugins_loaded', '_bootstrap_mediatheque' );
 
 function _install_mediatheque() {
-	delete_option( 'mediatheque_version' );
-	delete_option( 'mediatheque_capability' );
-	delete_option( 'mediatheque_mime_types' );
+	delete_network_option( 0, 'mediatheque_version' );
+	delete_network_option( 0, 'mediatheque_capability' );
+	delete_network_option( 0, 'mediatheque_mime_types' );
 
 	$directory_id = mediatheque_get_user_media_type_id( 'mediatheque-directory' );
 	if ( $directory_id ) {

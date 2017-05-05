@@ -48,7 +48,7 @@ class MediaTheque_Settings {
 				'mediatheque_capability' => array(
 					'title'             => __( 'Capacités requises.', 'mediatheque' ),
 					'callback'          => 'mediatheque_settings_field_capability',
-					'sanitize_callback' => 'sanitize_text_field',
+					'sanitize_callback' => 'mediatheque_sanitize_capability',
 				),
 				'mediatheque_mime_types' => array(
 					'title'             => __( 'Types de fichier autorisés.', 'mediatheque' ),

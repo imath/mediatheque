@@ -18,7 +18,7 @@ defined( 'ABSPATH' ) || exit;
  * @return string The MediaThèque Raw DB Version.
  */
 function mediatheque_db_version() {
-	return get_option( 'mediatheque_version', 0 );
+	return get_network_option( 0, 'mediatheque_version', 0 );
 }
 
 /**
@@ -53,7 +53,12 @@ function mediatheque_upgrade() {
 		return;
 	}
 
-	$db_version = mediatheque_version();
+	$db_version   = mediatheque_version();
+	$is_main_site = mediatheque_is_main_site();
+
+	if ( ! $is_main_site ) {
+		switch_to_blog( get_current_network_id() );
+	}
 
 	if ( mediatheque_is_install() ) {
 
@@ -72,7 +77,7 @@ function mediatheque_upgrade() {
 		);
 
 		foreach ( $default_options as $option_name => $option_value ) {
-			add_option( $option_name, $option_value );
+			add_network_option( 0, $option_name, $option_value );
 		}
 
 		/**
@@ -96,8 +101,12 @@ function mediatheque_upgrade() {
 		delete_option( 'rewrite_rules' );
 	}
 
+	if ( ! $is_main_site ) {
+		restore_current_blog();
+	}
+
 	// Update the db version.
-	update_option( 'mediatheque_version', $db_version );
+	update_network_option( 0, 'mediatheque_version', $db_version );
 }
 add_action( 'admin_init', 'mediatheque_upgrade', 999 );
 

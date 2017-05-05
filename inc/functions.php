@@ -98,6 +98,32 @@ function mediatheque_get_download_rewrite_slug() {
 }
 
 /**
+ * Checks if the current or given site ID is the main site of the network.
+ *
+ * @since  1.0.0
+ *
+ * @param  int  $site_id The site ID to check. Optional. Defaults to the current site ID.
+ * @return bool True if the site is the main site of the network. False otherwise.
+ */
+function mediatheque_is_main_site( $site_id = 0 ) {
+	$return = ! is_multisite();
+
+	if ( $return ) {
+		return $return;
+	}
+
+	if ( empty( $site_id ) || ! is_numeric( $site_id ) ) {
+		$site_id = get_current_blog_id();
+	}
+
+	if ( (int) get_current_network_id() === (int) $site_id ) {
+		$return = true;
+	}
+
+	return $return;
+}
+
+/**
  * Get the download url for a User Media Item.
  *
  * @since 1.0.0
@@ -106,6 +132,12 @@ function mediatheque_get_download_rewrite_slug() {
  * @return string      The download url for the User Media Item.
  */
 function mediatheque_get_download_url( $user_media = null ) {
+	$is_main_site = mediatheque_is_main_site();
+
+	if ( ! $is_main_site ) {
+		switch_to_blog( get_current_network_id() );
+	}
+
 	if ( null === $user_media && isset( mediatheque()->user_media_link ) ) {
 		return mediatheque()->user_media_link;
 	} else {
@@ -118,7 +150,13 @@ function mediatheque_get_download_url( $user_media = null ) {
 		return $url;
 	}
 
-	return sprintf( '%1$s/%2$s/', trim( get_post_permalink( $user_media ), '/' ), mediatheque_get_download_rewrite_slug() );
+	$download_url = sprintf( '%1$s/%2$s/', trim( get_post_permalink( $user_media ), '/' ), mediatheque_get_download_rewrite_slug() );
+
+	if ( ! $is_main_site ) {
+		restore_current_blog();
+	}
+
+	return apply_filters( 'mediatheque_get_download_url', $download_url, $user_media );
 }
 
 /**
@@ -262,7 +300,7 @@ function mediatheque_get_all_caps() {
 function mediatheque_map_meta_caps( $caps = array(), $cap = '', $user_id = 0, $args = array() ) {
 	if ( in_array( $cap, mediatheque_get_all_caps(), true ) ) {
 		if ( $user_id ) {
-			$required_cap = get_option( 'mediatheque_capability', 'exist' );
+			$required_cap = get_network_option( 0, 'mediatheque_capability', 'exist' );
 			$admin_caps   = array_diff_key( mediatheque_types_capabilities(), array( 'assign_terms' => false ) );
 			$admin_caps   = array_merge( $admin_caps, array(
 				'edit_user_uploads',
@@ -275,8 +313,13 @@ function mediatheque_map_meta_caps( $caps = array(), $cap = '', $user_id = 0, $a
 				'edit_published_user_uploads',
 			) );
 
+			$admin_cap = 'manage_options';
+			if ( is_multisite() ) {
+				$admin_cap = 'manage_network_options';
+			}
+
 			if ( in_array( $cap, $admin_caps, true ) ) {
-				$caps = array( 'manage_options' );
+				$caps = array( $admin_cap );
 			} else {
 				$caps = array( $required_cap );
 				$manage_caps = array(
@@ -290,7 +333,7 @@ function mediatheque_map_meta_caps( $caps = array(), $cap = '', $user_id = 0, $a
 				}
 
 				if ( in_array( $cap, $manage_caps, true ) && ( ! $author || (int) $author !== (int) $user_id ) ) {
-					$caps = array( 'manage_options' );
+					$caps = array( $admin_cap );
 				}
 			}
 		}
@@ -435,17 +478,36 @@ function mediatheque_additionnal_user_rest_param( $query_params = array() ) {
  */
 function mediatheque_rest_user_query( $prepared_args = array(), WP_REST_Request $request ) {
 	if ( $request->get_param( 'has_disk_usage' ) ) {
-		// Regular users can't browse or edit other users files.
-		if ( ! current_user_can( 'list_users' ) ) {
-			return array( 'id' => 0 );
+		$capacity = 'list_users';
+
+		if ( is_multisite() ) {
+			$capacity = 'manage_network_users';
+		}
+
+		$headers = $request->get_headers();
+		if ( ! empty( $headers['referer'] ) ) {
+			$referer          = array_shift( $headers['referer'] );
+			$is_network_admin = 0 === strpos( $referer, network_admin_url() );
+		}
+
+		// Regular users/site admins can't browse or edit other users files.
+		if ( ! current_user_can( $capacity ) || empty( $is_network_admin ) ) {
+			return array_merge( $prepared_args, array( 'login' => '0' ) );
 
 		// Authorized users can browse and edit other users files.
 		} else {
-			// We are only listing the users who uploaded at least one file.
-			$prepared_args = array_merge( $prepared_args, array(
+			$p_args = array(
 				'meta_key'     => '_mediatheque_disk_usage',
 				'meta_compare' => 'EXISTS',
-			) );
+			);
+
+			// Reset the blog ID to 0 to get all network users.
+			if ( ! empty( $is_network_admin ) ) {
+				$p_args['blog_id'] = 0;
+			}
+
+			// We are only listing the users who uploaded at least one file.
+			$prepared_args = array_merge( $prepared_args, $p_args );
 
 			// Make sure the Admin has the meta set to include him in results.
 			$user_id = get_current_user_id();
@@ -498,6 +560,12 @@ function mediatheque_get_i18n_media_type( $media_type = '' ) {
 }
 
 function mediatheque_get_media_info( $user_media = null, $arg = 'media_type' ) {
+	$is_main_site = mediatheque_is_main_site();
+
+	if ( ! $is_main_site ) {
+		switch_to_blog( get_current_network_id() );
+	}
+
 	$user_media = get_post( $user_media );
 
 	if ( empty( $user_media->ID ) ) {
@@ -513,6 +581,10 @@ function mediatheque_get_media_info( $user_media = null, $arg = 'media_type' ) {
 
 	$filedata['media_type'] = wp_ext2type( $filedata['ext'] );
 	$filedata['size']       = filesize( $file );
+
+	if ( ! $is_main_site ) {
+		restore_current_blog();
+	}
 
 	if ( 'all' !== $arg ) {
 		return $filedata[ $arg ];
@@ -531,6 +603,12 @@ function mediatheque_get_media_info( $user_media = null, $arg = 'media_type' ) {
  * @return array                  The User Media intermediate size data.
  */
 function mediatheque_image_get_intermediate_size( $user_media_id = 0, $size = array() ) {
+	$is_main_site = mediatheque_is_main_site();
+
+	if ( ! $is_main_site ) {
+		switch_to_blog( get_current_network_id() );
+	}
+
 	$user_media = get_post( $user_media_id );
 	$size_data  = array();
 
@@ -560,6 +638,10 @@ function mediatheque_image_get_intermediate_size( $user_media_id = 0, $size = ar
 	// Get the the intermediate size
 	} else {
 		$size_data = image_get_intermediate_size( $user_media->ID, $size );
+	}
+
+	if ( ! $is_main_site ) {
+		restore_current_blog();
 	}
 
 	if ( empty( $size_data['path'] ) ) {
@@ -688,12 +770,10 @@ function mediatheque_set_upload_base_dir( $dir = array() ) {
  * @since 1.0.0
  */
 function mediatheque_register_upload_dir() {
-	$needs_switch = false;
-	$network_id   = (int) get_current_network_id();
+	$is_main_site = mediatheque_is_main_site();
 
-	if ( is_multisite() && (int) get_current_blog_id() !== $network_id ) {
-		$needs_switch = true;
-		switch_to_blog( $network_id );
+	if ( ! $is_main_site ) {
+		switch_to_blog( get_current_network_id() );
 	}
 
 	add_filter( 'upload_dir', 'mediatheque_set_upload_base_dir', 10, 1 );
@@ -702,7 +782,7 @@ function mediatheque_register_upload_dir() {
 
 	remove_filter( 'upload_dir', 'mediatheque_set_upload_base_dir', 10, 1 );
 
-	if ( $needs_switch ) {
+	if ( ! $is_main_site ) {
 		restore_current_blog();
 	}
 }
@@ -760,6 +840,11 @@ function mediatheque_localize_script( $handle = 'mediatheque-views' ) {
 		$handle
 	);
 
+	$network_root_url = '';
+	if ( ! mediatheque_is_main_site() ) {
+		$network_root_url = trailingslashit( network_site_url() ) . mediatheque_get_root_slug();
+	}
+
 	wp_localize_script( $handle, 'mediaThequeSettings', array(
 		'params' => array(
 			'container' => 'mediatheque-ui',
@@ -784,6 +869,7 @@ function mediatheque_localize_script( $handle = 'mediatheque-views' ) {
 		),
 		'common' => array(
 			'rootSlug'        => mediatheque_get_root_slug(),
+			'networkRootUrl'  => $network_root_url,
 			'downloadSlug'    => mediatheque_get_download_rewrite_slug(),
 			'closeBtn'        => __( 'Fermer', 'mediatheque' ),
 			'noUserMedia'     => __( 'Aucun media utilisateur ne correspond à votre requête.', 'mediatheque' ),
@@ -1251,6 +1337,36 @@ function mediatheque_download( $user_media = null ) {
 	die();
 }
 
+function mediatheque_get_post_by_slug( $slug = '' ) {
+	if ( ! $slug ) {
+		return false;
+	}
+
+	$is_main_site = mediatheque_is_main_site();
+
+	if ( ! $is_main_site ) {
+		switch_to_blog( get_current_network_id() );
+	}
+
+	$mediatheque_statuses = wp_list_pluck( mediatheque_get_post_statuses( 'all' ), 'name' );
+
+	$posts = get_posts( array(
+		'name'        => $slug,
+		'post_type'   => 'user_media',
+		'post_status' => $mediatheque_statuses,
+	) );
+
+	if ( ! $is_main_site ) {
+		restore_current_blog();
+	}
+
+	if ( ! is_array( $posts ) || 1 !== count( $posts ) ) {
+		return false;
+	}
+
+	return apply_filters( 'mediatheque_get_post_by_slug', reset( $posts ), $slug, $mediatheque_statuses );
+}
+
 /**
  * Set some WP_Query parameters so that the Attachment template is used.
  *
@@ -1260,6 +1376,10 @@ function mediatheque_download( $user_media = null ) {
  */
 function mediatheque_parse_query( WP_Query $query ) {
 	$bail = false;
+
+	if ( ! mediatheque_is_main_site() ) {
+		return;
+	}
 
 	if ( ! $query->is_main_query() || true === $query->get( 'suppress_filters' ) ) {
 		$bail = true;
@@ -1278,20 +1398,12 @@ function mediatheque_parse_query( WP_Query $query ) {
 	}
 
 	if ( 1 === (int) $query->get( mediatheque_get_download_rewrite_tag() ) ) {
-		$mediatheque_statuses = wp_list_pluck( mediatheque_get_post_statuses( 'all' ), 'name' );
+		$user_media = mediatheque_get_post_by_slug( $query->get( 'mediatheque' ) );
 
-		$user_media = get_posts( array(
-			'name'        => $query->get( 'mediatheque' ),
-			'post_type'   => 'user_media',
-			'post_status' => $mediatheque_statuses,
-		) );
-
-		if ( ! is_array( $user_media ) || 1 !== count( $user_media ) ) {
+		if ( false === $user_media ) {
 			$query->set_404();
 			return;
 		}
-
-		$user_media = reset( $user_media );
 
 		if ( 'publish' !== get_post_status( $user_media ) && ! current_user_can( 'read_private_user_uploads' ) ) {
 			$query->set_404();
@@ -1318,13 +1430,25 @@ function mediatheque_parse_query( WP_Query $query ) {
 }
 
 function mediatheque_get_user_media_type_id( $slug = '' ) {
+	$is_main_site = mediatheque_is_main_site();
+
+	if ( ! $is_main_site ) {
+		switch_to_blog( get_current_network_id() );
+	}
+
 	$user_media_type = get_term_by( 'slug', $slug, 'user_media_types' );
 
 	if ( empty( $user_media_type->term_id ) ) {
 		return false;
 	}
 
-	return (int) $user_media_type->term_id;
+	$term_id = (int) $user_media_type->term_id;
+
+	if ( ! $is_main_site ) {
+		restore_current_blog();
+	}
+
+	return $term_id;
 }
 
 function mediatheque_set_displayed_directory( $id = 0 ) {
@@ -1370,6 +1494,12 @@ function mediatheque_get_display_content( $attr ) {
 		return $content;
 	}
 
+	$is_main_site = mediatheque_is_main_site();
+
+	if ( ! $is_main_site ) {
+		switch_to_blog( get_current_network_id() );
+	}
+
 	$atts = shortcode_atts( array(
 		'directory' => 0,
 		'width'     => '100%',
@@ -1395,6 +1525,10 @@ function mediatheque_get_display_content( $attr ) {
 	}
 
 	do_action( 'mediatheque_display_content' );
+
+	if ( ! $is_main_site ) {
+		restore_current_blog();
+	}
 
 	return $content;
 }
@@ -1539,6 +1673,12 @@ function mediatheque_delete_dir( $dir = null ) {
 		return false;
 	}
 
+	$is_main_site = mediatheque_is_main_site();
+
+	if ( ! $is_main_site ) {
+		switch_to_blog( get_current_network_id() );
+	}
+
 	$dir = get_post( $dir );
 
 	if ( empty( $dir->post_type ) || 'user_media' !== $dir->post_type ) {
@@ -1590,6 +1730,10 @@ function mediatheque_delete_dir( $dir = null ) {
 	 */
 	do_action( 'mediatheque_deleted_dir', $dir_id );
 
+	if ( ! $is_main_site ) {
+		restore_current_blog();
+	}
+
 	return $dir;
 }
 
@@ -1604,6 +1748,12 @@ function mediatheque_delete_dir( $dir = null ) {
 function mediatheque_delete_media( $media = null ) {
 	if ( empty( $media ) ) {
 		return false;
+	}
+
+	$is_main_site = mediatheque_is_main_site();
+
+	if ( ! $is_main_site ) {
+		switch_to_blog( get_current_network_id() );
 	}
 
 	$user_media = get_post( $media );
@@ -1662,12 +1812,22 @@ function mediatheque_delete_media( $media = null ) {
 	 */
 	do_action( 'mediatheque_deleted_media', $user_media_id );
 
+	if ( ! $is_main_site ) {
+		restore_current_blog();
+	}
+
 	return $user_media;
 }
 
 function mediatheque_move( $media = null, $parent = null ) {
 	if ( empty( $media ) || is_null( $parent ) ) {
 		return false;
+	}
+
+	$is_main_site = mediatheque_is_main_site();
+
+	if ( ! $is_main_site ) {
+		switch_to_blog( get_current_network_id() );
 	}
 
 	$user_media = get_post( $media );
@@ -1732,6 +1892,10 @@ function mediatheque_move( $media = null, $parent = null ) {
 	 * @param  string  $newdir        The new destination dir.
 	 */
 	do_action( 'mediatheque_moved_media', $user_media_id, $newdir );
+
+	if ( ! $is_main_site ) {
+		restore_current_blog();
+	}
 
 	return $new_file;
 }
@@ -1870,7 +2034,13 @@ function mediatheque_oembed_dataparse( $result = null, $data = null, $url = '' )
 		return $result;
 	}
 
-	return $mediatheque->user_media_oembeds[ $url ];
+	$return = $mediatheque->user_media_oembeds[ $url ];
+
+	if ( is_multisite() && ms_is_switched() ) {
+		restore_current_blog();
+	}
+
+	return $return;
 }
 
 function mediatheque_oembed_get_url_args( $url = '' ) {
@@ -1971,8 +2141,32 @@ function mediatheque_file_shortcode( $user_media = null, $args = array() ) {
 }
 
 function mediatheque_oembed_user_media_id( $id = 0, $url = '' ) {
-	if ( ! $id ) {
+	$_id = $id;
+
+	/**
+	 * On Multisite embedding an URL of the main site in a subsite
+	 * fails to fetch the embed html.
+	 *
+	 * @see https://core.trac.wordpress.org/ticket/40673
+	 */
+	if ( ! $id && is_multisite() ) {
+		$network_url = trailingslashit( network_site_url() ) . mediatheque_get_root_slug();
+
+		$network_url = addcslashes( $network_url, '/' );
+		preg_match( "/$network_url\/(.*?)\?/", $url, $matches );
+
+		if ( empty( $matches[1] ) ) {
+			return $id;
+		}
+
+		$slug = trim( $matches[1], '/' );
+		$_id = mediatheque_get_post_by_slug( $slug );
+	}
+
+	if ( ! $_id ) {
 		return $id;
+	} elseif ( is_a( $_id, 'WP_Post' ) ) {
+		$id = $_id->ID;
 	}
 
 	$url_id = str_replace( '&amp;', '&', $url );
@@ -1982,7 +2176,13 @@ function mediatheque_oembed_user_media_id( $id = 0, $url = '' ) {
 		return $id;
 	}
 
-	$user_media = get_post( $id );
+	$is_main_site = mediatheque_is_main_site();
+
+	if ( ! $is_main_site ) {
+		switch_to_blog( get_current_network_id() );
+	}
+
+	$user_media = get_post( $_id );
 	$media_type = mediatheque_get_media_info( $user_media );
 
 	// Take care of images
@@ -2106,6 +2306,10 @@ function mediatheque_oembed_user_media_id( $id = 0, $url = '' ) {
 		if ( ! array_intersect( $cache_keys, $cached_keys ) ) {
 			update_post_meta( $user_media->ID, '_user_media_cached_keys', array_merge( $cached_keys, $cache_keys ) );
 		}
+	} else {
+		if ( ! $is_main_site ) {
+			restore_current_blog();
+		}
 	}
 
 	return $id;
@@ -2149,7 +2353,7 @@ function mediatheque_clear_cached_media( $user_media = null ) {
 	return (bool) $return;
 }
 
-function mediatheque_get_attached_post( $s = '' ) {
+function mediatheque_get_attached_posts( $s = '' ) {
 	if ( ! $s ) {
 		return array();
 	}
@@ -2190,7 +2394,7 @@ function mediatheque_maybe_hide_link( $link = '', $url = '' ) {
 			update_option( '_mediatheque_vanished_media', array_merge( $vanished_media_log, array( $s ) ) );
 
 			$search_posts   = new WP_Query;
-			$search_results = mediatheque_get_attached_post( $s );
+			$search_results = mediatheque_get_attached_posts( $s );
 
 			if ( ! empty( $search_results ) ) {
 				$warning = _n(
@@ -2233,7 +2437,7 @@ function mediatheque_settings_section_callback() {}
 
 function mediatheque_settings_field_capability() {
 	$role_names = wp_roles()->role_names;
-	$setting    = get_option( 'mediatheque_capability', 'exist' );
+	$setting    = get_network_option( 0, 'mediatheque_capability', 'exist' );
 
 	$caps = array(
 		'exist' => __( 'Utilisateur connecté', 'mediatheque' ),
@@ -2248,7 +2452,7 @@ function mediatheque_settings_field_capability() {
 	}
 	?>
 
-	<select name="mediatheque_capability" id="mediatheque_capability">
+	<select name="mediatheque_capability" id="mediatheque_capability"<?php echo is_network_admin() ? ' disabled' : '' ;?>>
 
 		<?php foreach ( (array) apply_filters( 'mediatheque_caps', $caps ) as $cap => $role ) : ?>
 			<option value="<?php echo esc_attr( $cap ); ?>" <?php selected( $setting, $cap ); ?>>
@@ -2286,7 +2490,7 @@ function mediatheque_get_default_mime_types() {
 }
 
 function mediatheque_get_allowed_mime_types() {
-	$mime_types = get_option( 'mediatheque_mime_types', array() );
+	$mime_types = get_network_option( 0, 'mediatheque_mime_types', array() );
 	$mime_types = array_intersect( mediatheque_get_mime_types(), $mime_types );
 
 	return (array) apply_filters( 'mediatheque_get_allowed_mime_types', $mime_types );
@@ -2329,6 +2533,14 @@ function mediatheque_settings_field_mime_types() {
 	}
 }
 
+function mediatheque_sanitize_capability( $capability ) {
+	if ( empty( $capability ) ) {
+		$capability = 'exist';
+	}
+
+	return sanitize_text_field( $capability );
+}
+
 function mediatheque_sanitize_mime_types( $mime_types ) {
 	if ( ! is_array( $mime_types ) ) {
 		return array();
@@ -2360,6 +2572,12 @@ function mediatheque_upload_error_handler( $file = array(), $message = '' ) {
 function mediatheque_delete_user_data( $user_id = 0, $reassign = 0 ) {
 	if ( ! $user_id ) {
 		return;
+	}
+
+	$is_main_site = mediatheque_is_main_site();
+
+	if ( ! $is_main_site ) {
+		switch_to_blog( get_current_network_id() );
 	}
 
 	$mediatheque_statuses = wp_list_pluck( mediatheque_get_post_statuses( 'all' ), 'name' );
@@ -2402,5 +2620,9 @@ function mediatheque_delete_user_data( $user_id = 0, $reassign = 0 ) {
 
 		// Remove the empty directory
 		@ rmdir( $dirpath );
+	}
+
+	if ( ! $is_main_site ) {
+		restore_current_blog();
 	}
 }

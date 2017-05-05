@@ -124,25 +124,6 @@ class MediaTheque_REST_Controller extends WP_REST_Attachments_Controller {
 	}
 
 	/**
-	 * Checks if a given request has access to create a User Media.
-	 *
-	 * @since 1.0.0
-	 * @access public
-	 *
-	 * @param WP_REST_Request $request Full details about the request.
-	 * @return WP_Error|true Boolean true if the User Media may be created, or a WP_Error if not.
-	 */
-	public function create_item_permissions_check( $request ) {
-		$ret = WP_REST_Posts_Controller::create_item_permissions_check( $request );
-
-		if ( ! $ret || is_wp_error( $ret ) ) {
-			return $ret;
-		}
-
-		return true;
-	}
-
-	/**
 	 * Retrieves the query params for collections of User Media.
 	 *
 	 * @since 1.0.0
@@ -250,6 +231,31 @@ class MediaTheque_REST_Controller extends WP_REST_Attachments_Controller {
 	}
 
 	/**
+	 * Checks if a given request has access to read a User Media.
+	 *
+	 * @since 1.0.0
+	 * @access public
+	 *
+	 * @param WP_REST_Request $request Full details about the request.
+	 * @return bool|WP_Error True if the request has read access for the User Media, WP_Error object otherwise.
+	 */
+	public function get_item_permissions_check( $request ) {
+		$is_main_site = mediatheque_is_main_site();
+
+		if ( ! $is_main_site ) {
+			switch_to_blog( get_current_network_id() );
+		}
+
+		$return = parent::get_item_permissions_check( $request );
+
+		if ( ! $is_main_site ) {
+			restore_current_blog();
+		}
+
+		return $return;
+	}
+
+	/**
 	 * Retrieves a single User Media.
 	 *
 	 * @since 1.0.0
@@ -259,11 +265,21 @@ class MediaTheque_REST_Controller extends WP_REST_Attachments_Controller {
 	 * @return WP_REST_Response|WP_Error Response object on success, or WP_Error object on failure.
 	 */
 	public function get_item( $request ) {
+		$is_main_site = mediatheque_is_main_site();
+
+		if ( ! $is_main_site ) {
+			switch_to_blog( get_current_network_id() );
+		}
+
 		$this->register_post_type_only_metas();
 
 		$response = parent::get_item( $request );
 
 		$this->unregister_post_type_only_metas();
+
+		if ( ! $is_main_site ) {
+			restore_current_blog();
+		}
 
 		return $response;
 	}
@@ -278,11 +294,21 @@ class MediaTheque_REST_Controller extends WP_REST_Attachments_Controller {
 	 * @return WP_REST_Response|WP_Error Response object on success, or WP_Error object on failure.
 	 */
 	public function get_items( $request ) {
+		$is_main_site = mediatheque_is_main_site();
+
+		if ( ! $is_main_site ) {
+			switch_to_blog( get_current_network_id() );
+		}
+
 		$this->register_post_type_only_metas();
 
 		$response = parent::get_items( $request );
 
 		$this->unregister_post_type_only_metas();
+
+		if ( ! $is_main_site ) {
+			restore_current_blog();
+		}
 
 		return $response;
 	}
@@ -487,7 +513,7 @@ class MediaTheque_REST_Controller extends WP_REST_Attachments_Controller {
 
 		if ( $is_edit ) {
 			$embed_link     = esc_url_raw( get_post_permalink( $post ) );
-			$attached_posts = mediatheque_get_attached_post( $embed_link );
+			$attached_posts = mediatheque_get_attached_posts( $embed_link );
 
 			foreach ( $attached_posts as $index => $attached_post ) {
 				$attached_posts[ $index ] = array(
@@ -517,6 +543,35 @@ class MediaTheque_REST_Controller extends WP_REST_Attachments_Controller {
 	}
 
 	/**
+	 * Checks if a given request has access to create a User Media.
+	 *
+	 * @since 1.0.0
+	 * @access public
+	 *
+	 * @param WP_REST_Request $request Full details about the request.
+	 * @return WP_Error|true Boolean true if the User Media may be created, or a WP_Error if not.
+	 */
+	public function create_item_permissions_check( $request ) {
+		$is_main_site = mediatheque_is_main_site();
+
+		if ( ! $is_main_site ) {
+			switch_to_blog( get_current_network_id() );
+		}
+
+		$ret = WP_REST_Posts_Controller::create_item_permissions_check( $request );
+
+		if ( ! $is_main_site ) {
+			restore_current_blog();
+		}
+
+		if ( ! $ret || is_wp_error( $ret ) ) {
+			return $ret;
+		}
+
+		return true;
+	}
+
+	/**
 	 * Creates a User Media.
 	 *
 	 * @since 1.0.0
@@ -526,6 +581,12 @@ class MediaTheque_REST_Controller extends WP_REST_Attachments_Controller {
 	 * @return WP_Error|WP_REST_Response Response object on success, WP_Error object on failure.
 	 */
 	public function create_item( $request ) {
+		$is_main_site = mediatheque_is_main_site();
+
+		if ( ! $is_main_site ) {
+			switch_to_blog( get_current_network_id() );
+		}
+
 		$headers = $request->get_headers();
 		$action  = $request->get_param( 'action' );
 		$size    = 0;
@@ -693,6 +754,10 @@ class MediaTheque_REST_Controller extends WP_REST_Attachments_Controller {
 		$response->set_status( 201 );
 		$response->header( 'Location', rest_url( sprintf( '%s/%s/%d', $this->namespace, $this->rest_base, $id ) ) );
 
+		if ( ! $is_main_site ) {
+			restore_current_blog();
+		}
+
 		return $response;
 	}
 
@@ -721,6 +786,31 @@ class MediaTheque_REST_Controller extends WP_REST_Attachments_Controller {
 	}
 
 	/**
+	 * Checks if a given request has access to delete a User Media.
+	 *
+	 * @since 1.0.0
+	 * @access public
+	 *
+	 * @param WP_REST_Request $request Full details about the request.
+	 * @return true|WP_Error True if the request has access to delete the User Media, WP_Error object otherwise.
+	 */
+	public function delete_item_permissions_check( $request ) {
+		$is_main_site = mediatheque_is_main_site();
+
+		if ( ! $is_main_site ) {
+			switch_to_blog( get_current_network_id() );
+		}
+
+		$return = parent::delete_item_permissions_check( $request );
+
+		if ( ! $is_main_site ) {
+			restore_current_blog();
+		}
+
+		return $return;
+	}
+
+	/**
 	 * Deletes a User Media or a Directory of User Media.
 	 *
 	 * @since 1.0.0
@@ -730,6 +820,12 @@ class MediaTheque_REST_Controller extends WP_REST_Attachments_Controller {
 	 * @return WP_REST_Response|WP_Error Response object on success, or WP_Error object on failure.
 	 */
 	public function delete_item( $request ) {
+		$is_main_site = mediatheque_is_main_site();
+
+		if ( ! $is_main_site ) {
+			switch_to_blog( get_current_network_id() );
+		}
+
 		$user_media = $this->get_post( $request['id'] );
 		if ( is_wp_error( $user_media ) ) {
 			return $user_media;
@@ -774,6 +870,10 @@ class MediaTheque_REST_Controller extends WP_REST_Attachments_Controller {
 		 */
 		do_action( 'rest_delete_user_media', $user_media, $response, $request );
 
+		if ( ! $is_main_site ) {
+			restore_current_blog();
+		}
+
 		return $response;
 	}
 
@@ -795,6 +895,31 @@ class MediaTheque_REST_Controller extends WP_REST_Attachments_Controller {
 	}
 
 	/**
+	 * Checks if a given request has access to update a User Media.
+	 *
+	 * @since 1.0.0
+	 * @access public
+	 *
+	 * @param WP_REST_Request $request Full details about the request.
+	 * @return true|WP_Error True if the request has access to update the User Media, WP_Error object otherwise.
+	 */
+	public function update_item_permissions_check( $request ) {
+		$is_main_site = mediatheque_is_main_site();
+
+		if ( ! $is_main_site ) {
+			switch_to_blog( get_current_network_id() );
+		}
+
+		$return = parent::update_item_permissions_check( $request );
+
+		if ( ! $is_main_site ) {
+			restore_current_blog();
+		}
+
+		return $return;
+	}
+
+	/**
 	 * Updates a single User Media.
 	 *
 	 * @since 1.0.0
@@ -804,6 +929,12 @@ class MediaTheque_REST_Controller extends WP_REST_Attachments_Controller {
 	 * @return WP_Error|WP_REST_Response Response object on success, WP_Error object on failure.
 	 */
 	public function update_item( $request ) {
+		$is_main_site = mediatheque_is_main_site();
+
+		if ( ! $is_main_site ) {
+			switch_to_blog( get_current_network_id() );
+		}
+
 		$id = (int) $request->get_param( 'id' );
 
 		if ( empty( $id ) || 'user_media' !== get_post_type( $id ) ) {
@@ -890,6 +1021,10 @@ class MediaTheque_REST_Controller extends WP_REST_Attachments_Controller {
 		$request->set_param( 'context', 'edit' );
 		$response = $this->prepare_item_for_response( $user_media, $request );
 		$response = rest_ensure_response( $response );
+
+		if ( ! $is_main_site ) {
+			restore_current_blog();
+		}
 
 		return $response;
 	}

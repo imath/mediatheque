@@ -5,7 +5,7 @@
 [x] The Disk usage should be updated when a file is deleted.
 [x] Add a shortcode to load the UI anywhere.
 [x] Make sure the create_item() method can handle folders.
-[] Make sure to switch_to_blog() before saving the User Media metadata.
+[x] Make sure to switch_to_blog() before saving the User Media metadata.
 [x] The way the embed template is filter is not right. I should check the post type first.
 [x] Create the 2 User Media Types on activation (File/Folder).
 [x] Improve the way Views are added to the screen in admin.js
