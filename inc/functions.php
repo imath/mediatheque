@@ -1494,6 +1494,12 @@ function mediatheque_get_display_content( $attr ) {
 		return $content;
 	}
 
+	$is_main_site = mediatheque_is_main_site();
+
+	if ( ! $is_main_site ) {
+		switch_to_blog( get_current_network_id() );
+	}
+
 	$atts = shortcode_atts( array(
 		'directory' => 0,
 		'width'     => '100%',
@@ -1519,6 +1525,10 @@ function mediatheque_get_display_content( $attr ) {
 	}
 
 	do_action( 'mediatheque_display_content' );
+
+	if ( ! $is_main_site ) {
+		restore_current_blog();
+	}
 
 	return $content;
 }
@@ -2133,7 +2143,12 @@ function mediatheque_file_shortcode( $user_media = null, $args = array() ) {
 function mediatheque_oembed_user_media_id( $id = 0, $url = '' ) {
 	$_id = $id;
 
-	// On Multisite embedding an URL of the main site in a subsite fails to fetch the embed html.
+	/**
+	 * On Multisite embedding an URL of the main site in a subsite
+	 * fails to fetch the embed html.
+	 *
+	 * @see https://core.trac.wordpress.org/ticket/40673
+	 */
 	if ( ! $id && is_multisite() ) {
 		$network_url = trailingslashit( network_site_url() ) . mediatheque_get_root_slug();
 

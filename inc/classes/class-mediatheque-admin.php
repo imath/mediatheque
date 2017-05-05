@@ -114,9 +114,10 @@ class MediaTheque_Admin {
 	 * @since 1.0.0
 	 */
 	private function hooks() {
-		add_action( 'admin_menu',         array( $this, 'menus'     )     );
-		add_action( 'network_admin_menu', array( $this, 'menus'     )     );
-		add_action( 'init',               array( $this, 'globals'   ), 14 );
+		add_action( 'admin_menu',         array( $this, 'menus'   )     );
+		add_action( 'network_admin_menu', array( $this, 'menus'   )     );
+		add_action( 'user_admin_menu',    array( $this, 'menus'   )     );
+		add_action( 'init',               array( $this, 'globals' ), 14 );
 
 		/** Media Editor ******************************************************/
 
@@ -360,7 +361,7 @@ class MediaTheque_Admin {
 			array( $this, 'do_settings' )
 		);
 
-		if ( ! is_network_admin() ) {
+		if ( ! is_network_admin() && ! is_user_admin() ) {
 			$this->vanished_logs = get_option( '_mediatheque_vanished_media', array() );
 			$count_vanished      = count( $this->vanished_logs );
 
