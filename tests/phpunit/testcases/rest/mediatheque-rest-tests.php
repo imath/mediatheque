@@ -24,6 +24,10 @@ class MediaTheque_Rest_Tests extends WP_Test_REST_Controller_Testcase {
 			'role' => 'administrator',
 		) );
 
+		if ( is_multisite() ) {
+			grant_super_admin( $this->admin_id );
+		}
+
 		$this->user_id = $this->factory->user->create( array(
 			'role' => 'subscriber',
 		) );
@@ -356,6 +360,80 @@ class MediaTheque_Rest_Tests extends WP_Test_REST_Controller_Testcase {
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertTrue( $data['deleted'] );
 		$this->assertTrue( 'delete_user_upload' === $this->cap );
+	}
+
+	public function test_prepare_item_for_edit_response() {
+		$user_media_id = $this->factory->post->create( array(
+			'post_author' => $this->user_id,
+			'post_status' => 'publish',
+			'post_title'  => 'User Media',
+			'post_type'   => 'user_media',
+		) );
+
+		$url = mediatheque_get_download_url( $user_media_id );
+
+		$p = $this->factory->post->create( array(
+			'post_content' => $url,
+		) );
+
+		$request  = new WP_REST_Request( 'GET', '/wp/v2/' . $this->rb . '/' . $user_media_id );
+		$params = array(
+			'user_media_edit' => true,
+		);
+		$request->set_query_params( $params );
+		$response = $this->server->dispatch( $request );
+		$response = rest_ensure_response( $response );
+
+		$this->assertEquals( 200, $response->get_status() );
+
+		$user_media = $response->get_data();
+		$posts = wp_list_pluck( $user_media['attached_posts'], 'id' );
+		$post = reset( $posts );
+
+		$this->assertSame( $p, $post );
+	}
+
+	/**
+	 * @group ms-required
+	 * @group multisite
+	 */
+	public function test_prepare_item_for_edit_response_from_site() {
+		$user_media_id = $this->factory->post->create( array(
+			'post_author' => $this->user_id,
+			'post_status' => 'publish',
+			'post_title'  => 'User Media',
+			'post_type'   => 'user_media',
+		) );
+
+		$url = mediatheque_get_download_url( $user_media_id );
+
+		$blog_id = $this->factory->blog->create( array(
+			'user_id' => $this->user_id,
+		) );
+
+		switch_to_blog( $blog_id );
+
+		$p = $this->factory->post->create( array(
+			'post_content' => $url,
+		) );
+
+		$request  = new WP_REST_Request( 'GET', '/wp/v2/' . $this->rb . '/' . $user_media_id );
+		$params = array(
+			'user_media_edit' => true,
+		);
+		$request->set_query_params( $params );
+		$response = $this->server->dispatch( $request );
+		$response = rest_ensure_response( $response );
+
+		$this->assertEquals( 200, $response->get_status() );
+
+		$user_media = $response->get_data();
+		$posts = wp_list_pluck( $user_media['attached_posts'], 'id' );
+		$post = reset( $posts );
+
+		$this->assertSame( $p, $post );
+
+		restore_current_blog();
 	}
 
 	public function test_prepare_item() {}

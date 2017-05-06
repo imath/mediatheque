@@ -512,7 +512,14 @@ class MediaTheque_REST_Controller extends WP_REST_Attachments_Controller {
 		$is_edit        = $request->get_param( 'user_media_edit' );
 
 		if ( $is_edit ) {
-			$embed_link     = esc_url_raw( get_post_permalink( $post ) );
+			$embed_link = esc_url_raw( get_post_permalink( $post ) );
+
+			if ( is_multisite() && ms_is_switched() ) {
+				$main_site_id = get_current_network_id();
+
+				restore_current_blog();
+			}
+
 			$attached_posts = mediatheque_get_attached_posts( $embed_link );
 
 			foreach ( $attached_posts as $index => $attached_post ) {
@@ -521,6 +528,10 @@ class MediaTheque_REST_Controller extends WP_REST_Attachments_Controller {
 					'title'     => esc_html( $attached_post->post_title ),
 					'edit_link' => esc_url_raw( get_edit_post_link( $attached_post ) ),
 				);
+			}
+
+			if ( ! empty( $main_site_id ) ) {
+				switch_to_blog( $main_site_id );
 			}
 
 			$data['attached_posts'] = $attached_posts;

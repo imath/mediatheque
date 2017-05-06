@@ -339,6 +339,16 @@ function mediatheque_map_meta_caps( $caps = array(), $cap = '', $user_id = 0, $a
 		}
 	}
 
+	/**
+	 * Filter here to edit the capabilities map.
+	 *
+	 * @since  1.0.0
+	 * 
+	 * @param  array  $caps    Capabilities for meta capability
+	 * @param  string $cap     Capability name
+	 * @param  int    $user_id User id
+	 * @param  mixed  $args    Arguments
+	 */
 	return apply_filters( 'mediatheque_map_meta_caps', $caps, $cap, $user_id, $args );
 }
 
