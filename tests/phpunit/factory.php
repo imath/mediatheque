@@ -65,17 +65,17 @@ class MediaTheque_UnitTest_Factory_For_File extends WP_UnitTest_Factory_For_Post
 
 		$user_id = get_current_user_id();
 
-		if ( ! isset( $args['author'] ) ) {
+		if ( ! isset( $args['post_author'] ) ) {
 			if ( is_user_logged_in() ) {
-				$args['author'] = get_current_user_id();
+				$args['post_author'] = get_current_user_id();
 
 			// Create a user
 			} else {
-				$args['author'] = $this->factory->user->create( array( 'role' => 'subscriber' ) );
+				$args['post_author'] = $this->factory->user->create( array( 'role' => 'subscriber' ) );
 			}
 		}
 
-		$this->author = (int) $args['author'];
+		$this->author = (int) $args['post_author'];
 		wp_set_current_user( $this->author );
 
 		$size = 0;
