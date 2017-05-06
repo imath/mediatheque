@@ -29,3 +29,4 @@ function _install_mediatheque() {
 }
 
 require getenv( 'WP_DEVELOP_DIR' ) . '/tests/phpunit/includes/bootstrap.php';
+require_once dirname( __FILE__ ) . '/factory.php';

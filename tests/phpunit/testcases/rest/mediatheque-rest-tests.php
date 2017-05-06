@@ -74,7 +74,10 @@ class MediaTheque_Rest_Tests extends WP_Test_REST_Controller_Testcase {
 	}
 
 	public function get_cap( $caps, $cap ) {
-		$this->cap = $cap;
+		if ( in_array( $cap, mediatheque_get_all_caps(), true ) ) {
+			$this->cap = $cap;
+		}
+		
 		return $caps;
 	}
 

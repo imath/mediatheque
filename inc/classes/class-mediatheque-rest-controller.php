@@ -697,7 +697,6 @@ class MediaTheque_REST_Controller extends WP_REST_Attachments_Controller {
 		} else {
 			// Create the Attached file & update the user's disk usage.
 			if ( 'upload_user_media' === $action ) {
-				// @todo Multisite probably requires to do a switch to blog there
 				update_attached_file( $id, $file );
 
 				if ( $size ) {
@@ -724,8 +723,6 @@ class MediaTheque_REST_Controller extends WP_REST_Attachments_Controller {
 		if ( 'upload_user_media' === $action ) {
 			// Include admin functions to get access to wp_generate_attachment_metadata().
 			require_once ABSPATH . 'wp-admin/includes/admin.php';
-
-			// @todo Multisite probably requires to do a switch to blog there
 			wp_update_attachment_metadata( $id, wp_generate_attachment_metadata( $id, $file ) );
 
 			if ( isset( $request['alt_text'] ) ) {
