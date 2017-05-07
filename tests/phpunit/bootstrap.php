@@ -14,6 +14,7 @@ function _install_mediatheque() {
 	delete_network_option( 0, 'mediatheque_version' );
 	delete_network_option( 0, 'mediatheque_capability' );
 	delete_network_option( 0, 'mediatheque_mime_types' );
+	delete_network_option( 0, 'mediatheque_personal_avatar' );
 
 	$directory_id = mediatheque_get_user_media_type_id( 'mediatheque-directory' );
 	if ( $directory_id ) {

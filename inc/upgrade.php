@@ -11,17 +11,6 @@
 defined( 'ABSPATH' ) || exit;
 
 /**
- * Get the MediaThèque Version saved in DB.
- *
- * @since 1.0.0
- *
- * @return string The MediaThèque Raw DB Version.
- */
-function mediatheque_db_version() {
-	return get_network_option( 0, 'mediatheque_version', 0 );
-}
-
-/**
  * Does the plugin needs to be upgraded ?
  *
  * @since 1.0.0
@@ -71,12 +60,7 @@ function mediatheque_upgrade() {
 		}
 
 		// Add default options.
-		$default_options = array(
-			'mediatheque_capability' => 'exist',
-			'mediatheque_mime_types' => mediatheque_get_default_mime_types(),
-		);
-
-		foreach ( $default_options as $option_name => $option_value ) {
+		foreach ( (array) mediatheque_get_default_options() as $option_name => $option_value ) {
 			add_network_option( 0, $option_name, $option_value );
 		}
 

@@ -55,6 +55,11 @@ class MediaTheque_Settings {
 					'callback'          => 'mediatheque_settings_field_mime_types',
 					'sanitize_callback' => 'mediatheque_sanitize_mime_types',
 				),
+				'mediatheque_personal_avatar' => array(
+					'title'             => __( 'Images de profil.', 'mediatheque' ),
+					'callback'          => 'mediatheque_settings_field_avatars',
+					'sanitize_callback' => 'absint',
+				),
 			),
 		) );
 

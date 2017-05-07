@@ -209,30 +209,6 @@ function mediatheque_min_suffix() {
 }
 
 /**
- * Get the Debug mode setting.
- *
- * @since  1.0.0
- *
- * @return bool True if debug mode is on. False otherwise.
- */
-function mediatheque_is_debug() {
-	$debug = false;
-
-	if ( defined( 'WP_DEBUG' ) && true === WP_DEBUG && current_user_can( 'manage_options' ) )  {
-		$debug = true;
-	}
-
-	/**
-	 * Filter here to edit the debug value.
-	 *
-	 * @since  1.0.0
-	 *
-	 * @param  bool $debug The minified suffix.
-	 */
-	return apply_filters( 'mediatheque_is_debug', $debug );
-}
-
-/**
  * Get the capabilities for the User media post type.
  *
  * @since  1.0.0
@@ -300,7 +276,7 @@ function mediatheque_get_all_caps() {
 function mediatheque_map_meta_caps( $caps = array(), $cap = '', $user_id = 0, $args = array() ) {
 	if ( in_array( $cap, mediatheque_get_all_caps(), true ) ) {
 		if ( $user_id ) {
-			$required_cap = get_network_option( 0, 'mediatheque_capability', 'exist' );
+			$required_cap = mediatheque_get_required_cap();
 			$admin_caps   = array_diff_key( mediatheque_types_capabilities(), array( 'assign_terms' => false ) );
 			$admin_caps   = array_merge( $admin_caps, array(
 				'edit_user_uploads',
@@ -343,7 +319,7 @@ function mediatheque_map_meta_caps( $caps = array(), $cap = '', $user_id = 0, $a
 	 * Filter here to edit the capabilities map.
 	 *
 	 * @since  1.0.0
-	 * 
+	 *
 	 * @param  array  $caps    Capabilities for meta capability
 	 * @param  string $cap     Capability name
 	 * @param  int    $user_id User id
@@ -532,19 +508,6 @@ function mediatheque_rest_user_query( $prepared_args = array(), WP_REST_Request 
 	return $prepared_args;
 }
 
-/**
- * Make sure the avatar sizes used by WordPress are all in Rest Avatar sizes.
- *
- * @since 1.0.0
- *
- * @param  array $sizes The avatar sizes.
- * @return array        The avatar sizes.
- */
-function mediatheque_rest_avatar_sizes( $sizes = array() ) {
-	$required = apply_filters( 'mediatheque_required_avatar_sizes', array( 96, 192 ) );
-	return array_merge( $sizes, $required );
-}
-
 function mediatheque_get_i18n_media_type( $media_type = '' ) {
 	$i18n_media_types = array(
 		'image'       => __( 'Image', 'mediatheque' ),
@@ -666,77 +629,6 @@ function mediatheque_image_get_intermediate_size( $user_media_id = 0, $size = ar
 }
 
 /**
- * Get the personal avatar using the User Media ID.
- *
- * @since 1.0.0
- *
- * @param  int     $user_media_id The User Media ID.
- * @param  int     $size          The size in pixels for the avatar.
- * @return string                 The avatar URL.
- */
-function mediatheque_get_personal_avatar( $user_media_id = 0, $size = 96 ) {
-	$mediatheque = mediatheque();
-
-	if ( ! empty( $mediatheque->personal_avatars[ $user_media_id ][ $size ] ) ) {
-		$personal_avatar = $mediatheque->personal_avatars[ $user_media_id ][ $size ];
-	} else {
-		$mediatheque->personal_avatars[ $user_media_id ][ $size ] = mediatheque_image_get_intermediate_size( $user_media_id, array( $size, $size ) );
-		$personal_avatar = $mediatheque->personal_avatars[ $user_media_id ][ $size ];
-	}
-
-	if ( empty( $personal_avatar['url'] ) ) {
-		return false;
-	}
-
-	return $personal_avatar['url'];
-}
-
-/**
- * Returns the MediaThèque Avatar data.
- *
- * @since 1.0.0
- *
- * @param  array $args        Default data.
- * @param  mixed $id_or_email A user ID, email, a User, a Post or a Comment object.
- * @return array              Avatar data.
- */
-function mediatheque_get_avatar_data( $args = array(), $id_or_email ) {
-	if ( empty( $id_or_email ) ) {
-		return $args;
-	}
-
-	if ( is_numeric( $id_or_email ) ) {
-		$user = get_user_by( 'id', (int) $id_or_email );
-	} else if ( is_a( $id_or_email, 'WP_User' ) ) {
-		$user = $id_or_email;
-	} else if ( is_a( $id_or_email, 'WP_Post' ) ) {
-		$user = get_user_by( 'id', (int) $id_or_email->post_author );
-	} else if ( is_a( $id_or_email, 'WP_Comment' ) ) {
-		$user = get_user_by( 'id', (int) $id_or_email->user_id );
-	} else if ( is_email( $id_or_email ) ) {
-		$user = get_user_by( 'email', $id_or_email );
-	}
-
-	if ( empty( $user->ID ) ) {
-		return $args;
-	}
-
-	$personal_avatar_id = $user->personal_avatar;
-
-	if ( ! $personal_avatar_id ) {
-		return $args;
-	}
-
-	$personal_avatar_url = mediatheque_get_personal_avatar( $personal_avatar_id, $args['size'] );
-
-	if ( ! $personal_avatar_url ) {
-		return $args;
-	}
-
-	return array_merge( $args, array( 'url' => $personal_avatar_url ) );
-}
-
-/**
  * Get the User Media base Uploads dir data.
  *
  * @since 1.0.0
@@ -765,6 +657,19 @@ function mediatheque_set_upload_base_dir( $dir = array() ) {
 	if ( empty( $dir['basedir'] ) || empty( $dir['baseurl'] ) ) {
 		_doing_it_wrong( __FUNCTION__, __( 'Paramètres manquants.', 'mediatheque' ) );
 		return $dir;
+	}
+
+	/**
+	 * This looks like a WordPress bug on subdomain installs.
+	 *
+	 * On a subsite, although ms is switched, the baseurl is the one
+	 * of the subsite and the url protocol is not set to https when needed.
+	 *
+	 * @todo explore this issue a bit more.
+	 */
+	if ( is_multisite() && is_subdomain_install() ) {
+		$parse_base_url = parse_url( $dir['baseurl'] );
+		$dir['baseurl'] = trailingslashit( network_site_url() ) . ltrim( $parse_base_url['path'], '/' ) ;
 	}
 
 	return array_merge( $dir, array(
@@ -1060,7 +965,7 @@ function mediatheque_register_objects() {
 			'name'              => _x( 'Types', 'taxonomy general name', 'mediatheque' ),
 			'singular_name'     => _x( 'Type', 'taxonomy singular name', 'mediatheque' ),
 		),
-		'show_ui'               => mediatheque_is_debug(),
+		'show_ui'               => false,
 		'show_admin_column'     => false,
 		'update_count_callback' => '_update_post_term_count',
 		'query_var'             => false,
@@ -1126,8 +1031,10 @@ function mediatheque_register_objects() {
 
 	/** Avatar image sizes **************************************************/
 
-	foreach ( (array) rest_get_avatar_sizes() as $size ) {
-		add_image_size( sprintf( 'avatar-%s', $size ), $size, $size, true );
+	if ( mediatheque_use_personal_avatar() ) {
+		foreach ( (array) rest_get_avatar_sizes() as $size ) {
+			add_image_size( sprintf( 'avatar-%s', $size ), $size, $size, true );
+		}
 	}
 }
 
@@ -2443,38 +2350,6 @@ function mediatheque_maybe_hide_link( $link = '', $url = '' ) {
 	);
 }
 
-function mediatheque_settings_section_callback() {}
-
-function mediatheque_settings_field_capability() {
-	$role_names = wp_roles()->role_names;
-	$setting    = get_network_option( 0, 'mediatheque_capability', 'exist' );
-
-	$caps = array(
-		'exist' => __( 'Utilisateur connecté', 'mediatheque' ),
-	);
-
-	if ( isset( $role_names['subscriber'] ) ) {
-		$caps['read'] = translate_user_role( $role_names['subscriber'] );
-	}
-
-	if ( isset( $role_names['contributor'] ) ) {
-		$caps['edit_posts'] = translate_user_role( $role_names['contributor'] );
-	}
-	?>
-
-	<select name="mediatheque_capability" id="mediatheque_capability"<?php echo is_network_admin() ? ' disabled' : '' ;?>>
-
-		<?php foreach ( (array) apply_filters( 'mediatheque_caps', $caps ) as $cap => $role ) : ?>
-			<option value="<?php echo esc_attr( $cap ); ?>" <?php selected( $setting, $cap ); ?>>
-				<?php echo esc_html( $role ); ?>
-			</option>
-		<?php endforeach; ?>
-
-	</select>
-	<p class="description"><?php esc_html_e( 'Sélectionner les capacités du rôle qu\'il faut à minima détenir pour pouvoir utiliser la MediaThèque.', 'mediatheque' ); ?></p>
-	<?php
-}
-
 function mediatheque_get_mime_types() {
 	return array_diff_key( wp_get_mime_types(), array(
 		'swf'      => false,
@@ -2500,63 +2375,10 @@ function mediatheque_get_default_mime_types() {
 }
 
 function mediatheque_get_allowed_mime_types() {
-	$mime_types = get_network_option( 0, 'mediatheque_mime_types', array() );
+	$mime_types = mediatheque_get_allowed_file_types();
 	$mime_types = array_intersect( mediatheque_get_mime_types(), $mime_types );
 
 	return (array) apply_filters( 'mediatheque_get_allowed_mime_types', $mime_types );
-}
-
-function mediatheque_settings_field_mime_types() {
-	$types            = wp_get_ext_types();
-	$translated_types = mediatheque_get_i18n_media_type( $types );
-	$setting          = mediatheque_get_allowed_mime_types();
-	$mimes            = mediatheque_get_mime_types();
-	$printed_mime     = array();
-
-	foreach ( $translated_types as $k_type => $translated_type ) {
-		if ( 'code' === $k_type ) {
-			continue;
-		}
-		?>
-		<fieldset style="border: solid 1px #ccc; margin-bottom: 1em">
-			<legend style="padding: 0 1em">
-				<input type="checkbox" class="mediatheque-selectall" data-mime-type="<?php echo esc_attr( $k_type ); ?>"> <?php echo esc_html( $translated_type ); ?>
-			</legend>
-
-			<ul style="margin: 1em 2em 1em;">
-
-			<?php foreach ( $types[ $k_type ] as $wp_type ) {
-				$ext_mime = wp_check_filetype( '.' . $wp_type, $mimes );
-
-				if ( $ext_mime['type'] && ! in_array( $ext_mime['type'], $printed_mime, true ) ) {
-					array_push( $printed_mime, $ext_mime['type'] );
-					?>
-					<li>
-						<input type="checkbox" name="mediatheque_mime_types[]" data-mime-type="<?php echo esc_attr( $k_type );?>" value="<?php echo esc_attr( $ext_mime['type'] );?>" <?php checked( true, in_array( $ext_mime['type'], $setting, true ) );?>> <?php echo esc_html( $ext_mime['type'] ) ;?>
-					</li>
-					<?php
-				}
-			} ?>
-
-		</fieldset>
-		<?php
-	}
-}
-
-function mediatheque_sanitize_capability( $capability ) {
-	if ( empty( $capability ) ) {
-		$capability = 'exist';
-	}
-
-	return sanitize_text_field( $capability );
-}
-
-function mediatheque_sanitize_mime_types( $mime_types ) {
-	if ( ! is_array( $mime_types ) ) {
-		return array();
-	}
-
-	return array_map( 'sanitize_text_field', $mime_types );
 }
 
 function mediatheque_upload_error_handler( $file = array(), $message = '' ) {

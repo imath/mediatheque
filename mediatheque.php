@@ -98,8 +98,17 @@ final class MediaTheque {
 	private function inc() {
 		spl_autoload_register( array( $this, 'autoload' ) );
 
+		require( $this->inc_dir . 'options.php' );
 		require( $this->inc_dir . 'functions.php' );
 		require( $this->inc_dir . 'upgrade.php' );
+
+		if ( mediatheque_use_personal_avatar() ) {
+			require( $this->inc_dir . 'avatars.php' );
+		}
+
+		if ( is_admin() ) {
+			require( $this->inc_dir . 'settings.php' );
+		}
 	}
 
 	/**
@@ -125,10 +134,6 @@ final class MediaTheque {
 		// Add a new query parameter to Users rest request
 		add_filter( 'rest_user_collection_params', 'mediatheque_additionnal_user_rest_param', 10, 1 );
 		add_filter( 'rest_user_query',             'mediatheque_rest_user_query',             10, 2 );
-		add_filter( 'rest_avatar_sizes',           'mediatheque_rest_avatar_sizes',           10, 1 );
-
-		// Use the personal avatar url when available.
-		add_filter( 'pre_get_avatar_data', 'mediatheque_get_avatar_data',  10, 2 );
 
 		// Set the single User Media Templates
 		add_action( 'parse_query',                    'mediatheque_parse_query'           );

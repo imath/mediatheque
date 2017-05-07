@@ -132,9 +132,6 @@ class MediaTheque_Admin {
 			add_action( 'admin_head',                                  array( $this, 'admin_head'              ) );
 			add_action( 'admin_head-settings_page_user-media-options', array( $this, 'settings_menu_highlight' ) );
 		}
-
-		/** User Profile ****************************************************/
-		add_action( 'profile_personal_options', array( $this, 'personal_avatar' ), 10, 1 );
 	}
 
 	/**
@@ -254,7 +251,7 @@ class MediaTheque_Admin {
 					continue;
 
 				// Permalink is specific
-				} elseif ( ! isset( $permalink_structure ) ) {
+				} elseif ( ! isset( $permalink_structure ) && 'user-media-permalinks' === $key ) {
 					continue;
 				} elseif ( 'user-media-permalinks' === $key && $can_manage_options ) {
 					if ( ! $permalink_structure ) {
@@ -262,6 +259,8 @@ class MediaTheque_Admin {
 					} else {
 						continue;
 					}
+				} elseif ( 'menu-settings' === $key && ! mediatheque_is_main_site() ) {
+					continue;
 				}
 
 				if ( ! get_user_setting( $setting ) ) {
@@ -518,50 +517,6 @@ location ~* /(?:uploads|files)/mediatheque/private/.* {
 		', esc_html( $this->title ), $this->template( false ) );
 
 		$this->get_template_parts();
-	}
-
-	/**
-	 * Output a button on User's dashboard profile to select one of his User Media
-	 * and set it as his personal avatar.
-	 *
-	 * @since  1.0.0
-	 *
-	 * @param  WP_User $user The current User object.
-	 * @return string        HTML Output.
-	 */
-	public function personal_avatar( $user = null ) {
-		$message = '';
-
-		if ( $user->personal_avatar ) {
-			$message = sprintf(
-				__( 'Pour supprimer votre avatar local, vous pouvez %s.', 'mediatheque' ),
-				sprintf( '<a href="#" class="mediabrary-remove">%s</a>', __( 'cliquer ici', 'mediatheque' ) )
-			);
-		}
-
-		add_filter( 'mediatheque_media_statuses', array( $this, 'avatar_user_media_statuses' ), 10, 1 );
-		?>
-		<div id="personal-avatar-editor">
-			<p class="description"><?php printf(
-				__( 'Vous pouvez également utiliser une des images de votre %1$s comme avatar pour ce site. %2$s', 'mediatheque' ),
-				mediatheque_button( array(
-					'editor_id'           => 'personal_avatar',
-					'editor_btn_classes'  => array( 'mediabrary-insert' ),
-					'editor_btn_text'     => __( 'MediaThèque', 'mediatheque' ),
-					'editor_btn_dashicon' => false,
-					'echo'                => false,
-					'media_type'          => 'image',
-				) ),
-				'<span id="mediabrary-remove-message">' . $message . '</span>'
-			); ?></p>
-
-		</div>
-		<?php
-		remove_filter( 'mediatheque_media_statuses', array( $this, 'avatar_user_media_statuses' ), 10, 1 );
-	}
-
-	public function avatar_user_media_statuses( $statuses = array() ) {
-		return array_intersect_key( $statuses, array( 'publish' => true ) );
 	}
 
 	public function tools_card() {
