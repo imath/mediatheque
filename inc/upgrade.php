@@ -100,7 +100,7 @@ add_action( 'admin_init', 'mediatheque_upgrade', 999 );
  * @since 1.0.0.
  */
 function mediatheque_get_pointers() {
-	return array(
+	$pointers = array(
 		'user-media-permalinks' => array(
 			'title'    => __( 'Modifiez la structure de vos permaliens.', 'mediatheque' ),
 			'content'  => __( 'MediaThèque nécessite que la structure de vos permaliens soit différente que celle définie par défaut.', 'mediatheque' ),
@@ -122,4 +122,16 @@ function mediatheque_get_pointers() {
 			'position' => 'top',
 		),
 	);
+
+	if ( is_multisite() ) {
+		if ( is_super_admin() ) {
+			$pointers['toplevel_page_user-media']['title']   = $pointers['menu-media']['title'];
+			$pointers['toplevel_page_user-media']['content'] = __( 'Vous pouvez gérer les media de tous les utilisateurs depuis ce menu.', 'mediatheque' );
+			unset( $pointers['menu-media'] );
+		} else {
+			$pointers['menu-media']['content'] = $pointers['toplevel_page_user-media']['content'];
+		}
+	}
+
+	return $pointers;
 }

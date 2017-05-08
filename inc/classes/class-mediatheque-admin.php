@@ -478,19 +478,29 @@ class MediaTheque_Admin {
 				</p>
 			</form>
 
-			<?php if ( ! empty( $GLOBALS['is_nginx'] ) ) {
+			<?php if ( ! empty( $GLOBALS['is_nginx'] ) ) : ?>
+				<h2><?php esc_html_e( 'Configuration complémentaire Nginx', 'mediatheque' ) ;?></h2>
 
-				printf(
-					'<textarea class="code" readonly="readonly" cols="100" rows="5">%s</textarea>',
-					sprintf( '
+				<table class="form-table">
+					<tbody>
+						<tr>
+							<th scope="row"><?php esc_html_e( 'Configuration de votre serveur', 'mediatheque' ) ;?></th>
+							<td>
+								<?php printf(
+									'<textarea class="code" readonly="readonly" cols="100" rows="5">%s</textarea>',
+sprintf( '
 location ~* /(?:uploads|files)/mediatheque/private/.* {
 	if ($http_cookie !~* "wordpress_logged_in") {
 		return 301 %s;
 	}
-}', wp_login_url() )
-				);
+}', wp_login_url() ) ); ?>
+								<p class="description"><?php esc_html_e( 'Vous utilisez Nginx. Si vous souhaitez protéger les media privés partagés par vos utilisateurs, ajoutez le code ci-dessus au fichier de configuration de votre serveur.', 'mediatheque' ); ?></p>
+							</td>
+						</tr>
+					</tbody>
+				</table>
 
-			} ?>
+			<?php endif; ?>
 		</div>
 		<?php
 	}
