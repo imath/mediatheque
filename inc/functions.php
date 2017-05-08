@@ -642,7 +642,7 @@ function mediatheque_get_upload_dir() {
 		mediatheque_register_upload_dir();
 	}
 
-	return $mediatheque->upload_dir;
+	return apply_filters( 'mediatheque_get_upload_dir', $mediatheque->upload_dir );
 }
 
 /**
@@ -667,14 +667,18 @@ function mediatheque_set_upload_base_dir( $dir = array() ) {
 	 *
 	 * @todo explore this issue a bit more.
 	 */
-	if ( is_multisite() ) {
+	if ( is_multisite() && ms_is_switched() ) {
 		$parse_base_url = parse_url( $dir['baseurl'] );
 
 		if ( is_subdomain_install() ) {
 			$dir['baseurl'] = trailingslashit( network_site_url() ) . ltrim( $parse_base_url['path'], '/' );
 		} else {
 			$path = explode( '/', ltrim( $parse_base_url['path'], '/' ) );
-			array_shift( $path );
+
+			if ( 'wp-content' !== $path[0] ) {
+				array_shift( $path );
+			}
+
 			$dir['baseurl'] = network_site_url() . join( '/', $path );
 		}
 	}

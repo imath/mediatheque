@@ -24,7 +24,6 @@ class MediaTheque_Functions_Tests extends WP_UnitTestCase {
 		switch_to_blog( $blog_id );
 
 		unset( mediatheque()->upload_dir );
-
 		$dir_from_site = mediatheque_get_upload_dir();
 
 		restore_current_blog();
