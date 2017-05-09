@@ -10,6 +10,13 @@
 // Exit if accessed directly.
 defined( 'ABSPATH' ) || exit;
 
+/**
+ * Disable some extensions from the User Media files.
+ *
+ * @since 1.0.0
+ *
+ * @return array The potential User Media mime types.
+ */
 function mediatheque_get_mime_types() {
 	return array_diff_key( wp_get_mime_types(), array(
 		'swf'      => false,
@@ -20,6 +27,15 @@ function mediatheque_get_mime_types() {
 	) );
 }
 
+/**
+ * Returns the default available mime types for User Media.
+ *
+ * Used when activating the plugin for the first time.
+ *
+ * @since 1.0.0
+ *
+ * @return array The default available mime types for User Media (for regular users).
+ */
 function mediatheque_get_default_mime_types() {
 	$mime_types = array_intersect_key( mediatheque_get_mime_types(), array(
 		'jpg|jpeg|jpe' => true,
@@ -34,13 +50,35 @@ function mediatheque_get_default_mime_types() {
 	return array_values( $mime_types );
 }
 
+/**
+ * Returns the allowed mime types for User Media.
+ *
+ * @since 1.0.0
+ *
+ * @return array The allowed available mime types for User Media (for regular users).
+ */
 function mediatheque_get_allowed_mime_types() {
 	$mime_types = mediatheque_get_allowed_file_types();
 	$mime_types = array_intersect( mediatheque_get_mime_types(), $mime_types );
 
+	/**
+	 * Filter here to edit the he allowed mime types for User Media.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param array $mime_types The allowed available mime types for User Media (for regular users).
+	 */
 	return (array) apply_filters( 'mediatheque_get_allowed_mime_types', $mime_types );
 }
 
+/**
+ * Translates the media types.
+ *
+ * @since 1.0.0
+ *
+ * @param string $media_type A specific Media Type.
+ * @return string|array      A translated Media Type or a translated list of Media Types.
+ */
 function mediatheque_get_i18n_media_type( $media_type = '' ) {
 	$i18n_media_types = array(
 		'image'       => __( 'Image', 'mediatheque' ),
