@@ -96,6 +96,14 @@ function mediatheque_get_avatar_data( $args = array(), $id_or_email ) {
 }
 add_filter( 'pre_get_avatar_data', 'mediatheque_get_avatar_data', 10, 2 );
 
+/**
+ * Restrict the User Media Status to Publish for Avatar selection.
+ *
+ * @since 1.0.0
+ *
+ * @param  array $statuses The list of available User Media statuses.
+ * @return array           The list of available User Media statuses for the Avatar UI.
+ */
 function mediatheque_avatar_user_media_statuses( $statuses = array() ) {
 	return array_intersect_key( $statuses, array( 'publish' => true ) );
 }
