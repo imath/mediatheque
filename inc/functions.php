@@ -2469,3 +2469,8 @@ function mediatheque_delete_user_data( $user_id = 0, $reassign = 0 ) {
 		restore_current_blog();
 	}
 }
+
+function mediatheque_load_textdomain() {
+	$mediatheque = mediatheque();
+	load_plugin_textdomain( $mediatheque->domain, false, trailingslashit( basename( $mediatheque->dir ) ) . 'languages' );
+}
