@@ -659,85 +659,7 @@ function mediatheque_register_objects() {
  * @return string the plugin's templates dir.
  */
 function mediatheque_templates() {
-	return mediatheque()->templates;
-}
-
-/**
- * Add a custom default template for embedded User Media.
- *
- * @since  1.0.0
- *
- * @param  string $template  Path to the template. See locate_template().
- * @return string            Path to the template. See locate_template().
- */
-function mediatheque_embed_template( $template = '' ) {
-	$object = get_queried_object();
-
-	// Only Apply the template override on Embedded User Media
-	if ( empty( $object->post_type ) || 'user_media' !== $object->post_type ) {
-		return $template;
-	}
-
-	$filename = pathinfo( $template, PATHINFO_FILENAME );
-
-	/**
-	 * If the theme is not overriding the template yet
-	 * override it with the plugin's default template.
-	 */
-	if ( 'embed-user_media' !== $filename ) {
-		$template = mediatheque_templates() . 'embed-user_media.php';
-	}
-
-	return $template;
-}
-
-/**
- * Print the User Media excerpt for the embed template.
- *
- * @since  1.0.0
- */
-function mediatheque_embed_excerpt() {
-	$excerpt = apply_filters( 'the_excerpt_embed', get_the_excerpt() );
-	$excerpt = mediatheque_prepend_user_media( $excerpt );
-
-	echo apply_filters( 'mediatheque_embed_excerpt', $excerpt );
-}
-
-/**
- * Prints the necessary markup for the embed download button.
- *
- * @since 1.0.0
- */
-function mediatheque_embed_download_button() {
-	if ( 'private' === get_post_status() ) {
-		return;
-	}
-
-	if ( mediatheque_get_displayed_directory() ) {
-		$dashicon = 'files';
-		$url      = get_post_permalink();
-		$text     = __( 'Afficher', 'mediatheque' );
-	} else {
-		$dashicon = 'download';
-		$url      = mediatheque_get_download_url();
-		$text     = __( 'Télécharger', 'mediatheque' );
-	}
-
-	printf(
-		'<div class="wp-embed-%1$s">
-			<a href="%2$s" target="_top">
-				<span class="dashicons dashicons-%1$s"></span>
-				%3$s
-			</a>
-		</div>',
-		esc_attr( $dashicon ),
-		esc_url( $url ),
-		sprintf(
-			'%1$s<span class="screen-reader-text"> %2$s</span>',
-			esc_html( $text ),
-			esc_html( get_the_title() )
-		)
-	);
+	return apply_filters( 'mediatheque_templates_dir', mediatheque()->templates );
 }
 
 /**
@@ -839,6 +761,35 @@ function mediatheque_get_template_parts( $list = array() ) {
 }
 
 /**
+ * Add a custom default template for embedded User Media.
+ *
+ * @since  1.0.0
+ *
+ * @param  string $template  Path to the template. See locate_template().
+ * @return string            Path to the template. See locate_template().
+ */
+function mediatheque_embed_template( $template = '' ) {
+	$object = get_queried_object();
+
+	// Only Apply the template override on Embedded User Media
+	if ( empty( $object->post_type ) || 'user_media' !== $object->post_type ) {
+		return $template;
+	}
+
+	$filename = pathinfo( $template, PATHINFO_FILENAME );
+
+	/**
+	 * If the theme is not overriding the template yet
+	 * override it with the plugin's default template.
+	 */
+	if ( 'embed-user_media' !== $filename ) {
+		$template = mediatheque_templates() . 'embed-user_media.php';
+	}
+
+	return $template;
+}
+
+/**
  * Set some WP_Query parameters so that the Attachment template is used.
  *
  * @since  1.0.0
@@ -900,272 +851,6 @@ function mediatheque_parse_query( WP_Query $query ) {
 	add_filter( 'the_content', 'mediatheque_prepend_user_media', 11 );
 }
 
-function mediatheque_set_displayed_directory( $id = 0 ) {
-	mediatheque()->template_tags->directory = $id;
-}
-
-function mediatheque_set_template_tags( $tags = array() ) {
-	if ( empty( $tags ) || ! is_array( $tags ) ) {
-		return;
-	}
-
-	$mediatheque = mediatheque();
-
-	foreach ( $tags as $kt => $vt ) {
-		$mediatheque->template_tags->{$kt} = $vt;
-	}
-}
-
-function mediatheque_get_displayed_directory() {
-	return (int) mediatheque_get_tag( 'directory' );
-}
-
-function mediatheque_get_tag( $tag = '' ) {
-	$content_tag = 0;
-
-	if ( ! $tag ) {
-		return $content_tag;
-	}
-
-	$mediatheque = mediatheque();
-
-	if ( isset( $mediatheque->template_tags->{$tag} ) ) {
-		$content_tag = $mediatheque->template_tags->{$tag};
-	}
-
-	return apply_filters( 'mediatheque_get_displayed_' . $tag , $content_tag );
-}
-
-function mediatheque_get_display_content( $attr ) {
-	$content = '';
-
-	if ( did_action( 'mediatheque_display_content' ) ) {
-		return $content;
-	}
-
-	$is_main_site = mediatheque_is_main_site();
-
-	if ( ! $is_main_site ) {
-		switch_to_blog( get_current_network_id() );
-	}
-
-	$atts = shortcode_atts( array(
-		'directory' => 0,
-		'width'     => '100%',
-		'height'    => '450px',
-	), $attr, 'mediatheque' );
-
-	// Globalize template tags
-	mediatheque_set_template_tags( $atts );
-
-	$template = mediatheque_locate_template_part( 'display', 'php' );
-
-	if ( $template ) {
-		wp_enqueue_script( 'mediatheque-display' );
-		mediatheque_localize_script();
-
-		wp_enqueue_style( 'mediatheque-uploader' );
-
-		ob_start();
-
-		load_template( $template, true );
-
-		$content = ob_get_clean();
-	}
-
-	do_action( 'mediatheque_display_content' );
-
-	if ( ! $is_main_site ) {
-		restore_current_blog();
-	}
-
-	return $content;
-}
-add_shortcode( 'mediatheque', 'mediatheque_get_display_content' );
-
-function mediatheque_prepend_embed_thumbnail( $excerpt = '', $user_media = null, $type = 'user-media' ) {
-	$user_media = get_post( $user_media );
-
-	if ( empty( $user_media->ID ) ) {
-		return $excerpt;
-	}
-
-	$pattern = '<div style="background: #f1f1f1 url( %1$s ) no-repeat; background-size: %2$s; background-position:%3$s; width:150px; height:150px"></div>';
-
-	$media_icon = '';
-	if ( 'directory' === $type ) {
-		// Set the displayed directory.
-		mediatheque_set_displayed_directory( $user_media->ID );
-
-		$media_icon = sprintf(
-			$pattern,
-			esc_url_raw( mediatheque_assets_url() . 'folder.svg' ),
-			'50%',
-			'50%'
-		);
-	} else {
-		$filedata = mediatheque_get_media_info( $user_media, 'all' );
-
-		if ( isset( $filedata['media_type'] ) ) {
-			if ( 'image' === $filedata['media_type'] ) {
-				$thumb_data = mediatheque_image_get_intermediate_size( $user_media, 'thumbnail' );
-
-				if ( isset( $thumb_data['url'] ) ) {
-					$media_icon = sprintf(
-						'<img src="%s" width="150" height="150">',
-						esc_url_raw( $thumb_data['url'] )
-					);
-				}
-
-			} else {
-				$media_icon = sprintf(
-					$pattern,
-					esc_url_raw( wp_mime_type_icon( $filedata['media_type'] ) ),
-					'48px 64px',
-					'50%'
-				);
-			}
-		}
-	}
-
-	if ( ! $excerpt && 'user-media' === $type ) {
-		$media_type  = mediatheque_get_i18n_media_type( $filedata['media_type'] );
-		$media_title = basename( $user_media->guid );
-		$media_size  = mediatheque_format_file_size( $filedata['size'] / 1000 );
-
-		$excerpt = sprintf( '<dl>
-				<dt><strong>%1$s</strong><dt>
-				<dd><small>%2$s (%3$s)</small></dd>
-			</dl>',
-			esc_html( $media_title ),
-			esc_html( $media_type ),
-			esc_html( $media_size )
-		);
-	}
-
-	$thumbnail = sprintf( '<div class="wp-embed-featured-image square">
-		<a href="%1$s" target="_top">
-			%2$s
-		</a>
-	</div>', get_post_permalink( $user_media ), $media_icon );
-
-	return $thumbnail . "\n" . $excerpt;
-}
-
-/**
- * Make sure the User Media file is prepended to its description.
- *
- * @since  1.0.0
- *
- * @param  string $content The User Media description.
- * @return string          The User Media description.
- */
-function mediatheque_prepend_user_media( $content = '' ) {
-	if ( 'user_media' !== get_post_type() || empty( $GLOBALS['post'] ) ) {
-		return $content;
-	}
-
-	$mediatheque  = mediatheque();
-	$term_ids     = wp_get_object_terms( $GLOBALS['post']->ID, 'user_media_types', array( 'fields' => 'ids' ) );
-	$directory_id = mediatheque_get_user_media_type_id( 'mediatheque-directory' );
-
-	// Single Directory display
-	if ( in_array( $directory_id, $term_ids, true ) ) {
-		if ( ! is_embed() ){
-			$content .= "\n" . mediatheque_get_display_content( array(
-				'directory' => $GLOBALS['post']->ID,
-			) );
-		} else {
-			$content = mediatheque_prepend_embed_thumbnail( $content, $GLOBALS['post'], 'directory' );
-		}
-
-	// Single User Media display
-	} else {
-		if ( ! is_embed() ){
-			$mediatheque->user_media_link = mediatheque_get_download_url( $GLOBALS['post'] );
-
-			// Overrides
-			$reset_post = clone $GLOBALS['post'];
-			$GLOBALS['post']->post_type = 'attachment';
-			wp_cache_set( $reset_post->ID, $GLOBALS['post'], 'posts' );
-			add_filter( 'wp_get_attachment_link', 'mediatheque_attachment_link', 10, 1 );
-
-			$content = prepend_attachment( $content );
-
-			// Resets
-			$GLOBALS['post'] = $reset_post;
-			wp_cache_set( $reset_post->ID, $reset_post, 'posts' );
-			remove_filter( 'the_content',            'mediatheque_prepend_user_media', 11    );
-			remove_filter( 'wp_get_attachment_link', 'mediatheque_attachment_link',    10, 1 );
-
-			unset( $mediatheque->user_media_link );
-		} else {
-			$content = mediatheque_prepend_embed_thumbnail( $content, $GLOBALS['post'], 'user-media' );
-		}
-	}
-
-	$GLOBALS['wp_query']->is_attachment = false;
-
-	return $content;
-}
-
-function mediatheque_button( $args = array() ) {
-	static $instance = 0;
-	$instance++;
-
-	$r = wp_parse_args( $args, array(
-		'editor_id'           => 'content',
-		'editor_btn_classes'  => array( 'mediabrary-insert' ),
-		'editor_btn_text'     => __( 'Ajouter un media', 'mediatheque' ),
-		'editor_btn_dashicon' => 'dashicons-format-image',
-		'echo'                => true,
-		'media_type'          => '',
-	) );
-
-	$post = get_post();
-	if ( ! $post && ! empty( $GLOBALS['post_ID'] ) ) {
-		$post = $GLOBALS['post_ID'];
-	}
-
-	wp_enqueue_media( array(
-		'post' => $post
-	) );
-
-	if ( ! empty( $r['media_type'] ) ) {
-		wp_add_inline_script( 'mediatheque-views', sprintf( '
-				var mediaThequeCustoms = %s;
-			',
-			json_encode( array( 'mediaType' => $r['media_type'] ) )
-		) );
-	}
-
-	$img = '';
-	$output = '<a href="#"%s class="%s" data-editor="%s">%s</a>';
-
-	if ( false !== $r['editor_btn_dashicon'] ) {
-		$img = '<span class="dashicons ' . $r['editor_btn_dashicon']  . '"></span> ';
-		$output = '<button type="button"%s class="button %s" data-editor="%s">%s</button>';
-	}
-
-	$id_attribute = $instance === 1 ? ' id="insert-mediabrary-item"' : '';
-
-	if ( true === $r['echo' ] ) {
-		printf( $output,
-			$id_attribute,
-			join( ' ', array_map( 'sanitize_html_class', $r['editor_btn_classes'] ) ),
-			esc_attr( $r['editor_id'] ),
-			$img . $r['editor_btn_text']
-		);
-	}
-
-	return sprintf( $output,
-		$id_attribute,
-		join( ' ', array_map( 'sanitize_html_class', $r['editor_btn_classes'] ) ),
-		esc_attr( $r['editor_id'] ),
-		$img . $r['editor_btn_text']
-	);
-}
-
 /**
  * Catch the WP Media Editor id to allow users without the 'upload_files' capability
  * to use a light version of it.
@@ -1190,32 +875,6 @@ function mediatheque_editor_settings( $settings = array(), $editor_id = '' ) {
 	mediatheque()->editor_id = $editor_id;
 
 	return $settings;
-}
-
-/**
- * Add a button to open a light WP Media Editor for users without the 'upload_files' capability.
- *
- * @since  1.0.0
- *
- * @param  string $editor The editor HTML Output.
- * @return string $editor The editor HTML Output.
- */
-function mediatheque_the_editor( $editor = '' ) {
-	$mediatheque = mediatheque();
-
-	if ( empty( $mediatheque->editor_id ) || ! current_user_can( 'publish_user_uploads' ) ) {
-		return $editor;
-	}
-
-	return sprintf( '<div id="wp-%1$s-media-buttons" class="wp-media-buttons mediatheque-buttons" data-editor="%1$s">%2$s</div>%3$s',
-		esc_attr( $mediatheque->editor_id ),
-		mediatheque_button( array(
-			'editor_id'           => $mediatheque->editor_id,
-			'editor_btn_classes'  => array( 'mediatheque-insert' ),
-			'echo'                => false,
-		) ),
-		$editor
-	);
 }
 
 function mediatheque_wp_link_query_args( $args = array() ) {
@@ -1501,74 +1160,6 @@ function mediatheque_get_attached_posts( $s = '' ) {
 		'post_type' => 'any',
 		's'         => $s,
 	) );
-}
-
-/**
- * Hide the vanished User Media or warn the Administrator of it.
- *
- * @since  1.0.0
- *
- * @param  string $link The oembed link output.
- * @param  string $url  The requested URL.
- * @return string       An empty string for regular users, a warning message for Admins
- */
-function mediatheque_maybe_hide_link( $link = '', $url = '' ) {
-	if ( empty( $link ) || empty( $url ) ) {
-		return $link;
-	}
-
-	$mediatheque_url = mediatheque_oembed_get_url_args( $url );
-
-	if ( empty( $mediatheque_url['attached'] ) ) {
-		return $link;
-	}
-
-	if ( ! current_user_can( 'manage_options' ) ) {
-		$vanished_media_log = get_option( '_mediatheque_vanished_media', array() );
-		$query_vars = parse_url( $url, PHP_URL_QUERY );
-		$s          = str_replace( '?' . $query_vars, '', $url );
-
-		if ( ! in_array( $s, $vanished_media_log, true ) ) {
-			update_option( '_mediatheque_vanished_media', array_merge( $vanished_media_log, array( $s ) ) );
-
-			$search_posts   = new WP_Query;
-			$search_results = mediatheque_get_attached_posts( $s );
-
-			if ( ! empty( $search_results ) ) {
-				$warning = _n(
-					'Ci-dessous le titre du contenu dans lequel le media est présent :',
-					'Ci-dessous la liste des titres de contenu dans lesquels le media est présent :',
-					count( $search_results ),
-					'mediatheque'
-				);
-
-				foreach ( $search_results as $p ) {
-					$post_type_object = get_post_type_object( $p->post_type );
-
-					$link = '';
-					if ( $post_type_object->_edit_link ) {
-						$link = ' ( ' . esc_url_raw( admin_url( sprintf( $post_type_object->_edit_link . '&action=edit', $p->ID ) ) ) . ' )';
-					}
-
-					$warning .= "\n " . sprintf( '- %1$s%2$s', esc_html( $p->post_title ), $link );
-				}
-
-				wp_mail(
-					get_option( 'admin_email' ),
-					"[ " . wp_specialchars_decode( get_option( 'blogname' ) ) . " ] " . __( 'Media disparu', 'mediatheque' ),
-					$warning
-				);
-			}
-		}
-
-		return '';
-	}
-
-	return sprintf(
-		'<div class="mediatheque-vanished-media" style="border-left: solid 4px #dc3232; padding-left: 1em"><p>%1$s &lt; <em>%2$s</em></p></div>',
-		'¯\_(ツ)_/¯',
-		__( 'Hum hum, il semble que ce media ait mystérieusement disparu.', 'mediatheque' )
-	);
 }
 
 function mediatheque_load_textdomain() {

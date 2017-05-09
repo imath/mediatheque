@@ -101,6 +101,7 @@ final class MediaTheque {
 		require( $this->inc_dir . 'users.php' );
 		require( $this->inc_dir . 'functions.php' );
 		require( $this->inc_dir . 'media.php' );
+		require( $this->inc_dir . 'templates.php' );
 		require( $this->inc_dir . 'upgrade.php' );
 
 		if ( mediatheque_use_personal_avatar() ) {
