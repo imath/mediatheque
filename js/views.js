@@ -819,8 +819,25 @@ window.mediaTheque = window.mediaTheque || _.extend( {}, _.pick( window.wp, 'Bac
 			this.removeSelf();
 		},
 
-		mkdirError: function( error ) {
-			console.log( error );
+		mkdirError: function( dir, result ) {
+			var o = this.options || {}, feedback, error;
+
+			if ( ! _.isObject( o.mediaView ) ) {
+				return;
+			}
+
+			if ( result.responseJSON && result.responseJSON.message ) {
+				feedback = new Backbone.Model( {
+					dismissible: true,
+					type: 'notice-error',
+					message: result.responseJSON.message
+				} );
+
+				// The message should be preprended with the File name.
+				o.mediaView.views.add( new mediaTheque.Views.Feedback( { model: feedback } ), { at: 0 } );
+			}
+
+			this.removeSelf();
 		},
 
 		setFocus: function() {
@@ -855,10 +872,10 @@ window.mediaTheque = window.mediaTheque || _.extend( {}, _.pick( window.wp, 'Bac
 
 		uploadError: function( error ) {
 			var o = this.options || {}, file, errorData,
-			    feedback = new Backbone.Model( {
-			    	dismissible: true,
-			    	type: 'notice-error'
-			    } );
+				feedback = new Backbone.Model( {
+					dismissible: true,
+					type: 'notice-error'
+				} );
 
 			file = error.get( 'file' );
 			errorData = error.get( 'data' );
@@ -1230,7 +1247,8 @@ window.mediaTheque = window.mediaTheque || _.extend( {}, _.pick( window.wp, 'Bac
 					this.views.add( '#forms', new mediaTheque.Views.MkDir( {
 						params: params,
 						toolbarItem: 'directory',
-						model: new Backbone.Model( mediaThequeSettings.dirmaker )
+						model: new Backbone.Model( mediaThequeSettings.dirmaker ),
+						mediaView: _.first( this.views._views['#media'] )
 					} ) );
 				}
 			}
