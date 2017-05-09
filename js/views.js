@@ -720,7 +720,7 @@ window.mediaTheque = window.mediaTheque || _.extend( {}, _.pick( window.wp, 'Bac
 
 			mediaTheque.Views.Users.prototype.initialize.apply( this, arguments );
 
-			if ( mediaThequeSettings.common.directory ) {
+			if ( ! _.isUndefined( mediaThequeSettings.common.directory ) && false !== mediaThequeSettings.common.directory ) {
 				qv.parent = parseInt( mediaThequeSettings.common.directory, 10 );
 			}
 
