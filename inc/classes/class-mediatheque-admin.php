@@ -157,7 +157,7 @@ class MediaTheque_Admin {
 		wp_enqueue_script( 'mediatheque-editor' );
 		mediatheque_localize_script();
 
-		wp_enqueue_style( 'mediatheque-uploader' );
+		wp_enqueue_style( 'mediatheque-style' );
 	}
 
 	/**
@@ -514,7 +514,7 @@ location ~* /(?:uploads|files)/mediatheque/private/.* {
 		wp_enqueue_script( 'mediatheque-manage' );
 		mediatheque_localize_script();
 
-		wp_enqueue_style( 'mediatheque-uploader' );
+		wp_enqueue_style( 'mediatheque-style' );
 
 		wp_plupload_default_settings();
 

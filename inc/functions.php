@@ -510,8 +510,8 @@ function mediatheque_register_scripts() {
 	}
 
 	wp_register_style(
-		'mediatheque-uploader',
-		sprintf( '%1$suploader%2$s.css', mediatheque_assets_url(), $min ),
+		'mediatheque-style',
+		sprintf( '%1$sstyle%2$s.css', mediatheque_assets_url(), $min ),
 		array( 'dashicons' ),
 		$v
 	);

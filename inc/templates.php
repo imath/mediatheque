@@ -121,7 +121,7 @@ function mediatheque_get_display_content( $attr ) {
 		wp_enqueue_script( 'mediatheque-display' );
 		mediatheque_localize_script();
 
-		wp_enqueue_style( 'mediatheque-uploader' );
+		wp_enqueue_style( 'mediatheque-style' );
 
 		ob_start();
 
