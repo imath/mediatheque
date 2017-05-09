@@ -98,6 +98,7 @@ final class MediaTheque {
 		spl_autoload_register( array( $this, 'autoload' ) );
 
 		require( $this->inc_dir . 'options.php' );
+		require( $this->inc_dir . 'users.php' );
 		require( $this->inc_dir . 'functions.php' );
 		require( $this->inc_dir . 'upgrade.php' );
 
