@@ -112,6 +112,10 @@ function mediatheque_avatar_user_media_statuses( $statuses = array() ) {
 function mediatheque_profile_personal_avatar( $user = null ) {
 	$message = '';
 
+	if ( ! current_user_can( 'publish_user_uploads' ) ) {
+		return;
+	}
+
 	if ( $user->personal_avatar ) {
 		$message = sprintf(
 			__( 'Pour supprimer votre avatar local, vous pouvez %s.', 'mediatheque' ),
