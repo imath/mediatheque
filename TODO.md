@@ -37,5 +37,5 @@
 [x] Take care of Directory embed template
 [x] Handle user deletion
 [x] Split the css file into smaller css files
-[] Improve/add inline comments
+[x] Improve/add inline comments
 [] Add Grunt tasks

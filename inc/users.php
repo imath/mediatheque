@@ -147,6 +147,17 @@ function mediatheque_meta_sanitize_value( $value = '', $meta_key = '' ) {
 	return $value;
 }
 
+/**
+ * Auth callback for the Personal avatar usermeta.
+ *
+ * @since 1.0.0
+ *
+ * @param boolean  $auth      True to allow edit. False otherwise.
+ * @param  string  $meta_key  The usermeta key.
+ * @param  integer $object_id The Object Id.
+ * @param  integer $user_id   The User ID.
+ * @return boolean            True to allow edit. False otherwise.
+ */
 function mediatheque_meta_auth_personal_avatar( $auth = false, $meta_key = '', $object_id = 0, $user_id = 0 ) {
 	if ( 'personal_avatar' !== $meta_key ) {
 		return $auth;

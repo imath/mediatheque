@@ -483,6 +483,11 @@ location ~* /(?:uploads|files)/mediatheque/private/.* {
 		mediatheque_print_template_parts();
 	}
 
+	/**
+	 * Adds a card to the tools screen to describe the Vanished media logs tool.
+	 *
+	 * @since 1.0.0
+	 */
 	public function tools_card() {
 		$page = add_query_arg( 'page', 'user-media-tools', self_admin_url( 'tools.php' ) );
 		?>
@@ -493,6 +498,11 @@ location ~* /(?:uploads|files)/mediatheque/private/.* {
 		<?php
 	}
 
+	/**
+	 * Outputs the Vanished media logs tool.
+	 *
+	 * @since 1.0.0
+	 */
 	public function do_tools() {
 		$page = add_query_arg( array(
 			'page'  => 'user-media-tools',
