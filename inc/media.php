@@ -11,7 +11,7 @@
 defined( 'ABSPATH' ) || exit;
 
 /**
- * Disable some extensions from the User Media files.
+ * Disables some extensions from the User Media files.
  *
  * @since 1.0.0
  *
@@ -103,6 +103,15 @@ function mediatheque_get_i18n_media_type( $media_type = '' ) {
 	return $media_type;
 }
 
+/**
+ * Gets file infos about the User Media.
+ *
+ * @since 1.0.0
+ *
+ * @param  WP_Post      $user_media The User Media object.
+ * @param  string       $arg        'all' to get all infos or the key of the needed info.
+ * @return string|array             The requested info or the all infos list.
+ */
 function mediatheque_get_media_info( $user_media = null, $arg = 'media_type' ) {
 	$is_main_site = mediatheque_is_main_site();
 
@@ -138,7 +147,7 @@ function mediatheque_get_media_info( $user_media = null, $arg = 'media_type' ) {
 }
 
 /**
- * Get a specific (or nearest) intermediate size for a User Media.
+ * Gets a specific (or nearest) intermediate size for a User Media.
  *
  * @since 1.0.0
  *
@@ -199,6 +208,14 @@ function mediatheque_image_get_intermediate_size( $user_media_id = 0, $size = ar
 	return $size_data;
 }
 
+/**
+ * Gets the User Media Types term ID given its slug.
+ *
+ * @since 1.0.0
+ *
+ * @param  string        $slug The term slug.
+ * @return integer|false       The term ID or false if not found.
+ */
 function mediatheque_get_user_media_type_id( $slug = '' ) {
 	$is_main_site = mediatheque_is_main_site();
 
@@ -221,6 +238,14 @@ function mediatheque_get_user_media_type_id( $slug = '' ) {
 	return $term_id;
 }
 
+/**
+ * Gets a User Media object given its slug.
+ *
+ * @since 1.0.0
+ *
+ * @param  string        $slug The User Media slug.
+ * @return WP_Post|false       The User Media object or false if not found.
+ */
 function mediatheque_get_post_by_slug( $slug = '' ) {
 	if ( ! $slug ) {
 		return false;
@@ -248,9 +273,25 @@ function mediatheque_get_post_by_slug( $slug = '' ) {
 		return false;
 	}
 
+	/**
+	 * Filter here to edit the User Media Object.
+	 *
+	 * @param WP_Post $value                The User Media object.
+	 * @param string  $slug                 The User Media slug.
+	 * @param array   $mediatheque_statuses The available User Media statuses.
+	 */
 	return apply_filters( 'mediatheque_get_post_by_slug', reset( $posts ), $slug, $mediatheque_statuses );
 }
 
+/**
+ * Returns the HTML Output of a WP Editor inserted file.
+ *
+ * @since 1.0.0
+ *
+ * @param  WP_Post $user_media The User Media object.
+ * @param  array   $args       The display preferences for the inserted file.
+ * @return string              HTML Output for a file.
+ */
 function mediatheque_file_shortcode( $user_media = null, $args = array() ) {
 	if ( empty( $user_media->post_type ) || 'user_media' !== $user_media->post_type ) {
 		$user_media = get_post();
@@ -322,6 +363,13 @@ function mediatheque_file_shortcode( $user_media = null, $args = array() ) {
 	);
 }
 
+/**
+ * Downloads a given User Media object.
+ *
+ * @since 1.0.0
+ *
+ * @param WP_Post $user_media The User Media object.
+ */
 function mediatheque_download( $user_media = null ) {
 	if ( empty( $user_media->mediatheque_file ) || ! file_exists( $user_media->mediatheque_file ) ) {
 		return false;
@@ -352,11 +400,11 @@ function mediatheque_download( $user_media = null ) {
 }
 
 /**
- * Delete a directory of User Media.
+ * Deletes a directory of User Media.
  *
  * @since 1.0.0
  *
- * @param  int|WP_Post         $dir  Required. The User Media Directory ID or Object.
+ * @param  integer|WP_Post     $dir  Required. The User Media Directory ID or Object.
  * @return array|false|WP_Post       False on failure.
  */
 function mediatheque_delete_dir( $dir = null ) {
@@ -417,7 +465,7 @@ function mediatheque_delete_dir( $dir = null ) {
 	 *
 	 * @since 1.0.0
 	 *
-	 * @param int $dir_id The User Media Directory ID.
+	 * @param integer $dir_id The User Media Directory ID.
 	 */
 	do_action( 'mediatheque_deleted_dir', $dir_id );
 
@@ -429,12 +477,12 @@ function mediatheque_delete_dir( $dir = null ) {
 }
 
 /**
- * Delete a User Media.
+ * Deletes a User Media.
  *
  * @since 1.0.0
  *
- * @param  int|WP_Post         $media  Required. The User Media ID or Object.
- * @return array|false|WP_Post         False on failure.
+ * @param  integer|WP_Post     $media Required. The User Media ID or Object.
+ * @return array|false|WP_Post        False on failure.
  */
 function mediatheque_delete_media( $media = null ) {
 	if ( empty( $media ) ) {
@@ -499,7 +547,7 @@ function mediatheque_delete_media( $media = null ) {
 	 *
 	 * @since 1.0.0
 	 *
-	 * @param int $user_media_id The User Media ID.
+	 * @param integer $user_media_id The User Media ID.
 	 */
 	do_action( 'mediatheque_deleted_media', $user_media_id );
 
@@ -510,7 +558,16 @@ function mediatheque_delete_media( $media = null ) {
 	return $user_media;
 }
 
-function mediatheque_move( $media = null, $parent = null ) {
+/**
+ * Moves a User Media.
+ *
+ * @since 1.0.0
+ *
+ * @param  int|WP_Post  $media  Required. The User Media ID or Object.
+ * @param  integer      $parent Required. The User Media's new parent ID.
+ * @return false|string         False on failure, the new file path on success.
+ */
+function mediatheque_move_media( $media = null, $parent = null ) {
 	if ( empty( $media ) || is_null( $parent ) ) {
 		return false;
 	}
@@ -552,10 +609,11 @@ function mediatheque_move( $media = null, $parent = null ) {
 	 *
 	 * @since  1.0.0
 	 *
-	 * @param  WP_Post $media  The Use Media Object.
-	 * @param  string  $newdir The new destination dir.
+	 * @param  WP_Post $media    The Use Media Object.
+	 * @param  string  $newdir   The new destination dir.
+	 * @param  string  $filename The file name.
 	 */
-	do_action( 'mediatheque_move_media', $user_media, $newdir );
+	do_action( 'mediatheque_move_media', $user_media, $newdir, $filename );
 
 	$moved = @ copy( $file, $new_file );
 
@@ -581,8 +639,9 @@ function mediatheque_move( $media = null, $parent = null ) {
 	 *
 	 * @param  int     $user_media_id The Use Media ID.
 	 * @param  string  $newdir        The new destination dir.
+	 * @param  string  $filename      The file name.
 	 */
-	do_action( 'mediatheque_moved_media', $user_media_id, $newdir );
+	do_action( 'mediatheque_moved_media', $user_media_id, $newdir, $filename );
 
 	if ( ! $is_main_site ) {
 		restore_current_blog();
@@ -591,6 +650,15 @@ function mediatheque_move( $media = null, $parent = null ) {
 	return $new_file;
 }
 
+/**
+ * Replaces the WordPress default not allowed file error message.
+ *
+ * @since 1.0.0
+ *
+ * @param array  $file      Reference to a single element of $_FILES.
+ * @param string $message   The error message.
+ * @return array            The error message as expected by _wp_handle_upload().
+ */
 function mediatheque_upload_error_handler( $file = array(), $message = '' ) {
 	if ( __( 'Sorry, this file type is not permitted for security reasons.', 'default' ) === $message ) {
 		$message = __( 'Désolé, vous n\'êtes pas autorisé à télécharger ce type de fichier', 'mediatheque' );

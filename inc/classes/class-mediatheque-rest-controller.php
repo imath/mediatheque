@@ -961,7 +961,7 @@ class MediaTheque_REST_Controller extends WP_REST_Attachments_Controller {
 			// Include admin functions to get access to wp_generate_attachment_metadata().
 			require_once ABSPATH . 'wp-admin/includes/admin.php';
 
-			$file = mediatheque_move( $id, $this->user_media_parent );
+			$file = mediatheque_move_media( $id, $this->user_media_parent );
 
 			if ( ! $file ) {
 				return new WP_Error( 'rest_mv_failed', __( 'Le déplacement du media utilisateur a échoué.', 'mediatheque' ), array( 'status' => 400 ) );
