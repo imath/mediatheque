@@ -15,6 +15,10 @@ if ( is_admin() ) {
 	add_action( 'plugins_loaded', array( 'MediaTheque_Admin', 'start' ), 10 );
 }
 
+// Enqueue User Media
+add_action( 'wp_enqueue_media',      'mediatheque_enqueue_user_media'        );
+add_action( 'print_media_templates', 'mediatheque_print_containers',   10, 0 );
+
 // Load translations
 add_action( 'init', 'mediatheque_load_textdomain', 9 );
 

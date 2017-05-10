@@ -478,11 +478,13 @@ function mediatheque_localize_script( $handle = 'mediatheque-views' ) {
 }
 
 function mediatheque_register_scripts() {
-	$url = mediatheque_js_url();
 	$min = mediatheque_min_suffix();
 	$v   = mediatheque_version();
 
-	$scripts = array(
+	/** JavaScripts **********************************************************/
+	$url = mediatheque_js_url();
+
+	$scripts = apply_filters( 'mediatheque_register_javascripts', array(
 		'mediatheque-uploader' => array(
 			'location' => sprintf( '%1$suploader%2$s.js', $url, $min ),
 			'deps'     => array( 'wp-api', 'wp-backbone', 'wp-plupload' ),
@@ -503,18 +505,33 @@ function mediatheque_register_scripts() {
 			'location' => sprintf( '%1$sdisplay%2$s.js', $url, $min ),
 			'deps'     => array( 'mediatheque-views' ),
 		),
-	);
+	), $url, $min, $v );
 
-	foreach ( $scripts as $handle => $script ) {
-		wp_register_script( $handle, $script['location'], $script['deps'], $v, true );
+	foreach ( $scripts as $js_handle => $script ) {
+		wp_register_script( $js_handle, $script['location'], $script['deps'], $v, true );
 	}
 
-	wp_register_style(
-		'mediatheque-style',
-		sprintf( '%1$sstyle%2$s.css', mediatheque_assets_url(), $min ),
-		array( 'dashicons' ),
-		$v
-	);
+	/** Styles ***************************************************************/
+	$url = mediatheque_assets_url();
+
+	$styles = apply_filters( 'mediatheque_register_styles', array(
+		'mediatheque-ui' => array(
+			'location' => sprintf( '%1$sui%2$s.css', $url, $min ),
+			'deps'     => array( 'dashicons' ),
+		),
+		'mediatheque-uploader' => array(
+			'location' => sprintf( '%1$suploader%2$s.css', $url, $min ),
+			'deps'     => array( 'mediatheque-ui' ),
+		),
+		'mediatheque-editor' => array(
+			'location' => sprintf( '%1$seditor%2$s.css', $url, $min ),
+			'deps'     => array( 'mediatheque-uploader' ),
+		),
+	), $url, $min, $v );
+
+	foreach ( $styles as $css_handle => $style ) {
+		wp_register_style( $css_handle, $style['location'], $style['deps'], $v );
+	}
 }
 
 /**
@@ -758,6 +775,12 @@ function mediatheque_get_template_parts( $list = array() ) {
 	}
 
 	return $template_parts;
+}
+
+function mediatheque_print_template_parts() {
+	foreach ( mediatheque_get_template_parts() as $id => $tmpl ) {
+		mediatheque_get_template_part( $id, $tmpl );
+	}
 }
 
 /**

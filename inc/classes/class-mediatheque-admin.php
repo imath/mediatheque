@@ -119,13 +119,7 @@ class MediaTheque_Admin {
 		add_action( 'user_admin_menu',    array( $this, 'menus'   )     );
 		add_action( 'init',               array( $this, 'globals' ), 14 );
 
-		/** Media Editor ******************************************************/
-
-		add_action( 'wp_enqueue_media',      array( $this, 'scripts'  )        );
-		add_action( 'print_media_templates', array( $this, 'template' ), 10, 0 );
-
 		/** Settings *********************************************************/
-
 		add_action( 'admin_enqueue_scripts', array( $this, 'inline_scripts' ) );
 
 		if ( ! is_multisite() ) {
@@ -146,18 +140,6 @@ class MediaTheque_Admin {
 		if ( is_super_admin() ) {
 			$this->title = __( 'MediaThèque Utilisateurs', 'mediatheque' );
 		}
-	}
-
-	/**
-	 * Enqueue scripts.
-	 *
-	 * @since  1.0.0
-	 */
-	public function scripts() {
-		wp_enqueue_script( 'mediatheque-editor' );
-		mediatheque_localize_script();
-
-		wp_enqueue_style( 'mediatheque-style' );
 	}
 
 	/**
@@ -289,34 +271,6 @@ class MediaTheque_Admin {
 
 			wp_add_inline_script( 'common', $inline_scripts );
 		}
-	}
-
-	public function get_template_parts() {
-		foreach ( mediatheque_get_template_parts() as $id => $tmpl ) {
-			mediatheque_get_template_part( $id, $tmpl );
-		}
-	}
-
-	/**
-	 * Print Media Editor's templates
-	 *
-	 * @since  1.0.0
-	 */
-	public function template( $editor = true ) {
-		$base_layout = '<div id="mediatheque-container">
-			<div id="toolbar" class="wp-filter"></div>
-			<div id="forms"></div>
-			<div id="users"></div>
-			<div id="trail"></div>
-			<div id="media"></div>
-		</div>';
-
-		if ( true === $editor ) {
-			printf( '<script type="text/html" id="tmpl-mediatheque-main">%s</script>', $base_layout );
-			$this->get_template_parts();
-		}
-
-		return $base_layout;
 	}
 
 	/**
@@ -514,7 +468,7 @@ location ~* /(?:uploads|files)/mediatheque/private/.* {
 		wp_enqueue_script( 'mediatheque-manage' );
 		mediatheque_localize_script();
 
-		wp_enqueue_style( 'mediatheque-style' );
+		wp_enqueue_style( 'mediatheque-uploader' );
 
 		wp_plupload_default_settings();
 
@@ -524,9 +478,9 @@ location ~* /(?:uploads|files)/mediatheque/private/.* {
 				<div id="mediatheque-backdrop"></div>
 				%2$s
 			</div>
-		', esc_html( $this->title ), $this->template( false ) );
+		', esc_html( $this->title ), mediatheque_print_containers( false ) );
 
-		$this->get_template_parts();
+		mediatheque_print_template_parts();
 	}
 
 	public function tools_card() {

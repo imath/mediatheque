@@ -36,6 +36,6 @@
 [x] Check the attachment navigation
 [x] Take care of Directory embed template
 [x] Handle user deletion
-[] Split the css file into smaller css files
+[x] Split the css file into smaller css files
 [] Improve/add inline comments
 [] Add Grunt tasks

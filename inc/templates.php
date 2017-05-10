@@ -10,6 +10,44 @@
 // Exit if accessed directly.
 defined( 'ABSPATH' ) || exit;
 
+
+/**
+ * Enqueue User Media Scripts and styles for the WP Editor.
+ *
+ * @since 1.0.0
+ */
+function mediatheque_enqueue_user_media() {
+	wp_enqueue_script( 'mediatheque-editor' );
+	mediatheque_localize_script();
+
+	wp_enqueue_style( 'mediatheque-editor' );
+}
+
+/**
+ * Print Media containers
+ *
+ * @since  1.0.0
+ *
+ * @param  boolean $editor Whether the WP Media Editor is used.
+ * @return string          User Media Templates output.
+ */
+function mediatheque_print_containers( $editor = true ) {
+	$base_layout = '<div id="mediatheque-container">
+		<div id="toolbar" class="wp-filter"></div>
+		<div id="forms"></div>
+		<div id="users"></div>
+		<div id="trail"></div>
+		<div id="media"></div>
+	</div>';
+
+	if ( true === $editor ) {
+		printf( '<script type="text/html" id="tmpl-mediatheque-main">%s</script>', $base_layout );
+		mediatheque_print_template_parts();
+	}
+
+	return $base_layout;
+}
+
 function mediatheque_button( $args = array() ) {
 	static $instance = 0;
 	$instance++;
@@ -121,7 +159,7 @@ function mediatheque_get_display_content( $attr ) {
 		wp_enqueue_script( 'mediatheque-display' );
 		mediatheque_localize_script();
 
-		wp_enqueue_style( 'mediatheque-style' );
+		wp_enqueue_style( 'mediatheque-ui' );
 
 		ob_start();
 
