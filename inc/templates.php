@@ -12,7 +12,7 @@ defined( 'ABSPATH' ) || exit;
 
 
 /**
- * Enqueue User Media Scripts and styles for the WP Editor.
+ * Enqueues User Media Scripts and styles for the WP Editor.
  *
  * @since 1.0.0
  */
@@ -24,7 +24,7 @@ function mediatheque_enqueue_user_media() {
 }
 
 /**
- * Print Media containers
+ * Prints Media containers
  *
  * @since  1.0.0
  *
@@ -48,6 +48,22 @@ function mediatheque_print_containers( $editor = true ) {
 	return $base_layout;
 }
 
+/**
+ * Outputs the Mediatheque button & UI.
+ *
+ * @since 1.0.0
+ *
+ * @param array $args {
+ *   An array of arguments.
+ *   @type string  $editor_id           Optional. The WordPress Editor css ID.
+ *   @type array   $editor_btn_classes  Optional. The list of CSS classes for the button.
+ *   @type string  $editor_btn_text     Optional. The caption for the button.
+ *   @type string  $editor_btn_dashicon Optional. The dashicon to use for the button.
+ *   @type boolean $echo                Optional. True to output, false to return.
+ *   @type string  $media_type          Optional. The file types to filter the User Media query with.
+ *                                      {@see mediatheque_get_i18n_media_type() for available keys}}
+ * }
+ */
 function mediatheque_button( $args = array() ) {
 	static $instance = 0;
 	$instance++;
@@ -106,7 +122,7 @@ function mediatheque_button( $args = array() ) {
 }
 
 /**
- * Add a button to open a light WP Media Editor for users without the 'upload_files' capability.
+ * Adds a button to open a light WP Media Editor for users without the 'upload_files' capability.
  *
  * @since  1.0.0
  *
@@ -131,6 +147,14 @@ function mediatheque_the_editor( $editor = '' ) {
 	);
 }
 
+/**
+ * Returns the [mediatheque] shortcode output.
+ *
+ * @since 1.0.0
+ *
+ * @param  array  $attr Attributes of the [mediatheque] shortcode.
+ * @return string       HTML Output.
+ */
 function mediatheque_get_display_content( $attr ) {
 	$content = '';
 
@@ -178,6 +202,16 @@ function mediatheque_get_display_content( $attr ) {
 }
 add_shortcode( 'mediatheque', 'mediatheque_get_display_content' );
 
+/**
+ * Builds the User Media's Thumbnail Output for the embed template.
+ *
+ * @since 1.0.0
+ *
+ * @param  string  $excerpt    The embed User Media's excerpt.
+ * @param  WP_Post $user_media The User Media Object.
+ * @param  string  $type       Whether it's a 'directory' or a 'user-media'.
+ * @return string              HTML Output.
+ */
 function mediatheque_prepend_embed_thumbnail( $excerpt = '', $user_media = null, $type = 'user-media' ) {
 	$user_media = get_post( $user_media );
 
@@ -372,10 +406,24 @@ function mediatheque_maybe_hide_link( $link = '', $url = '' ) {
 	);
 }
 
+/**
+ * Sets and globalizes the displayed directory.
+ *
+ * @since 1.0.0
+ *
+ * @param integer $id The directory ID.
+ */
 function mediatheque_set_displayed_directory( $id = 0 ) {
 	mediatheque()->template_tags->directory = $id;
 }
 
+/**
+ * Sets and globalizes a list of template tags.
+ *
+ * @since 1.0.0
+ *
+ * @param array $id The list of template tags.
+ */
 function mediatheque_set_template_tags( $tags = array() ) {
 	if ( empty( $tags ) || ! is_array( $tags ) ) {
 		return;
@@ -388,10 +436,14 @@ function mediatheque_set_template_tags( $tags = array() ) {
 	}
 }
 
-function mediatheque_get_displayed_directory() {
-	return (int) mediatheque_get_tag( 'directory' );
-}
-
+/**
+ * Gets the output for a template tag.
+ *
+ * @since 1.0.0
+ *
+ * @param  string $tag The template tag's key.
+ * @return mixed       The output for the template tag.
+ */
 function mediatheque_get_tag( $tag = '' ) {
 	$content_tag = 0;
 
@@ -405,7 +457,25 @@ function mediatheque_get_tag( $tag = '' ) {
 		$content_tag = $mediatheque->template_tags->{$tag};
 	}
 
+	/**
+	 * Filter here to edit the $tag output.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param mixed $content_tag The output for the template tag.
+	 */
 	return apply_filters( 'mediatheque_get_displayed_' . $tag , $content_tag );
+}
+
+/**
+ * Gets the displayed directory.
+ *
+ * @since 1.0.0
+ *
+ * @return integer The displayed directory.
+ */
+function mediatheque_get_displayed_directory() {
+	return (int) mediatheque_get_tag( 'directory' );
 }
 
 /**
@@ -417,6 +487,13 @@ function mediatheque_embed_excerpt() {
 	$excerpt = apply_filters( 'the_excerpt_embed', get_the_excerpt() );
 	$excerpt = mediatheque_prepend_user_media( $excerpt );
 
+	/**
+	 * Filter here to edit the embed excerpt.
+	 *
+	 * @since  1.0.0
+	 *
+	 * @param string $excerpt The embed excerpt.
+	 */
 	echo apply_filters( 'mediatheque_embed_excerpt', $excerpt );
 }
 
