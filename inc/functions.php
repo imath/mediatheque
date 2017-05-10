@@ -128,8 +128,8 @@ function mediatheque_is_main_site( $site_id = 0 ) {
  *
  * @since 1.0.0
  *
- * @param  WP_Post|int The User Media object or the ID of the User Media item.
- * @return string      The download url for the User Media Item.
+ * @param  WP_Post|integer $user_media The User Media object or the ID of the User Media item.
+ * @return string                      The download url for the User Media Item.
  */
 function mediatheque_get_download_url( $user_media = null ) {
 	$is_main_site = mediatheque_is_main_site();
@@ -156,6 +156,14 @@ function mediatheque_get_download_url( $user_media = null ) {
 		restore_current_blog();
 	}
 
+	/**
+	 * Filter here to edit the download url for a User Media Item.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param  string          $download_url The download url for the User Media Item.
+	 * @param  WP_Post|integer $user_media   The User Media object of the User Media item.
+	 */
 	return apply_filters( 'mediatheque_get_download_url', $download_url, $user_media );
 }
 
@@ -208,6 +216,14 @@ function mediatheque_min_suffix() {
 	return apply_filters( 'mediatheque_min_suffix', $min );
 }
 
+/**
+ * Formats file size/disk usage for display.
+ *
+ * @since 1.0.0
+ *
+ * @param  integer $kb The size in kilobytes.
+ * @return string      The formatted size.
+ */
 function mediatheque_format_file_size( $kb = 0 ) {
 	$unit = ' KB';
 
@@ -359,6 +375,13 @@ function mediatheque_get_post_statuses( $status = '' ) {
 	return $mediatheque->statuses[ $status ];
 }
 
+/**
+ * Loacalizes scripts data.
+ *
+ * @since 1.0.0
+ *
+ * @param string $handle The Javascript script handle.
+ */
 function mediatheque_localize_script( $handle = 'mediatheque-views' ) {
 	$mediatheque = mediatheque();
 
@@ -477,6 +500,11 @@ function mediatheque_localize_script( $handle = 'mediatheque-views' ) {
 	) );
 }
 
+/**
+ * Registers JavaScripts and Styles.
+ *
+ * @since 1.0.0
+ */
 function mediatheque_register_scripts() {
 	$min = mediatheque_min_suffix();
 	$v   = mediatheque_version();
@@ -535,7 +563,7 @@ function mediatheque_register_scripts() {
 }
 
 /**
- * Register the post type and the taxonomy used by User Media.
+ * Register various objects for MediaThèque's needs.
  *
  * @since 1.0.0
  */
@@ -693,6 +721,15 @@ function mediatheque_embed_style() {
 	);
 }
 
+/**
+ * Finds a template part by looking in the active parent theme or child theme first.
+ *
+ * @since 1.0.0
+ *
+ * @param  string $template The needed template name.
+ * @param  string $type     The extension for the template.
+ * @return string           The located template.
+ */
 function mediatheque_locate_template_part( $template = '', $type = 'html' ) {
 	if ( empty( $template ) ) {
 		return false;
@@ -777,6 +814,11 @@ function mediatheque_get_template_parts( $list = array() ) {
 	return $template_parts;
 }
 
+/**
+ * Print JavaScript templates for the MediaThèque.
+ *
+ * @since 1.0.0
+ */
 function mediatheque_print_template_parts() {
 	foreach ( mediatheque_get_template_parts() as $id => $tmpl ) {
 		mediatheque_get_template_part( $id, $tmpl );
@@ -900,6 +942,14 @@ function mediatheque_editor_settings( $settings = array(), $editor_id = '' ) {
 	return $settings;
 }
 
+/**
+ * Makes sure to avoid requesting for User Media when in the WP Editor context.
+ *
+ * @since 1.0.0
+ *
+ * @param  array $args The query arguments.
+ * @return array       The query arguments.
+ */
 function mediatheque_wp_link_query_args( $args = array() ) {
 	if ( is_array( $args['post_type'] ) && in_array( 'user_media', $args['post_type'], true ) ) {
 		$args['post_type'] = array_diff( $args['post_type'], array( 'user_media' ) );
@@ -908,6 +958,16 @@ function mediatheque_wp_link_query_args( $args = array() ) {
 	return $args;
 }
 
+/**
+ * Shortcircuits wp_filter_oembed_result() in the case of an inserted User Media.
+ *
+ * @since 1.0.0
+ *
+ * @param string       $result The oEmbed HTML output result.
+ * @param object       $data   Data object from WP_oEmbed::data2html().
+ * @param string       $url    The embedded URL.
+ * @return false|string        The oEmbed HTML output result.
+ */
 function mediatheque_oembed_pre_dataparse( $result = null, $data = null, $url = '' ) {
 	$mediatheque = mediatheque();
 
@@ -918,6 +978,16 @@ function mediatheque_oembed_pre_dataparse( $result = null, $data = null, $url = 
 	return $result;
 }
 
+/**
+ * Sets the oEmbed HTML output result for inserted User Media.
+ *
+ * @since 1.0.0
+ *
+ * @param string       $result The oEmbed HTML output result.
+ * @param object       $data   Data object from WP_oEmbed::data2html().
+ * @param string       $url    The embedded URL.
+ * @return false|string        The oEmbed HTML output result.
+ */
 function mediatheque_oembed_dataparse( $result = null, $data = null, $url = '' ) {
 	$mediatheque = mediatheque();
 
@@ -934,6 +1004,14 @@ function mediatheque_oembed_dataparse( $result = null, $data = null, $url = '' )
 	return $return;
 }
 
+/**
+ * Parses the oEmbed URL to get its query params.
+ *
+ * @since 1.0.0
+ *
+ * @param string $url The oEmbed URL.
+ * @return array      The query params.
+ */
 function mediatheque_oembed_get_url_args( $url = '' ) {
 	$args = array();
 
@@ -960,6 +1038,15 @@ function mediatheque_oembed_get_url_args( $url = '' ) {
 	) );
 }
 
+/**
+ * Builds a specific User Media oEmbed HTML Output.
+ *
+ * @since 1.0.0
+ *
+ * @param  integer $id  The Found post ID.
+ * @param  string  $url The oEmbed URL.
+ * @return integer $id  The Found post ID.
+ */
 function mediatheque_oembed_user_media_id( $id = 0, $url = '' ) {
 	$_id = $id;
 
@@ -1173,6 +1260,14 @@ function mediatheque_clear_cached_media( $user_media = null ) {
 	return (bool) $return;
 }
 
+/**
+ * Performs a User Media search in all post types.
+ *
+ * @since 1.0.0
+ *
+ * @param  string $s The User Media permalink.
+ * @return array     The found posts, pages etc..
+ */
 function mediatheque_get_attached_posts( $s = '' ) {
 	if ( ! $s ) {
 		return array();
@@ -1185,6 +1280,11 @@ function mediatheque_get_attached_posts( $s = '' ) {
 	) );
 }
 
+/**
+ * Loads translation.
+ *
+ * @since 1.0.0
+ */
 function mediatheque_load_textdomain() {
 	$mediatheque = mediatheque();
 	load_plugin_textdomain( $mediatheque->domain, false, trailingslashit( basename( $mediatheque->dir ) ) . 'languages' );
