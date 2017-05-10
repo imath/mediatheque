@@ -10,8 +10,18 @@
 // Exit if accessed directly.
 defined( 'ABSPATH' ) || exit;
 
+/**
+ * Settings section callback.
+ *
+ * @since 1.0.0.
+ */
 function mediatheque_settings_section_callback() {}
 
+/**
+ * Capability Setting field callback.
+ *
+ * @since 1.0.0.
+ */
 function mediatheque_settings_field_capability() {
 	$role_names = wp_roles()->role_names;
 	$setting    = mediatheque_get_required_cap();
@@ -28,7 +38,6 @@ function mediatheque_settings_field_capability() {
 		$caps['edit_posts'] = translate_user_role( $role_names['contributor'] );
 	}
 	?>
-
 	<select name="mediatheque_capability" id="mediatheque_capability"<?php echo is_network_admin() ? ' disabled' : '' ;?>>
 
 		<?php foreach ( (array) apply_filters( 'mediatheque_caps', $caps ) as $cap => $role ) : ?>
@@ -42,6 +51,14 @@ function mediatheque_settings_field_capability() {
 	<?php
 }
 
+/**
+ * Sanitizes the Capability Setting field before saving it to DB.
+ *
+ * @since 1.0.0.
+ *
+ * @param string $capability The new capability.
+ * @param string             The sanitized capability.
+ */
 function mediatheque_sanitize_capability( $capability ) {
 	if ( empty( $capability ) ) {
 		$capability = 'exist';
@@ -50,6 +67,11 @@ function mediatheque_sanitize_capability( $capability ) {
 	return sanitize_text_field( $capability );
 }
 
+/**
+ * Allowed Mime Types Setting field callback.
+ *
+ * @since 1.0.0.
+ */
 function mediatheque_settings_field_mime_types() {
 	$types            = wp_get_ext_types();
 	$translated_types = mediatheque_get_i18n_media_type( $types );
@@ -87,6 +109,14 @@ function mediatheque_settings_field_mime_types() {
 	}
 }
 
+/**
+ * Sanitizes the Allowed Mime Types Setting field before saving it to DB.
+ *
+ * @since 1.0.0.
+ *
+ * @param array $mime_types The new Allowed Mime Types.
+ * @param array             The sanitized Allowed Mime Types.
+ */
 function mediatheque_sanitize_mime_types( $mime_types ) {
 	if ( ! is_array( $mime_types ) ) {
 		return array();
@@ -95,6 +125,11 @@ function mediatheque_sanitize_mime_types( $mime_types ) {
 	return array_map( 'sanitize_text_field', $mime_types );
 }
 
+/**
+ * Personal Avatar Feature Setting field callback.
+ *
+ * @since 1.0.0.
+ */
 function mediatheque_settings_field_avatars() {
 	$use_avatars = mediatheque_use_personal_avatar();
 
