@@ -1,4 +1,4 @@
-/* global wp, _ */
+/* global wp, _, mediaTheque, mediaThequeSettings, mediaThequeCustoms */
 
 // Make sure the wp object exists.
 window.wp = window.wp || {};
@@ -385,7 +385,7 @@ window.mediaTheque = window.mediaTheque || _.extend( {}, _.pick( window.wp, 'Bac
 			this.$el.attr( 'data-id', this.model.get( 'id' ) );
 
 			if ( 'image' === this.model.get( 'media_type' ) && this.model.get( 'guid' ) ) {
-				var bgUrl = fullUrl = this.model.get( 'guid' ).rendered,
+				var bgUrl = this.model.get( 'guid' ).rendered, fullUrl = bgUrl,
 				    mediaDetails = this.model.get( 'media_details' ), fileName;
 
 				if ( _.isObject( mediaDetails.sizes ) && mediaDetails.sizes.medium ) {
@@ -492,9 +492,9 @@ window.mediaTheque = window.mediaTheque || _.extend( {}, _.pick( window.wp, 'Bac
 		 * @param  {Backbone.Model} model The User Media Object
 		 */
 		adjustMore: function( model ) {
-			var o = this.options || {}, modelId = model.get( 'id' );
+			var modelId = model.get( 'id' );
 
-			this.excludeDisplayed = []
+			this.excludeDisplayed = [];
 
 			// Remove the moved User Media from the list.
 			if ( ! _.isUndefined( this.views._views[''] ) && this.views._views[''].length && modelId ) {
@@ -556,7 +556,7 @@ window.mediaTheque = window.mediaTheque || _.extend( {}, _.pick( window.wp, 'Bac
 			}
 
 			// Eventually restrict the query to a media type
-			if ( 'undefined' != typeof mediaThequeCustoms && mediaThequeCustoms.mediaType ) {
+			if ( 'undefined' !== typeof mediaThequeCustoms && mediaThequeCustoms.mediaType ) {
 
 				// In this case, we need to get all user media for the given media type
 				if ( 0 === o.queryVars.get( 'parent' ) ) {
@@ -712,11 +712,11 @@ window.mediaTheque = window.mediaTheque || _.extend( {}, _.pick( window.wp, 'Bac
 
 	mediaTheque.Views.displayUserMedias = mediaTheque.Views.UserMedias.extend( {
 		events: {
-			'click .user-media-content' : 'selectMedia',
+			'click .user-media-content' : 'selectMedia'
 		},
 
 		initialize: function() {
-			var o = this.options || {}, qv = { 'user_media_context': 'display' };
+			var qv = { 'user_media_context': 'display' };
 
 			mediaTheque.Views.Users.prototype.initialize.apply( this, arguments );
 
@@ -820,7 +820,7 @@ window.mediaTheque = window.mediaTheque || _.extend( {}, _.pick( window.wp, 'Bac
 		},
 
 		mkdirError: function( dir, result ) {
-			var o = this.options || {}, feedback, error;
+			var o = this.options || {}, feedback;
 
 			if ( ! _.isObject( o.mediaView ) ) {
 				return;
@@ -858,7 +858,7 @@ window.mediaTheque = window.mediaTheque || _.extend( {}, _.pick( window.wp, 'Bac
 		},
 
 		initUploader: function() {
-			var pluploadOptions = _.mapObject( _.pick( this.model.attributes, 'container', 'browser', 'dropzone' ), function( v, k ) {
+			var pluploadOptions = _.mapObject( _.pick( this.model.attributes, 'container', 'browser', 'dropzone' ), function( v ) {
 				return '#' + v;
 			} );
 
@@ -887,7 +887,6 @@ window.mediaTheque = window.mediaTheque || _.extend( {}, _.pick( window.wp, 'Bac
 			}
 
 			if ( _.isObject( o.mediaView ) ) {
-				var model = o.mediaView.collection.get( file.id );
 				o.mediaView.collection.remove( file.id );
 
 				// The message should be preprended with the File name.
@@ -952,7 +951,7 @@ window.mediaTheque = window.mediaTheque || _.extend( {}, _.pick( window.wp, 'Bac
 					name: name,
 					position: position,
 					current: current,
-					disable: 0 !== o.users.length && 'users' !== id,
+					disable: 0 !== o.users.length && 'users' !== id
 				} );
 
 				this.addItemBar( this.collection.get( id ) );
@@ -980,7 +979,7 @@ window.mediaTheque = window.mediaTheque || _.extend( {}, _.pick( window.wp, 'Bac
 		activateView: function( event ) {
 			event.preventDefault();
 
-			var current = $( event.currentTarget ), model, disable = false, subview = null;
+			var current = $( event.currentTarget ), disable = false, subview = null;
 
 			if ( current.prop( 'disabled' ) ) {
 				return;

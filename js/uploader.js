@@ -1,4 +1,4 @@
-/* global wp, _ */
+/* global wp, _, mediaTheque, plupload, pluploadL10n, JSON */
 
 // Make sure the wp object exists.
 window.wp = window.wp || {};
@@ -25,7 +25,7 @@ window.mediaTheque = window.mediaTheque || _.extend( {}, _.pick( window.wp, 'Bac
 				return false;
 			}
 
-			return Backbone.Model.prototype.destroy.call( this, options );
+			return Backbone.Model.prototype.destroy.call( this, options, attrs, model );
 		}
 	} );
 
@@ -44,7 +44,7 @@ window.mediaTheque = window.mediaTheque || _.extend( {}, _.pick( window.wp, 'Bac
 				self.uploader.settings[ key ] = prop;
 
 				if ( key === 'headers' ) {
-					delete self.uploader.settings.multipart_params['_wpnonce'];
+					delete self.uploader.settings.multipart_params._wpnonce;
 					_.extend( self.uploader.settings.multipart_params, prop, { action: 'upload_user_media' } );
 				}
 			} );
@@ -64,7 +64,7 @@ window.mediaTheque = window.mediaTheque || _.extend( {}, _.pick( window.wp, 'Bac
 		 * @param  {object}        data
 		 * @param  {plupload.File} file     File that was uploaded.
 		 */
-		error = function( message, data, file ) {
+		var error = function( message, data, file ) {
 			if ( file.userMedia ) {
 				file.userMedia.destroy();
 			}
@@ -221,7 +221,7 @@ window.mediaTheque = window.mediaTheque || _.extend( {}, _.pick( window.wp, 'Bac
 			wp.Uploader.prototype.refresh.apply( this, arguments );
 		},
 
-		param: function( key, value ) {
+		param: function() {
 			wp.Uploader.prototype.param.apply( this, arguments );
 		}
 	} );

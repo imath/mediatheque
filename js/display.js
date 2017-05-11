@@ -1,4 +1,4 @@
-/* global wp, _ */
+/* global wp, _, mediaTheque */
 
 // Make sure the wp object exists.
 window.wp = window.wp || {};
@@ -16,7 +16,7 @@ window.mediaTheque = window.mediaTheque || _.extend( {}, _.pick( window.wp, 'Bac
 			this.userMedia    = new wp.api.collections.UserMedia();
 			this.queryVars    = new Backbone.Model();
 
-			var View = new mediaTheque.Views.Display( {
+			this.View = new mediaTheque.Views.Display( {
 				el:           $( '#mediatheque-container' ),
 				media:        this.userMedia,
 				queryVars:    this.queryVars
@@ -24,7 +24,7 @@ window.mediaTheque = window.mediaTheque || _.extend( {}, _.pick( window.wp, 'Bac
 		}
 	};
 
-	wp.api.loadPromise.done( function( api ) {
+	wp.api.loadPromise.done( function() {
 		mediaTheque.Display.init();
 	} );
 

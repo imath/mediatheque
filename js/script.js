@@ -1,4 +1,4 @@
-/* global wp, _ */
+/* global wp, _, mediaTheque, mediaThequeSettings, JSON, wpApiSettings */
 
 // Make sure the wp object exists.
 window.wp = window.wp || {};
@@ -308,7 +308,7 @@ window.mediaTheque = window.mediaTheque || _.extend( {}, _.pick( window.wp, 'Bac
 	mediaTheque.media.view.customizeFile = mediaTheque.media.view.customizeUserMedia.extend( {
 		initialize: function() {
 			var o = this.options || {}, position = 0,
-			    fields = this.options.fields || [], query_vars = {};
+			    fields = o.fields || [], query_vars = {};
 
 			this.options.query_keys = [];
 			this.collection = new Backbone.Collection();
@@ -370,7 +370,7 @@ window.mediaTheque = window.mediaTheque || _.extend( {}, _.pick( window.wp, 'Bac
 				// Call 'createStates' directly on the parent class.
 				mediaTheque.post.prototype.createStates.apply( this, arguments );
 			} else {
-				states.push( new wp.media.controller.Embed( { metadata: options.metadata } ) )
+				states.push( new wp.media.controller.Embed( { metadata: options.metadata } ) );
 			}
 
 			states.unshift( new mediaTheque.media.controller.UserMedia( { priority: priority } ) );
@@ -602,8 +602,7 @@ window.mediaTheque = window.mediaTheque || _.extend( {}, _.pick( window.wp, 'Bac
 			}, this._frame );
 
 			this._frame.on( 'content:render:user-media', function() {
-				var selection = this.state( 'user-media' ).get( 'selection' ),
-					view = new mediaTheque.media.view.mainUserMedia( {
+				var view = new mediaTheque.media.view.mainUserMedia( {
 						controller: this,
 						model:      this.state()
 					} ).render();
@@ -633,7 +632,7 @@ window.mediaTheque = window.mediaTheque || _.extend( {}, _.pick( window.wp, 'Bac
 		 *  the 'Insert Avatar' button is clicked in the media modal.
 		 */
 		select: function() {
-			var selection = this.get( 'userMediaSelection' );
+			var selection = this.get( 'userMediaSelection' ), model;
 
 			if ( ! selection.length ) {
 				return false;
@@ -672,7 +671,7 @@ window.mediaTheque = window.mediaTheque || _.extend( {}, _.pick( window.wp, 'Bac
 		init: function() {
 
 			if ( $( '.mediatheque-buttons' ).length ) {
-				var editorId = $( '.mediatheque-buttons' ).data( 'editor' );
+				var editorId = $( '.mediatheque-buttons' ).data( 'editor' ),
 				    editorTools = $( '.mediatheque-buttons' ).prev( '#wp-' + editorId + '-editor-tools' ).find( '.wp-editor-tabs' ).first();
 
 				$( editorTools ).before( $( '.mediatheque-buttons:visible' ) );
@@ -730,6 +729,8 @@ window.mediaTheque = window.mediaTheque || _.extend( {}, _.pick( window.wp, 'Bac
 		},
 
 		getURLparams: function( url, param ) {
+			var qs;
+
 			if ( url ) {
 				qs = ( -1 !== url.indexOf( '?' ) ) ? '?' + url.split( '?' )[1] : '';
 			} else {

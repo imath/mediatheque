@@ -1,4 +1,4 @@
-/* global wp, _ */
+/* global wp, _, mediaTheque, wpApiSettings */
 
 // Make sure the wp object exists.
 window.wp = window.wp || {};
@@ -27,7 +27,7 @@ window.mediaTheque = window.mediaTheque || _.extend( {}, _.pick( window.wp, 'Bac
 				}
 			};
 
-			var rootView = new mediaTheque.Views.Root( {
+			this.rootView = new mediaTheque.Views.Root( {
 				el:           $( '#mediatheque-container' ),
 				users:        this.users,
 				media:        this.userMedia,
