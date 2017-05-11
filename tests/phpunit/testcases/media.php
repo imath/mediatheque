@@ -64,4 +64,37 @@ class MediaTheque_Media_Tests extends WP_UnitTestCase {
 
 		$this->assertTrue( 'image' === $img_info );
 	}
+
+	public function test_mediatheque_image_get_intermediate_size() {
+		$user_id = $this->factory->user->create();
+
+		$um_id = $this->mediatheque_factory->user_media_file->create( array(
+			'file'        => DIR_TESTDATA . '/images/waffles.jpg',
+			'post_author' => $user_id,
+		) );
+		$this->user_media_ids[] = $um_id;
+
+		$up_dir = wp_get_upload_dir();
+		$small  = mediatheque_image_get_intermediate_size( $um_id, array( 24, 24 ) );
+
+		$this->assertTrue( file_exists( $up_dir['basedir'] . '/mediatheque/publish/' . $user_id . '/' . $small['file'] ) );
+
+		$full = mediatheque_image_get_intermediate_size( $um_id, array() );
+		$this->assertTrue( file_exists( $full['path'] ) );
+	}
+
+	public function test_mediatheque_get_post_by_slug() {
+		$um_id   = $this->mediatheque_factory->user_media_file->create( array(
+			'post_name'   => 'right-slug'
+		) );
+
+		$this->user_media_ids[] = $um_id;
+		$user_media = mediatheque_get_post_by_slug( 'right-slug' );
+
+		$this->assertEquals( $um_id, $user_media->ID );
+
+		$user_media = mediatheque_get_post_by_slug( 'wrong-slug' );
+
+		$this->assertEmpty( $user_media );
+	}
 }
