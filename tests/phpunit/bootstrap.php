@@ -2,6 +2,13 @@
 
 require_once getenv( 'WP_DEVELOP_DIR' ) . '/tests/phpunit/includes/functions.php';
 
+// Force pretty links, anyway Rest API requires it.
+if ( isset( $GLOBALS['wp_tests_options'] ) ) {
+	$GLOBALS['wp_tests_options']['permalink_structure'] = '/%postname%/';
+} else {
+	$GLOBALS['wp_tests_options'] = array( 'permalink_structure' => '/%postname%/' );
+}
+
 function _bootstrap_mediatheque() {
 	// load WP Idea Stream
 	require dirname( __FILE__ ) . '/../../mediatheque.php';
