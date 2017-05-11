@@ -77,7 +77,7 @@ class MediaTheque_Rest_Tests extends WP_Test_REST_Controller_Testcase {
 		if ( in_array( $cap, mediatheque_get_all_caps(), true ) ) {
 			$this->cap = $cap;
 		}
-		
+
 		return $caps;
 	}
 
@@ -442,4 +442,11 @@ class MediaTheque_Rest_Tests extends WP_Test_REST_Controller_Testcase {
 	public function test_prepare_item() {}
 
 	public function test_get_item_schema() {}
+
+	/**
+	 * Neutralize this check in parent class as we're using pretty links
+	 */
+	public function filter_rest_url_for_leading_slash( $url, $path ) {
+		return $url;
+	}
 }
