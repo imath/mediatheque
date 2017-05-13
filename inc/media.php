@@ -126,7 +126,7 @@ function mediatheque_get_media_info( $user_media = null, $arg = 'media_type' ) {
 	}
 
 	$file     = get_attached_file( $user_media->ID );
-	$filedata = wp_check_filetype( $file );
+	$filedata = wp_check_filetype( $file, mediatheque_get_mime_types() );
 
 	if ( empty( $filedata['ext'] ) ) {
 		return false;

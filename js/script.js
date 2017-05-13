@@ -208,6 +208,7 @@ window.mediaTheque = window.mediaTheque || _.extend( {}, _.pick( window.wp, 'Bac
 			this.$el.find( 'input.link-to-custom' ).val( this.options.attachment.get( 'url' ) );
 			this.$el.find( 'select.size' ).val( 'full' );
 			this.$el.find( 'select.size option[value="full"]' ).prop( 'selected', 'selected' );
+			this.$el.find( 'select.size option[value="custom"]' ).remove();
 			this.$el.find( '.link-to select option[value="custom"]' ).remove();
 
 			if ( this.imageEdit ) {

@@ -381,6 +381,8 @@ class MediaTheque_REST_Controller extends WP_REST_Attachments_Controller {
 
 		if ( ! is_super_admin() ) {
 			$overrides['mimes'] = mediatheque_get_allowed_mime_types();
+		} else {
+			$overrides['mimes'] = mediatheque_get_mime_types();
 		}
 
 		/** Include admin functions to get access to wp_handle_upload() */

@@ -50,6 +50,11 @@ window.mediaTheque = window.mediaTheque || _.extend( {}, _.pick( window.wp, 'Bac
 			} );
 		}
 
+		// Mime Type check will happen on the server side for User Media.
+		if ( ! _.isUndefined( self.uploader.settings.filters.mime_types ) ) {
+			self.uploader.settings.filters.mime_types = [];
+		}
+
 		this.filesQueue    = new Backbone.Collection();
 		this.filesUploaded = new Backbone.Collection();
 		this.filesError    = new Backbone.Collection();
