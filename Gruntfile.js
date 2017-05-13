@@ -146,9 +146,9 @@ module.exports = function( grunt ) {
 
 	grunt.registerTask( 'jstest', ['jsvalidate', 'jshint'] );
 
-	grunt.registerTask( 'shrink', ['clean', 'cssmin', 'uglify'] );
+	grunt.registerTask( 'shrink', ['cssmin', 'uglify'] );
 
-	grunt.registerTask( 'release', ['checktextdomain', 'makepot', 'jstest', 'shrink', 'compress'] );
+	grunt.registerTask( 'release', ['checktextdomain', 'makepot', 'clean', 'jstest', 'shrink', 'compress'] );
 
 	// Default task.
 	grunt.registerTask( 'default', ['commit'] );

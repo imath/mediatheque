@@ -4,7 +4,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: MediaThèque 1.0.0-beta1\n"
 "Report-Msgid-Bugs-To: https://github.com/imath/mediatheque/issues\n"
-"POT-Creation-Date: 2017-05-11 21:11:39+00:00\n"
+"POT-Creation-Date: 2017-05-13 10:27:25+00:00\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -103,7 +103,7 @@ msgid "Ordonne la liste en fonction des attributs des Media utilisateurs."
 msgstr ""
 
 #: inc/classes/class-mediatheque-rest-controller.php:358
-#: inc/classes/class-mediatheque-rest-controller.php:636
+#: inc/classes/class-mediatheque-rest-controller.php:638
 msgid "Aucune donnée fournie."
 msgstr ""
 
@@ -111,27 +111,27 @@ msgstr ""
 msgid "Le hash md5 pour le fichier ne correspond pas."
 msgstr ""
 
-#: inc/classes/class-mediatheque-rest-controller.php:739
+#: inc/classes/class-mediatheque-rest-controller.php:741
 msgid "L'écriture du répertoire de l'utilisateur a échoué."
 msgstr ""
 
-#: inc/classes/class-mediatheque-rest-controller.php:746
+#: inc/classes/class-mediatheque-rest-controller.php:748
 msgid "L'écriture du répertoire a échoué."
 msgstr ""
 
-#: inc/classes/class-mediatheque-rest-controller.php:843
+#: inc/classes/class-mediatheque-rest-controller.php:845
 msgid "Désolé vous n'êtes pas habilité(e) à supprimer ce media utilisateur."
 msgstr ""
 
-#: inc/classes/class-mediatheque-rest-controller.php:867
+#: inc/classes/class-mediatheque-rest-controller.php:869
 msgid "Ce media utilisateur ne peut être supprimé."
 msgstr ""
 
-#: inc/classes/class-mediatheque-rest-controller.php:949
+#: inc/classes/class-mediatheque-rest-controller.php:951
 msgid "Type invalide."
 msgstr ""
 
-#: inc/classes/class-mediatheque-rest-controller.php:967
+#: inc/classes/class-mediatheque-rest-controller.php:969
 msgid "Le déplacement du media utilisateur a échoué."
 msgstr ""
 
