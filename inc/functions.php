@@ -434,8 +434,8 @@ function mediatheque_localize_script( $handle = 'mediatheque-views' ) {
 			'alignBtns'       => array(
 				'left'   => __( 'Gauche', 'mediatheque' ),
 				'center' => __( 'Centre', 'mediatheque' ),
-				'right'  => __( 'Right', 'mediatheque' ),
-				'none'   => __( 'None', 'mediatheque' ),
+				'right'  => __( 'Droite', 'mediatheque' ),
+				'none'   => __( 'Aucun', 'mediatheque' ),
 			),
 			'directory'       => mediatheque_get_displayed_directory(),
 		),
