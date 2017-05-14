@@ -4,8 +4,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: MediaThèque 1.0.0-beta1\n"
 "Report-Msgid-Bugs-To: https://github.com/imath/mediatheque/issues\n"
-"POT-Creation-Date: 2017-05-13 12:38:10+00:00\n"
-"PO-Revision-Date: 2017-05-13 14:58+0100\n"
+"POT-Creation-Date: 2017-05-14 15:17:29+00:00\n"
+"PO-Revision-Date: 2017-05-14 17:19+0100\n"
 "Last-Translator: imath <mathchristo@yahoo.fr>\n"
 "Language-Team: FRENCH <contact@imathi.eu>\n"
 "Language: en_US\n"
@@ -378,11 +378,12 @@ msgstr "Archive"
 msgid "Code"
 msgstr "Code"
 
-#: inc/media.php:663
+#. translators: do not translate this string, it is used in a if statement
+#: inc/media.php:664
 msgid "Sorry, this file type is not permitted for security reasons."
 msgstr ""
 
-#: inc/media.php:664
+#: inc/media.php:665
 msgid "Désolé, vous n'êtes pas autorisé à télécharger ce type de fichier"
 msgstr "Sorry, you cannot upload files having this mime type"
 

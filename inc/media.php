@@ -660,6 +660,7 @@ function mediatheque_move_media( $media = null, $parent = null ) {
  * @return array            The error message as expected by _wp_handle_upload().
  */
 function mediatheque_upload_error_handler( $file = array(), $message = '' ) {
+	/* translators: do not translate this string, it is used in a if statement */
 	if ( __( 'Sorry, this file type is not permitted for security reasons.', 'default' ) === $message ) {
 		$message = __( 'Désolé, vous n\'êtes pas autorisé à télécharger ce type de fichier', 'mediatheque' );
 	}
