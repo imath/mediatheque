@@ -21,7 +21,11 @@
 			<# for ( i in data.value ) { #>
 				<tr>
 					<td>{{{data.value[i].title}}}</td>
-					<td><a href="{{{data.value[i].edit_link}}}"><span class="dashicons dashicons-edit"></span></a></td>
+					<td>
+						<# if ( data.value[i].edit_link ) { #>
+							<a href="{{{data.value[i].edit_link}}}"><span class="dashicons dashicons-edit"></span></a>
+						<# } #>
+					</td>
 				</tr>
 			<# } #>
 		</tbody>
