@@ -123,7 +123,8 @@ module.exports = function( grunt ) {
 						'!.jshintrc',
 						'!Gruntfile.js',
 						'!package.json',
-						'!phpunit.xml.dist'
+						'!phpunit.xml.dist',
+						'!CONTRIBUTING.md'
 					],
 					dest: './'
 				}]
