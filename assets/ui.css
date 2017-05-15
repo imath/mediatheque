@@ -315,6 +315,11 @@
 	cursor:move;
 }
 
+[contenteditable] {
+	-webkit-user-select: text;
+	user-select: text;
+}
+
 #mediatheque-container #media ul.loading,
 #mediatheque-container #trail ul.loading {
  	-webkit-filter: grayscale(1);
