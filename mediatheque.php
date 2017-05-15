@@ -5,7 +5,7 @@
  * Description: Une gestion alternative des media dans WordPress, pour tous.
  * Version: 1.0.0-beta1
  * Requires at least: 4.7
- * Tested up to: 4.7
+ * Tested up to: 4.8
  * License: GNU/GPL 2
  * Author: imath
  * Author URI: https://imathi.eu/
