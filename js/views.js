@@ -323,7 +323,8 @@ window.mediaTheque = window.mediaTheque || _.extend( {}, _.pick( window.wp, 'Bac
 			}, this );
 
 			if ( ! _.isEmpty( edits ) ) {
-				this.userMedia.save( edits );
+				// Make sure the post parent is set as we are not editing it in this view.
+				this.userMedia.save( _.extend( edits, { 'post_parent': this.userMedia.get( 'parent' ) || 0 } ) );
 				this.model.set( { edited: edits } );
 			}
 
