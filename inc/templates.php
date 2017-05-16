@@ -10,6 +10,19 @@
 // Exit if accessed directly.
 defined( 'ABSPATH' ) || exit;
 
+/**
+ * Checks if MediaThèque Views should be used according to the context.
+ *
+ * WordPress 4.8 added Media Widgets and the Customizer is enqueueing media for image
+ * related features, so let's avoid adding scripts for nothing.
+ *
+ * @since 1.0.0
+ *
+ * @return boolean True when the context is supported. False otherwise.
+ */
+function mediatheque_can_enqueue_user_media() {
+	return ! did_action( 'admin_print_scripts-widgets.php' ) && ! did_action( 'customize_controls_enqueue_scripts' );
+}
 
 /**
  * Enqueues User Media Scripts and styles for the WP Editor.
@@ -17,6 +30,11 @@ defined( 'ABSPATH' ) || exit;
  * @since 1.0.0
  */
 function mediatheque_enqueue_user_media() {
+	// Only enqueue our views when context is supported
+	if ( ! mediatheque_can_enqueue_user_media() ) {
+		return;
+	}
+
 	wp_enqueue_script( 'mediatheque-editor' );
 	mediatheque_localize_script();
 
@@ -32,6 +50,11 @@ function mediatheque_enqueue_user_media() {
  * @return string          User Media Templates output.
  */
 function mediatheque_print_containers( $editor = true ) {
+	// Only print our containers/templates when context is supported
+	if ( ! mediatheque_can_enqueue_user_media() ) {
+		return;
+	}
+
 	$base_layout = '<div id="mediatheque-container">
 		<div id="toolbar" class="wp-filter"></div>
 		<div id="forms"></div>
