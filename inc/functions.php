@@ -376,6 +376,40 @@ function mediatheque_get_post_statuses( $status = '' ) {
 }
 
 /**
+ * Sorts a list of keyed arrays using their position value.
+ *
+ * @since 1.0.0
+ *
+ * @param  array $f The array to sort.
+ * @return array    The sorted array.
+ */
+function mediatheque_sort_array_fields( $f = array() ) {
+	$order = array();
+
+	foreach ( $f as $kf => $af ) {
+		$position = 2;
+		if ( isset( $af['position'] ) ) {
+			$position = (int) $af['position'];
+		}
+
+		$order[ $kf ] = $position;
+	}
+
+	asort( $order );
+
+	$return = array();
+	foreach ( array_keys( $order ) as $o ) {
+		if ( ! isset( $f[ $o ] ) ) {
+			continue;
+		}
+
+		$return[ $o ] = $f[ $o ];
+	}
+
+	return $return;
+}
+
+/**
  * Loacalizes scripts data.
  *
  * @since 1.0.0
@@ -395,6 +429,50 @@ function mediatheque_localize_script( $handle = 'mediatheque-views' ) {
 	if ( ! mediatheque_is_main_site() ) {
 		$network_root_url = trailingslashit( network_site_url() ) . mediatheque_get_root_slug();
 	}
+
+	// Set editFields
+	$edit_fields = array(
+		'title' => array(
+			'name'  => __( 'Titre', 'mediatheque' ),
+			'position' => 0,
+			'type'     => 'text',
+			'classes'  => array( 'title' ),
+		),
+		'description' => array(
+			'name'  => __( 'Description', 'mediatheque' ),
+			'position' => 1,
+			'type'     => 'contenteditable',
+			'classes'  => array( 'description' ),
+		),
+		'attached_posts' => array(
+			'name'     => __( 'Attaché au(x) Contenu(s) :', 'mediatheque' ),
+			'position' => 20,
+			'type'     => 'list',
+			'classes'  => array( 'posts' ),
+		),
+		'reset' => array(
+			'caption'  => __( 'Annuler', 'mediatheque' ),
+			'position' => 21,
+			'type'     => 'reset',
+			'classes'  => array( 'button-secondary', 'reset' ),
+		),
+		'submit' => array(
+			'caption'  => __( 'Modifier', 'mediatheque' ),
+			'position' => 22,
+			'type'     => 'submit',
+			'classes'  => array( 'button-primary', 'submit' ),
+		),
+	);
+
+	/**
+	 * Filter here to add Custom Fields to the edit view of User Media.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param array $value The list of the custom fields keyed by their id.
+	 */
+	$custom_fields = (array) apply_filters( 'mediatheque_localize_custom_fields', array() );
+	$edit_fields   = $edit_fields + $custom_fields;
 
 	wp_localize_script( $handle, 'mediaThequeSettings', array(
 		'params' => array(
@@ -465,38 +543,7 @@ function mediatheque_localize_script( $handle = 'mediatheque-views' ) {
 				'classes'  => array( 'setting', 'checkbox-setting' ),
 			),
 		),
-		'editFields' => array(
-			'title' => array(
-				'name'  => __( 'Titre', 'mediatheque' ),
-				'position' => 0,
-				'type'     => 'text',
-				'classes'  => array( 'title' ),
-			),
-			'description' => array(
-				'name'  => __( 'Description', 'mediatheque' ),
-				'position' => 1,
-				'type'     => 'contenteditable',
-				'classes'  => array( 'description' ),
-			),
-			'attached_posts' => array(
-				'name'     => __( 'Attaché au(x) Contenu(s) :', 'mediatheque' ),
-				'position' => 2,
-				'type'     => 'list',
-				'classes'  => array( 'posts' ),
-			),
-			'reset' => array(
-				'caption'  => __( 'Annuler', 'mediatheque' ),
-				'position' => 3,
-				'type'     => 'reset',
-				'classes'  => array( 'button-secondary', 'reset' ),
-			),
-			'submit' => array(
-				'caption'  => __( 'Modifier', 'mediatheque' ),
-				'position' => 4,
-				'type'     => 'submit',
-				'classes'  => array( 'button-primary', 'submit' ),
-			),
-		),
+		'editFields' => mediatheque_sort_array_fields( $edit_fields ),
 	) );
 }
 
