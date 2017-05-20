@@ -7,7 +7,8 @@ class MediaTheque_UnitTest_Factory extends WP_UnitTest_Factory {
 	function __construct() {
 		parent::__construct();
 
-		$this->user_media_file = new MediaTheque_UnitTest_Factory_For_File( $this );
+		$this->user_media_file   = new MediaTheque_UnitTest_Factory_For_File( $this );
+		$this->user_media_folder = new MediaTheque_UnitTest_Factory_For_Folder( $this );
 	}
 }
 
@@ -119,6 +120,83 @@ class MediaTheque_UnitTest_Factory_For_File extends WP_UnitTest_Factory_For_Post
 
 			if ( $size ) {
 				mediatheque_disk_usage_update( $this->author, $size );
+			}
+		}
+
+		if ( ! $is_main_site ) {
+			restore_current_blog();
+		}
+
+		wp_set_current_user( $user_id );
+
+		return $id;
+	}
+}
+
+class MediaTheque_UnitTest_Factory_For_Folder extends WP_UnitTest_Factory_For_Post {
+	protected $author = 0;
+
+	function __construct( $factory = null ) {
+		parent::__construct( $factory );
+
+		$this->default_generation_definitions = array(
+			'post_title'    => new WP_UnitTest_Generator_Sequence( 'User Media Folder %s' ),
+			'post_content'  => new WP_UnitTest_Generator_Sequence( 'User Media Folder description %s' ),
+			'post_status'   => 'publish',
+			'post_type'     => 'user_media',
+		);
+	}
+
+	function create_object( $args ) {
+		$is_main_site = mediatheque_is_main_site();
+
+		if ( ! $is_main_site ) {
+			switch_to_blog( get_current_network_id() );
+		}
+
+		$user_id = get_current_user_id();
+
+		if ( ! isset( $args['post_author'] ) ) {
+			if ( is_user_logged_in() ) {
+				$args['post_author'] = get_current_user_id();
+
+			// Create a user
+			} else {
+				$args['post_author'] = $this->factory->user->create( array( 'role' => 'subscriber' ) );
+			}
+		}
+
+		$this->author = (int) $args['post_author'];
+		wp_set_current_user( $this->author );
+
+		$args['tax_input']      = array(
+			'user_media_types' => array( mediatheque_get_user_media_type_id( 'mediatheque-directory' ) ),
+		);
+
+		$id = wp_insert_post( wp_slash( (array) $args ), true );
+
+		if ( ! is_wp_error( $id ) ) {
+			$dir    = mediatheque_get_upload_dir();
+			$folder = get_post( $id );
+
+			if ( $folder->post_parent ) {
+				$dir['subdir'] = '/' . get_post_meta( $folder->post_parent, '_mediatheque_relative_path', true );
+			} else {
+				$dir['subdir'] .= sprintf( '/%1$s/%2$s', get_post_status( $folder ), $this->author );
+			}
+
+			$dir['path'] = sprintf( '%s%s', $dir['basedir'], $dir['subdir'] );
+
+			if ( ! is_dir( $dir['path'] ) ) {
+				wp_mkdir_p( $dir['path'] );
+			}
+
+			$dirname = wp_unique_filename( $dir['path'], $folder->post_name );
+
+			if ( wp_mkdir_p( $dir['path'] . '/' . $dirname ) ) {
+				update_post_meta( $id, '_mediatheque_relative_path', _wp_relative_upload_path( $dir['path'] . '/' . $dirname ) );
+			} else {
+				return false;
 			}
 		}
 
