@@ -145,4 +145,39 @@ class MediaTheque_Media_Tests extends WP_UnitTestCase {
 
 		$this->assertTrue( file_exists( $path_ur ) );
 	}
+
+	/**
+	 * @group folder
+	 */
+	public function test_mediatheque_delete_dir() {
+		$wp_uploads = wp_get_upload_dir();
+		$base_dir   = $wp_uploads['basedir'];
+
+		$user_id      = $this->factory->user->create();
+		$folder_id    = $this->mediatheque_factory->user_media_folder->create( array( 'post_author' => $user_id ) );
+		$folder_rpath = get_post_meta( $folder_id, '_mediatheque_relative_path', true );
+
+		$this->assertTrue( is_dir( $base_dir . '/' . $folder_rpath ) );
+
+		mediatheque_delete_dir( $folder_id );
+
+		$this->assertFalse( is_dir( $base_dir . '/' . $folder_rpath ) );
+		$this->assertNull( get_post( $folder_id ) );
+
+		$f_id = $this->mediatheque_factory->user_media_folder->create( array( 'post_author' => $user_id ) );
+
+		$um_id = $this->mediatheque_factory->user_media_file->create( array(
+			'post_author' => $user_id,
+			'post_parent' => $f_id,
+		) );
+		$file_path = get_attached_file( $um_id );
+
+		$this->assertTrue( file_exists( $file_path ) );
+
+		mediatheque_delete_dir( $f_id );
+
+		$this->assertFalse( file_exists( $file_path ) );
+		$this->assertNull( get_post( $um_id ) );
+		$this->assertNull( get_post( $f_id ) );
+	}
 }
