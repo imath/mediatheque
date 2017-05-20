@@ -76,6 +76,20 @@ class MediaTheque_UnitTest_Factory_For_File extends WP_UnitTest_Factory_For_Post
 			}
 		}
 
+		if ( isset( $args['post_status'] ) ) {
+			$this->user_media_status = $args['post_status'];
+		}
+
+		if ( isset( $args['post_parent'] ) ) {
+			$parent_status = get_post_status( $args['post_parent'] );
+
+			if ( $parent_status ) {
+				$this->user_media_parent_dir = get_post_meta( $args['post_parent'], '_mediatheque_relative_path', true );
+				$args['post_status']         = $parent_status;
+				$this->user_media_status     = $parent_status;
+			}
+		}
+
 		$this->author = (int) $args['post_author'];
 		wp_set_current_user( $this->author );
 
