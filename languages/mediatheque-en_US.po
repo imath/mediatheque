@@ -4,8 +4,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: MediaThèque 1.0.0-beta1\n"
 "Report-Msgid-Bugs-To: https://github.com/imath/mediatheque/issues\n"
-"POT-Creation-Date: 2017-05-15 05:25:51+00:00\n"
-"PO-Revision-Date: 2017-05-15 07:26+0100\n"
+"POT-Creation-Date: 2017-05-21 13:34:03+00:00\n"
+"PO-Revision-Date: 2017-05-21 19:04+0100\n"
 "Last-Translator: imath <mathchristo@yahoo.fr>\n"
 "Language-Team: FRENCH <contact@imathi.eu>\n"
 "Language: en_US\n"
@@ -42,23 +42,23 @@ msgstr "User MediaBrary"
 msgid "Bibliothèque partagée"
 msgstr "Shared library"
 
-#: inc/classes/class-mediatheque-admin.php:422
+#: inc/classes/class-mediatheque-admin.php:424
 msgid "Réglages de la MediaThèque"
 msgstr "MediaBrary Settings"
 
-#: inc/classes/class-mediatheque-admin.php:431
+#: inc/classes/class-mediatheque-admin.php:433
 msgid "Enregistrer les modifications"
 msgstr "Save changes"
 
-#: inc/classes/class-mediatheque-admin.php:436
+#: inc/classes/class-mediatheque-admin.php:438
 msgid "Configuration complémentaire Nginx"
 msgstr "Additional Nginx configuration"
 
-#: inc/classes/class-mediatheque-admin.php:441
+#: inc/classes/class-mediatheque-admin.php:443
 msgid "Configuration de votre serveur"
 msgstr "Server configuration"
 
-#: inc/classes/class-mediatheque-admin.php:451
+#: inc/classes/class-mediatheque-admin.php:453
 msgid ""
 "Vous utilisez Nginx. Si vous souhaitez protéger les media privés partagés "
 "par vos utilisateurs, ajoutez le code ci-dessus au fichier de configuration "
@@ -67,19 +67,19 @@ msgstr ""
 "You are using Nginx. If you wish to protect your users private media, you "
 "can use the code below inside your server configuration file."
 
-#: inc/classes/class-mediatheque-admin.php:495
-#: inc/classes/class-mediatheque-admin.php:518
+#: inc/classes/class-mediatheque-admin.php:497
+#: inc/classes/class-mediatheque-admin.php:520
 msgid "Outils de la MediaThèque"
 msgstr "MediaBrary tools"
 
-#: inc/classes/class-mediatheque-admin.php:496
+#: inc/classes/class-mediatheque-admin.php:498
 msgid ""
 "Vous pouvez gérer les media d'utilisateur qui sont attachés à vos contenus "
 "et qui ont disparu depuis cet <a href=\"%s\">outil</a>."
 msgstr ""
 "You can manage the vanished User Media from this <a href=\"%s\">tool</a>"
 
-#: inc/classes/class-mediatheque-admin.php:522
+#: inc/classes/class-mediatheque-admin.php:524
 msgid ""
 "Ci-dessous la liste des media d'utilisateur qui ont tenté de s'afficher pour "
 "vos visiteurs. Utilisez leur adresse pour identifier les contenus les "
@@ -92,16 +92,16 @@ msgstr ""
 "&quot;Rest&quot; button to clean these urls once your content has been "
 "edited."
 
-#: inc/classes/class-mediatheque-admin.php:527
-#: inc/classes/class-mediatheque-admin.php:532
+#: inc/classes/class-mediatheque-admin.php:529
+#: inc/classes/class-mediatheque-admin.php:534
 msgid "Ancienne adresse du media"
 msgstr "Old url for the User Media"
 
-#: inc/classes/class-mediatheque-admin.php:539
+#: inc/classes/class-mediatheque-admin.php:541
 msgid "Aucun media disparu n'a tenté de s'afficher à vos visiteurs"
 msgstr "No vanished user media were displayed to your visitors"
 
-#: inc/classes/class-mediatheque-admin.php:554
+#: inc/classes/class-mediatheque-admin.php:556
 msgid "Vider"
 msgstr "Reset"
 
@@ -170,175 +170,175 @@ msgstr "Missing parameters."
 msgid "Public"
 msgstr "Public"
 
-#: inc/functions.php:404
-msgid "Déposez vos fichiers pour les mettre en ligne"
-msgstr "Drop your files here"
-
-#: inc/functions.php:405
-msgid "ou"
-msgstr "or"
-
-#: inc/functions.php:406
-msgid "Choisissez des fichiers"
-msgstr "Browse files"
-
-#: inc/functions.php:409
-msgid "Choisissez un utilisateur"
-msgstr "Select a user"
-
-#: inc/functions.php:413
-msgid "Nouveau(x) fichier(s)"
-msgstr "New file(s)"
-
-#: inc/functions.php:414
-msgid "Nouveau répertoire"
-msgstr "New directory"
-
-#: inc/functions.php:418
-msgid "Nom de votre répertoire"
-msgstr "Name for your directory"
-
-#: inc/functions.php:419
-msgid "Créer"
-msgstr "Create"
-
-#: inc/functions.php:425
-msgid "Fermer"
-msgstr "Close"
-
-#: inc/functions.php:426
-msgid "Aucun media utilisateur ne correspond à votre requête."
-msgstr "No User Media were found."
-
-#: inc/functions.php:427
-msgid "Rejeter"
-msgstr "Reject"
-
-#: inc/functions.php:431
-msgid "Définissez vos préférences d'affichage du media"
-msgstr "Display preferences"
-
-#: inc/functions.php:432
-msgid "Définir"
-msgstr "Set"
-
-#: inc/functions.php:433
-msgid "Alignement"
-msgstr "Alignment"
-
-#: inc/functions.php:435
-msgid "Gauche"
-msgstr "Left"
-
 #: inc/functions.php:436
-msgid "Centre"
-msgstr "Center"
-
-#: inc/functions.php:437
-msgid "Droite"
-msgstr "Right"
-
-#: inc/functions.php:438
-msgid "Aucun"
-msgstr "None"
-
-#: inc/functions.php:444
-msgid "Masquer l'icone"
-msgstr "Hide icon"
-
-#: inc/functions.php:450
-msgid "Masquer le type de media."
-msgstr "Hide media type."
-
-#: inc/functions.php:456
-msgid "Masquer l'extension"
-msgstr "Hide file extension"
-
-#: inc/functions.php:462
-msgid "Masquer la taille du media."
-msgstr "Hide media size."
-
-#: inc/functions.php:470
 msgid "Titre"
 msgstr "Title"
 
-#: inc/functions.php:476
+#: inc/functions.php:442
 msgid "Description"
 msgstr "Description"
 
-#: inc/functions.php:482
+#: inc/functions.php:448
 msgid "Attaché au(x) Contenu(s) :"
 msgstr "Attached to:"
 
-#: inc/functions.php:488
+#: inc/functions.php:454
 msgid "Annuler"
 msgstr "Cancel"
 
-#: inc/functions.php:494
+#: inc/functions.php:460
 msgid "Modifier"
 msgstr "Edit"
 
-#: inc/functions.php:576
+#: inc/functions.php:482
+msgid "Déposez vos fichiers pour les mettre en ligne"
+msgstr "Drop your files here"
+
+#: inc/functions.php:483
+msgid "ou"
+msgstr "or"
+
+#: inc/functions.php:484
+msgid "Choisissez des fichiers"
+msgstr "Browse files"
+
+#: inc/functions.php:487
+msgid "Choisissez un utilisateur"
+msgstr "Select a user"
+
+#: inc/functions.php:491
+msgid "Nouveau(x) fichier(s)"
+msgstr "New file(s)"
+
+#: inc/functions.php:492
+msgid "Nouveau répertoire"
+msgstr "New directory"
+
+#: inc/functions.php:496
+msgid "Nom de votre répertoire"
+msgstr "Name for your directory"
+
+#: inc/functions.php:497
+msgid "Créer"
+msgstr "Create"
+
+#: inc/functions.php:503
+msgid "Fermer"
+msgstr "Close"
+
+#: inc/functions.php:504
+msgid "Aucun media utilisateur ne correspond à votre requête."
+msgstr "No User Media were found."
+
+#: inc/functions.php:505
+msgid "Rejeter"
+msgstr "Reject"
+
+#: inc/functions.php:509
+msgid "Définissez vos préférences d'affichage du media"
+msgstr "Display preferences"
+
+#: inc/functions.php:510
+msgid "Définir"
+msgstr "Set"
+
+#: inc/functions.php:511
+msgid "Alignement"
+msgstr "Alignment"
+
+#: inc/functions.php:513
+msgid "Gauche"
+msgstr "Left"
+
+#: inc/functions.php:514
+msgid "Centre"
+msgstr "Center"
+
+#: inc/functions.php:515
+msgid "Droite"
+msgstr "Right"
+
+#: inc/functions.php:516
+msgid "Aucun"
+msgstr "None"
+
+#: inc/functions.php:522
+msgid "Masquer l'icone"
+msgstr "Hide icon"
+
+#: inc/functions.php:528
+msgid "Masquer le type de media."
+msgstr "Hide media type."
+
+#: inc/functions.php:534
+msgid "Masquer l'extension"
+msgstr "Hide file extension"
+
+#: inc/functions.php:540
+msgid "Masquer la taille du media."
+msgstr "Hide media size."
+
+#: inc/functions.php:627
 msgid "Media utilisateurs"
 msgstr "User Media"
 
-#: inc/functions.php:578
+#: inc/functions.php:629
 msgid "Tous les media utilisateurs"
 msgstr "All User Media"
 
-#: inc/functions.php:579
+#: inc/functions.php:630
 msgid "Media utilisateur"
 msgstr "User Media"
 
-#: inc/functions.php:580 inc/functions.php:583
+#: inc/functions.php:631 inc/functions.php:634
 msgid "Nouveau media utilisateur"
 msgstr "New User Media"
 
-#: inc/functions.php:581
+#: inc/functions.php:632
 msgid "Ajouter un media utilisateur"
 msgstr "Add a new User Media"
 
-#: inc/functions.php:582
+#: inc/functions.php:633
 msgid "Modifier le media utilisateur"
 msgstr "Edit the User Media"
 
-#: inc/functions.php:584
+#: inc/functions.php:635
 msgid "Afficher le media utilisateur"
 msgstr "Show the User Media"
 
-#: inc/functions.php:585
+#: inc/functions.php:636
 msgid "Rechercher un media utilisateur"
 msgstr "Search for User Media"
 
-#: inc/functions.php:586
+#: inc/functions.php:637
 msgid "Media utilisateur introuvable"
 msgstr "No User Media were found."
 
-#: inc/functions.php:587
+#: inc/functions.php:638
 msgid "Media utilisateur introuvable dans la corbeille"
 msgstr "No User Media were found in trash"
 
-#: inc/functions.php:588
+#: inc/functions.php:639
 msgid "Insérer dans le contenu"
 msgstr "Insert into content"
 
-#: inc/functions.php:589
+#: inc/functions.php:640
 msgid "Utiliser comme avatar"
 msgstr "Use as your avatar"
 
-#: inc/functions.php:590
+#: inc/functions.php:641
 msgid "Attaché à ce contenu"
 msgstr "Attached to this content"
 
-#: inc/functions.php:591
+#: inc/functions.php:642
 msgid "Filtrer les Media utilisateurs"
 msgstr "Filter User Media"
 
-#: inc/functions.php:592
+#: inc/functions.php:643
 msgid "Navigation des Media utilisateurs"
 msgstr "User Media navigation"
 
-#: inc/functions.php:593
+#: inc/functions.php:644
 msgid "Liste des Media utilisateurs"
 msgstr "User Media List"
 
@@ -403,11 +403,11 @@ msgid ""
 "Autoriser les utilisateurs à choisir un de leurs media comme image de profil."
 msgstr "Allow users to choose one of their images as profile image."
 
-#: inc/templates.php:74
+#: inc/templates.php:97
 msgid "Ajouter un media"
 msgstr "Add User Media"
 
-#: inc/templates.php:373
+#: inc/templates.php:401
 msgid "Ci-dessous le titre du contenu dans lequel le media est présent :"
 msgid_plural ""
 "Ci-dessous la liste des titres de contenu dans lesquels le media est "
@@ -417,19 +417,19 @@ msgstr[0] ""
 msgstr[1] ""
 "Beneath is the list of content titles where the User Media is attached to:"
 
-#: inc/templates.php:393
+#: inc/templates.php:421
 msgid "Media disparu"
 msgstr "Vanished User Media"
 
-#: inc/templates.php:405
+#: inc/templates.php:433
 msgid "Hum hum, il semble que ce media ait mystérieusement disparu."
 msgstr "Hum hum, it looks like this media mysteriously vanished."
 
-#: inc/templates.php:513
+#: inc/templates.php:541
 msgid "Afficher"
 msgstr "Show"
 
-#: inc/templates.php:517
+#: inc/templates.php:545
 msgid "Télécharger"
 msgstr "Download"
 
@@ -502,17 +502,17 @@ msgstr "imath"
 msgid "https://imathi.eu/"
 msgstr "https://imathi.eu/"
 
-#: inc/functions.php:577
+#: inc/functions.php:628
 msgctxt "Plugin submenu"
 msgid "Ma MediaThèque"
 msgstr "My MediaBrary"
 
-#: inc/functions.php:623
+#: inc/functions.php:674
 msgctxt "taxonomy general name"
 msgid "Types"
 msgstr "Types"
 
-#: inc/functions.php:624
+#: inc/functions.php:675
 msgctxt "taxonomy singular name"
 msgid "Type"
 msgstr "Type"

@@ -20,7 +20,7 @@ add_action( 'wp_enqueue_media',      'mediatheque_enqueue_user_media'        );
 add_action( 'print_media_templates', 'mediatheque_print_containers',   10, 0 );
 
 // Load translations
-add_action( 'init', 'mediatheque_load_textdomain', 9 );
+add_action( 'plugins_loaded', 'mediatheque_load_textdomain', 9 );
 
 // Register objects
 add_action( 'init', 'mediatheque_register_objects', 12 );
