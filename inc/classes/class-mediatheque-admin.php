@@ -245,13 +245,15 @@ class MediaTheque_Admin {
 					continue;
 				}
 
-				if ( ! get_user_setting( $setting ) ) {
+				$cookie_setting = preg_replace( '/[^A-Za-z0-9=&_]/', '', $setting );
+
+				if ( ! get_user_setting( $cookie_setting ) ) {
 					$pointer = sprintf(
 						$pointer_placeholders,
 						$selector_id,
 						$p['title'],
 						$p['content'],
-						$setting,
+						$cookie_setting,
 						$p['position']
 					);
 					break;
