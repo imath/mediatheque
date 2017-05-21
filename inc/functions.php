@@ -602,6 +602,10 @@ function mediatheque_register_scripts() {
 			'location' => sprintf( '%1$seditor%2$s.css', $url, $min ),
 			'deps'     => array( 'mediatheque-uploader' ),
 		),
+		'mediatheque-front' => array(
+			'location' => sprintf( '%1$sfront%2$s.css', $url, $min ),
+			'deps'     => array( 'mediatheque-editor' ),
+		),
 	), $url, $min, $v );
 
 	foreach ( $styles as $css_handle => $style ) {
@@ -975,7 +979,7 @@ function mediatheque_parse_query( WP_Query $query ) {
  */
 function mediatheque_editor_settings( $settings = array(), $editor_id = '' ) {
 	// In this case, the User Media UI is a sidebar item of the WP Media Editor
-	if ( current_user_can( 'upload_files' ) ) {
+	if ( current_user_can( 'upload_files' ) && ( ! isset( $settings['media_buttons'] ) || ! empty( $settings['media_buttons'] ) ) ) {
 		return $settings;
 	}
 

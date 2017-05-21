@@ -117,6 +117,11 @@ function mediatheque_button( $args = array() ) {
 		) );
 	}
 
+	if ( ! is_admin() ) {
+		wp_enqueue_style( 'mediatheque-front' );
+		wp_enqueue_script( 'mce-view' );
+	}
+
 	$img = '';
 	$output = '<a href="#"%s class="%s" data-editor="%s">%s</a>';
 
