@@ -4,8 +4,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: MediaThèque 1.0.0-beta1\n"
 "Report-Msgid-Bugs-To: https://github.com/imath/mediatheque/issues\n"
-"POT-Creation-Date: 2017-05-21 13:34:03+00:00\n"
-"PO-Revision-Date: 2017-05-21 19:04+0100\n"
+"POT-Creation-Date: 2017-05-22 23:08:52+00:00\n"
+"PO-Revision-Date: 2017-05-23 01:10+0100\n"
 "Last-Translator: imath <mathchristo@yahoo.fr>\n"
 "Language-Team: FRENCH <contact@imathi.eu>\n"
 "Language: en_US\n"
@@ -262,83 +262,83 @@ msgstr "Right"
 msgid "Aucun"
 msgstr "None"
 
-#: inc/functions.php:522
+#: inc/functions.php:523
 msgid "Masquer l'icone"
 msgstr "Hide icon"
 
-#: inc/functions.php:528
+#: inc/functions.php:529
 msgid "Masquer le type de media."
 msgstr "Hide media type."
 
-#: inc/functions.php:534
+#: inc/functions.php:535
 msgid "Masquer l'extension"
 msgstr "Hide file extension"
 
-#: inc/functions.php:540
+#: inc/functions.php:541
 msgid "Masquer la taille du media."
 msgstr "Hide media size."
 
-#: inc/functions.php:627
+#: inc/functions.php:628
 msgid "Media utilisateurs"
 msgstr "User Media"
 
-#: inc/functions.php:629
+#: inc/functions.php:630
 msgid "Tous les media utilisateurs"
 msgstr "All User Media"
 
-#: inc/functions.php:630
+#: inc/functions.php:631
 msgid "Media utilisateur"
 msgstr "User Media"
 
-#: inc/functions.php:631 inc/functions.php:634
+#: inc/functions.php:632 inc/functions.php:635
 msgid "Nouveau media utilisateur"
 msgstr "New User Media"
 
-#: inc/functions.php:632
+#: inc/functions.php:633
 msgid "Ajouter un media utilisateur"
 msgstr "Add a new User Media"
 
-#: inc/functions.php:633
+#: inc/functions.php:634
 msgid "Modifier le media utilisateur"
 msgstr "Edit the User Media"
 
-#: inc/functions.php:635
+#: inc/functions.php:636
 msgid "Afficher le media utilisateur"
 msgstr "Show the User Media"
 
-#: inc/functions.php:636
+#: inc/functions.php:637
 msgid "Rechercher un media utilisateur"
 msgstr "Search for User Media"
 
-#: inc/functions.php:637
+#: inc/functions.php:638
 msgid "Media utilisateur introuvable"
 msgstr "No User Media were found."
 
-#: inc/functions.php:638
+#: inc/functions.php:639
 msgid "Media utilisateur introuvable dans la corbeille"
 msgstr "No User Media were found in trash"
 
-#: inc/functions.php:639
+#: inc/functions.php:640
 msgid "Insérer dans le contenu"
 msgstr "Insert into content"
 
-#: inc/functions.php:640
+#: inc/functions.php:641
 msgid "Utiliser comme avatar"
 msgstr "Use as your avatar"
 
-#: inc/functions.php:641
+#: inc/functions.php:642
 msgid "Attaché à ce contenu"
 msgstr "Attached to this content"
 
-#: inc/functions.php:642
+#: inc/functions.php:643
 msgid "Filtrer les Media utilisateurs"
 msgstr "Filter User Media"
 
-#: inc/functions.php:643
+#: inc/functions.php:644
 msgid "Navigation des Media utilisateurs"
 msgstr "User Media navigation"
 
-#: inc/functions.php:644
+#: inc/functions.php:645
 msgid "Liste des Media utilisateurs"
 msgstr "User Media List"
 
@@ -502,17 +502,17 @@ msgstr "imath"
 msgid "https://imathi.eu/"
 msgstr "https://imathi.eu/"
 
-#: inc/functions.php:628
+#: inc/functions.php:629
 msgctxt "Plugin submenu"
 msgid "Ma MediaThèque"
 msgstr "My MediaBrary"
 
-#: inc/functions.php:674
+#: inc/functions.php:675
 msgctxt "taxonomy general name"
 msgid "Types"
 msgstr "Types"
 
-#: inc/functions.php:675
+#: inc/functions.php:676
 msgctxt "taxonomy singular name"
 msgid "Type"
 msgstr "Type"

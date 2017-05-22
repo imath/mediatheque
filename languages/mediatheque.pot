@@ -4,7 +4,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: MediaThèque 1.0.0-beta2\n"
 "Report-Msgid-Bugs-To: https://github.com/imath/mediatheque/issues\n"
-"POT-Creation-Date: 2017-05-21 13:34:03+00:00\n"
+"POT-Creation-Date: 2017-05-22 23:08:52+00:00\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -251,83 +251,83 @@ msgstr ""
 msgid "Aucun"
 msgstr ""
 
-#: inc/functions.php:522
+#: inc/functions.php:523
 msgid "Masquer l'icone"
 msgstr ""
 
-#: inc/functions.php:528
+#: inc/functions.php:529
 msgid "Masquer le type de media."
 msgstr ""
 
-#: inc/functions.php:534
+#: inc/functions.php:535
 msgid "Masquer l'extension"
 msgstr ""
 
-#: inc/functions.php:540
+#: inc/functions.php:541
 msgid "Masquer la taille du media."
 msgstr ""
 
-#: inc/functions.php:627
+#: inc/functions.php:628
 msgid "Media utilisateurs"
 msgstr ""
 
-#: inc/functions.php:629
+#: inc/functions.php:630
 msgid "Tous les media utilisateurs"
 msgstr ""
 
-#: inc/functions.php:630
+#: inc/functions.php:631
 msgid "Media utilisateur"
 msgstr ""
 
-#: inc/functions.php:631 inc/functions.php:634
+#: inc/functions.php:632 inc/functions.php:635
 msgid "Nouveau media utilisateur"
 msgstr ""
 
-#: inc/functions.php:632
+#: inc/functions.php:633
 msgid "Ajouter un media utilisateur"
 msgstr ""
 
-#: inc/functions.php:633
+#: inc/functions.php:634
 msgid "Modifier le media utilisateur"
 msgstr ""
 
-#: inc/functions.php:635
+#: inc/functions.php:636
 msgid "Afficher le media utilisateur"
 msgstr ""
 
-#: inc/functions.php:636
+#: inc/functions.php:637
 msgid "Rechercher un media utilisateur"
 msgstr ""
 
-#: inc/functions.php:637
+#: inc/functions.php:638
 msgid "Media utilisateur introuvable"
 msgstr ""
 
-#: inc/functions.php:638
+#: inc/functions.php:639
 msgid "Media utilisateur introuvable dans la corbeille"
 msgstr ""
 
-#: inc/functions.php:639
+#: inc/functions.php:640
 msgid "Insérer dans le contenu"
 msgstr ""
 
-#: inc/functions.php:640
+#: inc/functions.php:641
 msgid "Utiliser comme avatar"
 msgstr ""
 
-#: inc/functions.php:641
+#: inc/functions.php:642
 msgid "Attaché à ce contenu"
 msgstr ""
 
-#: inc/functions.php:642
+#: inc/functions.php:643
 msgid "Filtrer les Media utilisateurs"
 msgstr ""
 
-#: inc/functions.php:643
+#: inc/functions.php:644
 msgid "Navigation des Media utilisateurs"
 msgstr ""
 
-#: inc/functions.php:644
+#: inc/functions.php:645
 msgid "Liste des Media utilisateurs"
 msgstr ""
 
@@ -484,17 +484,17 @@ msgstr ""
 msgid "https://imathi.eu/"
 msgstr ""
 
-#: inc/functions.php:628
+#: inc/functions.php:629
 msgctxt "Plugin submenu"
 msgid "Ma MediaThèque"
 msgstr ""
 
-#: inc/functions.php:674
+#: inc/functions.php:675
 msgctxt "taxonomy general name"
 msgid "Types"
 msgstr ""
 
-#: inc/functions.php:675
+#: inc/functions.php:676
 msgctxt "taxonomy singular name"
 msgid "Type"
 msgstr ""

@@ -357,6 +357,8 @@ window.mediaTheque = window.mediaTheque || _.extend( {}, _.pick( window.wp, 'Bac
 
 	wp.media.view.MediaFrame.Post = mediaTheque.post.extend( {
 		initialize: function() {
+			_.extend( this.options, _.pick( mediaThequeSettings.common, 'isUserMediaOnly' ) );
+
 			// Call 'initialize' directly on the parent class.
 			mediaTheque.post.prototype.initialize.apply( this, arguments );
 		},

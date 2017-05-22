@@ -516,6 +516,7 @@ function mediatheque_localize_script( $handle = 'mediatheque-views' ) {
 				'none'   => __( 'Aucun', 'mediatheque' ),
 			),
 			'directory'       => mediatheque_get_displayed_directory(),
+			'isUserMediaOnly' => ! current_user_can( 'upload_files' ) || ! empty( $mediatheque->editor_id ),
 		),
 		'fields' => array(
 			'icon' => array(
