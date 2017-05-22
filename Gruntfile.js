@@ -121,6 +121,7 @@ module.exports = function( grunt ) {
 						'!.gitattributes',
 						'!grunt/**',
 						'!.jshintrc',
+						'!.jshintignore',
 						'!Gruntfile.js',
 						'!package.json',
 						'!phpunit.xml.dist',

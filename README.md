@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/imath/mediatheque.svg?branch=master)](https://travis-ci.org/imath/mediatheque)
+
 # MediaThèque
 
 ## Français 🇫🇷
