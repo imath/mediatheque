@@ -6,5 +6,6 @@
 /phpunit.xml.dist export-ignore
 /.jshintrc export-ignore
 /.jshintignore export-ignore
+/.travis.yml export-ignore
 /tests export-ignore
 /CONTRIBUTING.md export-ignore

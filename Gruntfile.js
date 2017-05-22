@@ -122,6 +122,7 @@ module.exports = function( grunt ) {
 						'!grunt/**',
 						'!.jshintrc',
 						'!.jshintignore',
+						'!.travis.yml',
 						'!Gruntfile.js',
 						'!package.json',
 						'!phpunit.xml.dist',
