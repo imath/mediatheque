@@ -12,6 +12,7 @@
  * Text Domain: mediatheque
  * Domain Path: /languages/
  * Network: True
+ * GitHub Plugin URI: https://github.com/imath/mediatheque/
  */
 
 // Exit if accessed directly.
@@ -128,13 +129,6 @@ final class MediaTheque {
 
 		if ( false === strpos( $name, $this->domain ) ) {
 			return;
-		}
-
-		$folder = null;
-		$parts = explode( '-', $name );
-
-		if ( isset( $parts[2] ) ) {
-			$folder = $parts[2];
 		}
 
 		$path = $this->inc_dir . "classes/class-{$name}.php";
