@@ -127,7 +127,7 @@ module.exports = function( grunt ) {
 						'!package.json',
 						'!phpunit.xml.dist',
 						'!CONTRIBUTING.md',
-						'icon.png'
+						'!icon.png'
 					],
 					dest: './'
 				}]
