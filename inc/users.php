@@ -327,7 +327,7 @@ function mediatheque_delete_user_data( $user_id = 0, $reassign = 0 ) {
 	$d_user_media = get_posts( array(
 		'post_type'   => 'user_media',
 		'author'      => $user_id,
-		'numberposts' => -1,
+		'nopaging'    => true,
 		'post_status' => $mediatheque_statuses,
 	) );
 
