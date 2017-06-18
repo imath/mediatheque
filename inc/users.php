@@ -325,10 +325,11 @@ function mediatheque_delete_user_data( $user_id = 0, $reassign = 0 ) {
 	$mediatheque_statuses = wp_list_pluck( mediatheque_get_post_statuses( 'all' ), 'name' );
 
 	$d_user_media = get_posts( array(
-		'post_type'   => 'user_media',
-		'author'      => $user_id,
-		'nopaging'    => true,
-		'post_status' => $mediatheque_statuses,
+		'post_type'     => 'user_media',
+		'author'        => $user_id,
+		'nopaging'      => true,
+		'no_found_rows' => true,
+		'post_status'   => $mediatheque_statuses,
 	) );
 
 	/**
