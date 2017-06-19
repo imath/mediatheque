@@ -86,10 +86,10 @@ function mediatheque_settings_field_mime_types() {
 		?>
 		<fieldset style="border: solid 1px #ccc; margin-bottom: 1em">
 			<legend style="padding: 0 1em">
-                <label for="mediatheque-selectall">
-				<input id="mediatheque-selectall" type="checkbox" class="mediatheque-selectall" data-mime-type="<?php echo esc_attr( $k_type ); ?>"> <?php echo esc_html( $translated_type ); ?>
-                </label>
-            </legend>
+				<label for="mediatheque-selectall-<?php echo esc_attr( $k_type ); ?>">
+					<input id="mediatheque-selectall-<?php echo esc_attr( $k_type ); ?>" type="checkbox" class="mediatheque-selectall" data-mime-type="<?php echo esc_attr( $k_type ); ?>"> <?php echo esc_html( $translated_type ); ?>
+				</label>
+			</legend>
 
 			<ul style="margin: 1em 2em 1em;">
 
@@ -98,12 +98,13 @@ function mediatheque_settings_field_mime_types() {
 
 				if ( $ext_mime['type'] && ! in_array( $ext_mime['type'], $printed_mime, true ) ) {
 					array_push( $printed_mime, $ext_mime['type'] );
+					$sub_type_id = str_replace( $k_type . '/', '', $ext_mime['type'] );
 					?>
 					<li>
-                        <label for="mediatheque_mime_types">
-						<input id="mediatheque_mime_types" type="checkbox" name="mediatheque_mime_types[]" data-mime-type="<?php echo esc_attr( $k_type );?>" value="<?php echo esc_attr( $ext_mime['type'] );?>" <?php checked( true, in_array( $ext_mime['type'], $setting, true ) );?>> <?php echo esc_html( $ext_mime['type'] ) ;?>
-                        </label>
-                    </li>
+						<label for="mediatheque_mime_type-<?php echo esc_attr( $sub_type_id ); ?>">
+							<input id="mediatheque_mime_type-<?php echo esc_attr( $sub_type_id ); ?>" type="checkbox" name="mediatheque_mime_types[]" data-mime-type="<?php echo esc_attr( $k_type );?>" value="<?php echo esc_attr( $ext_mime['type'] );?>" <?php checked( true, in_array( $ext_mime['type'], $setting, true ) );?>> <?php echo esc_html( $ext_mime['type'] ) ;?>
+						</label>
+					</li>
 					<?php
 				}
 			} ?>
