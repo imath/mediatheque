@@ -86,8 +86,10 @@ function mediatheque_settings_field_mime_types() {
 		?>
 		<fieldset style="border: solid 1px #ccc; margin-bottom: 1em">
 			<legend style="padding: 0 1em">
-				<input type="checkbox" class="mediatheque-selectall" data-mime-type="<?php echo esc_attr( $k_type ); ?>"> <?php echo esc_html( $translated_type ); ?>
-			</legend>
+                <label for="mediatheque-selectall">
+				<input id="mediatheque-selectall" type="checkbox" class="mediatheque-selectall" data-mime-type="<?php echo esc_attr( $k_type ); ?>"> <?php echo esc_html( $translated_type ); ?>
+                </label>
+            </legend>
 
 			<ul style="margin: 1em 2em 1em;">
 
@@ -98,8 +100,10 @@ function mediatheque_settings_field_mime_types() {
 					array_push( $printed_mime, $ext_mime['type'] );
 					?>
 					<li>
-						<input type="checkbox" name="mediatheque_mime_types[]" data-mime-type="<?php echo esc_attr( $k_type );?>" value="<?php echo esc_attr( $ext_mime['type'] );?>" <?php checked( true, in_array( $ext_mime['type'], $setting, true ) );?>> <?php echo esc_html( $ext_mime['type'] ) ;?>
-					</li>
+                        <label for="mediatheque_mime_types">
+						<input id="mediatheque_mime_types" type="checkbox" name="mediatheque_mime_types[]" data-mime-type="<?php echo esc_attr( $k_type );?>" value="<?php echo esc_attr( $ext_mime['type'] );?>" <?php checked( true, in_array( $ext_mime['type'], $setting, true ) );?>> <?php echo esc_html( $ext_mime['type'] ) ;?>
+                        </label>
+                    </li>
 					<?php
 				}
 			} ?>
