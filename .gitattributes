@@ -9,4 +9,5 @@
 /.travis.yml export-ignore
 /tests export-ignore
 /CONTRIBUTING.md export-ignore
-icon.png export-ignore
+/LICENSE export-ignore
+/icon.png export-ignore
