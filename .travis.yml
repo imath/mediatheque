@@ -15,6 +15,7 @@ php:
 # x.y mirrors the latest from the x.y branch
 env:
   - WP_VERSION=master MT_TRAVISCI=travis:phpunit
+  - WP_VERSION=4.8 MT_TRAVISCI=travis:phpunit
   - WP_VERSION=4.7 MT_TRAVISCI=travis:phpunit
 
 before_install:
