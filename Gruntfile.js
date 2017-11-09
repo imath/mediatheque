@@ -127,6 +127,7 @@ module.exports = function( grunt ) {
 						'!package.json',
 						'!phpunit.xml.dist',
 						'!CONTRIBUTING.md',
+						'!CHANGELOG.md',
 						'!icon.png',
 						'!LICENSE'
 					],
@@ -153,7 +154,7 @@ module.exports = function( grunt ) {
 
 	grunt.registerTask( 'shrink', ['cssmin', 'uglify'] );
 
-	grunt.registerTask( 'release', ['checktextdomain', 'makepot', 'clean', 'jstest', 'shrink', 'compress'] );
+	grunt.registerTask( 'release', ['checktextdomain', 'makepot', 'clean', 'jstest', 'shrink'] );
 
 	// Travis CI Tasks.
 	grunt.registerTask( 'travis:phpunit', ['jstest', 'checktextdomain', 'phpunit'] );
