@@ -581,10 +581,21 @@ function mediatheque_register_scripts() {
 			'location' => sprintf( '%1$sdisplay%2$s.js', $url, $min ),
 			'deps'     => array( 'mediatheque-views' ),
 		),
+		'mediatheque-block' => array(
+			'location' => sprintf( '%1$sblock%2$s.js', $url, $min ),
+			'deps'     => array( 'wp-blocks', 'wp-element' ),
+			'footer'   => false,
+		),
 	), $url, $min, $v );
 
 	foreach ( $scripts as $js_handle => $script ) {
-		wp_register_script( $js_handle, $script['location'], $script['deps'], $v, true );
+		$in_footer = true;
+
+		if ( isset( $script['footer'] ) ) {
+			$in_footer = $script['footer'];
+		}
+
+		wp_register_script( $js_handle, $script['location'], $script['deps'], $v, $in_footer );
 	}
 
 	/** Styles ***************************************************************/
@@ -771,6 +782,10 @@ function mediatheque_embed_style() {
 		array(),
 		mediatheque_version()
 	);
+}
+
+function mediatheque_block_editor() {
+	wp_enqueue_script( 'mediatheque-block' );
 }
 
 /**

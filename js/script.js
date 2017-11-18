@@ -364,19 +364,21 @@ window.mediaTheque = window.mediaTheque || _.extend( {}, _.pick( window.wp, 'Bac
 		},
 
 		createStates: function() {
-			var priority = 20, options = this.options,
+			var options = this.options, params = { priority: 20 },
 			    states = [];
 
 			if ( ! options.isUserMediaOnly ) {
-				priority = 220;
+				 params.priority = 220;
 
 				// Call 'createStates' directly on the parent class.
 				mediaTheque.post.prototype.createStates.apply( this, arguments );
-			} else {
+			} else if ( ! options.gutenbergBlock ) {
 				states.push( new wp.media.controller.Embed( { metadata: options.metadata } ) );
+			} else {
+				params.menu = false;
 			}
 
-			states.unshift( new mediaTheque.media.controller.UserMedia( { priority: priority } ) );
+			states.unshift( new mediaTheque.media.controller.UserMedia( params ) );
 
 			this.states.add( states );
 		},
@@ -444,7 +446,15 @@ window.mediaTheque = window.mediaTheque || _.extend( {}, _.pick( window.wp, 'Bac
 				} );
 			}
 
-			mediaTheque.media.editor.insert( link );
+			selection.reset();
+
+			if ( this.frame.options.gutenbergBlock ) {
+				var block = $( this.frame.options.gutenbergBlock ).get( 0 );
+
+				block.dataset.output = link;
+			} else {
+				mediaTheque.media.editor.insert( link );
+			}
 		},
 
 		editMedia: function( collection ) {
