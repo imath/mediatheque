@@ -552,6 +552,7 @@ function mediatheque_localize_script( $handle = 'mediatheque-views' ) {
  * Registers JavaScripts and Styles.
  *
  * @since 1.0.0
+ * @since 1.1.0 Adds a way to enqueue JavaScripts in header.
  */
 function mediatheque_register_scripts() {
 	$min = mediatheque_min_suffix();
@@ -784,6 +785,11 @@ function mediatheque_embed_style() {
 	);
 }
 
+/**
+ * Enqueues the Gutenberg block.
+ *
+ * @since 1.1.0
+ */
 function mediatheque_block_editor() {
 	wp_enqueue_script( 'mediatheque-block' );
 }

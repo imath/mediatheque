@@ -427,7 +427,7 @@ window.mediaTheque = window.mediaTheque || _.extend( {}, _.pick( window.wp, 'Bac
 
 		insertUserMedia: function() {
 			var selection = this.get( 'userMediaSelection' ),
-			    userMedia, link;
+			    userMedia, link, title, output;
 
 			if ( ! selection.length ) {
 				return false;
@@ -437,23 +437,31 @@ window.mediaTheque = window.mediaTheque || _.extend( {}, _.pick( window.wp, 'Bac
 			link      = userMedia.get( 'link' );
 
 			if ( 'publish' === userMedia.get( 'status' ) ) {
-				link = '<p>' + link + '?attached=true'+ '</p>';
+				link  += '?attached=true';
+				output = '<p>' + link + '</p>';
 
 			} else {
-				link = wp.media.string.link( {
+				title = userMedia.get( 'title' ).rendered;
+
+				output = wp.media.string.link( {
 					linkUrl: link,
-					title: userMedia.get( 'title' ).rendered
+					title:   title
 				} );
 			}
 
 			selection.reset();
 
 			if ( this.frame.options.gutenbergBlock ) {
-				var block = $( this.frame.options.gutenbergBlock ).get( 0 );
+				var block = $( '.editor-visual-editor__block.is-selected .mediatheque-block' ).get( 0 );
 
-				block.dataset.output = link;
+				block.dataset.link = link;
+
+				// Used for private UserMedia
+				if ( title ) {
+					block.dataset.title = title;
+				}
 			} else {
-				mediaTheque.media.editor.insert( link );
+				mediaTheque.media.editor.insert( output );
 			}
 		},
 
