@@ -449,8 +449,6 @@ window.mediaTheque = window.mediaTheque || _.extend( {}, _.pick( window.wp, 'Bac
 				} );
 			}
 
-			selection.reset();
-
 			if ( this.frame.options.gutenbergBlock ) {
 				var block = $( '.editor-visual-editor__block.is-selected .mediatheque-block' ).get( 0 );
 

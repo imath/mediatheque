@@ -15,6 +15,9 @@ window.mediaTheque = window.mediaTheque || _.extend( {}, _.pick( window.wp, 'Bac
 		attributes: {
 			link: {
 				type: 'string'
+			},
+			title: {
+				type: 'string'
 			}
 		},
 
@@ -66,10 +69,18 @@ window.mediaTheque = window.mediaTheque || _.extend( {}, _.pick( window.wp, 'Bac
 						props.setAttributes( {
 							link: link,
 						} );
+
+						var title = block.data( 'title' );
+						if ( title ) {
+							props.setAttributes( {
+								title: title,
+							} );
+						}
 					}
 				} );
 			};
 
+			// No User Media were inserted yet.
 			if ( ! props || ! props.attributes.link ) {
 				return el(
 					'div', {
@@ -78,10 +89,26 @@ window.mediaTheque = window.mediaTheque || _.extend( {}, _.pick( window.wp, 'Bac
 						'button', { type: 'button', id: props.id, className: 'mediatheque-block button button-large', onClick:selectUserMedia }, 'Insérer un Media Utilisateur.'
 					)
 				);
+
+			// It's a private User Media.
+			} else if ( props.attributes.title ) {
+				return el(
+					'p', {
+						className: 'mediatheque-private'
+					}, el(
+						'a', {
+							href: props.attributes.link
+						},
+						 props.attributes.title
+					)
+				);
+
+			// It's a public User Media, fetch the output.
 			} else if ( $( '#' + props.id ).length ) {
 				requestUserMedia( props.attributes.link )
 			}
 
+			// The public User Media output is not ready yet.
 			return el(
 				'div', {
 					className: 'components-placeholder'
@@ -102,6 +129,21 @@ window.mediaTheque = window.mediaTheque || _.extend( {}, _.pick( window.wp, 'Bac
 				return;
 			}
 
+			// Content to save for a Private User Media
+			if ( props.attributes.title ) {
+				return el(
+					'p', {
+						className: 'mediatheque-private'
+					}, el(
+						'a', {
+							href: props.attributes.link
+						},
+						 props.attributes.title
+					)
+				);
+			}
+
+			// Content to save for a Public User Media
 			return '<p>' + props.attributes.link + '</p>';
 		}
 	} );
