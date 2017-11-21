@@ -53,7 +53,14 @@ window.mediaTheque = window.mediaTheque || _.extend( {}, _.pick( window.wp, 'Bac
 							gutenbergBlock : true,
 						};
 
+				/**
+				 * Overrides to make sure:
+				 * - only the User Media UI is loaded by disabling the router.
+				 * - the Drag & Drop is disabled to avoid Gutenberg to duplicate User Media
+				 * in regular media.
+				 */
 				mediaThequeSettings.common.isUserMediaOnly = true;
+				mediaThequeSettings.params = _.omit( mediaThequeSettings.params, 'dropzone' );
 
 				// Launch the WordPress Media Editor
 				wp.media.editor.open( '.gutenberg', options );
