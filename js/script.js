@@ -466,7 +466,7 @@ window.mediaTheque = window.mediaTheque || _.extend( {}, _.pick( window.wp, 'Bac
 		editMedia: function( collection ) {
 			var media, queryString, state = this.state();
 
-			if ( _.isUndefined( collection.models) || collection.models.length !== 1 ) {
+			if ( _.isUndefined( collection.models ) || collection.models.length !== 1 ) {
 				return;
 			}
 

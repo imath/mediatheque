@@ -6,7 +6,9 @@ window.mediaTheque = window.mediaTheque || _.extend( {}, _.pick( window.wp, 'Bac
 
 ( function( $ ) {
 	var el = wp.element.createElement,
-	    registerBlockType = wp.blocks.registerBlockType;
+	    registerBlockType = wp.blocks.registerBlockType,
+	    InspectorControls = wp.blocks.InspectorControls,
+	    AlignmentToolbar  = wp.blocks.AlignmentToolbar;
 
 	registerBlockType( 'mediatheque/usermedia', {
 		title: 'MediaThèque',
@@ -18,10 +20,16 @@ window.mediaTheque = window.mediaTheque || _.extend( {}, _.pick( window.wp, 'Bac
 			},
 			title: {
 				type: 'string'
+			},
+			alignment: {
+				type: 'string'
 			}
 		},
 
 		edit: function( props ) {
+			var alignment = props.attributes.alignment,
+			    focus = props.focus;
+
 			var requestUserMedia = function( link ) {
 				wp.ajax.post( 'parse-embed', {
 					post_ID: wp.media.view.settings.post.id,
@@ -87,6 +95,10 @@ window.mediaTheque = window.mediaTheque || _.extend( {}, _.pick( window.wp, 'Bac
 				} );
 			};
 
+			var onChangeAlignment = function( newAlignment ) {
+				props.setAttributes( { alignment: newAlignment } );
+			}
+
 			// No User Media were inserted yet.
 			if ( ! props || ! props.attributes.link ) {
 				return el(
@@ -99,16 +111,39 @@ window.mediaTheque = window.mediaTheque || _.extend( {}, _.pick( window.wp, 'Bac
 
 			// It's a private User Media.
 			} else if ( props.attributes.title ) {
-				return el(
-					'p', {
-						className: 'mediatheque-private'
-					}, el(
-						'a', {
-							href: props.attributes.link
-						},
-						 props.attributes.title
+				return [
+					!! focus && el(
+						InspectorControls,
+						{ key: 'controls' },
+						[
+							el( 'h3', {
+								key: 'label',
+							}, 'User Media Alignment' ),
+							el(
+								AlignmentToolbar,
+								{
+									key: 'aligncontrol',
+									value: alignment,
+									onChange: onChangeAlignment
+								}
+							)
+						]
+					),
+					el(
+						'p', {
+							key: 'editable',
+							className: 'mediatheque-private',
+							focus: focus,
+							style: { textAlign: alignment },
+							onFocus: props.setFocus
+						}, el(
+							'a', {
+								href: props.attributes.link
+							},
+							 props.attributes.title
+						)
 					)
-				);
+				];
 
 			// It's a public User Media, fetch the output.
 			} else if ( $( '#' + props.id ).length ) {
@@ -140,7 +175,8 @@ window.mediaTheque = window.mediaTheque || _.extend( {}, _.pick( window.wp, 'Bac
 			if ( props.attributes.title ) {
 				return el(
 					'p', {
-						className: 'mediatheque-private'
+						className: 'mediatheque-private',
+						style: { textAlign: props.attributes.alignment },
 					}, el(
 						'a', {
 							href: props.attributes.link
