@@ -28,7 +28,7 @@ window.mediaTheque = window.mediaTheque || _.extend( {}, _.pick( window.wp, 'Bac
 
 		edit: function( props ) {
 			var alignment = props.attributes.alignment,
-			    focus = props.focus;
+			    focus     = props.focus;
 
 			var requestUserMedia = function( link ) {
 				wp.ajax.post( 'parse-embed', {
@@ -37,6 +37,9 @@ window.mediaTheque = window.mediaTheque || _.extend( {}, _.pick( window.wp, 'Bac
 					shortcode: '[embed]' + link + '[/embed]'
 				} )
 				.done( function( response ) {
+					// Avoids fetching more than once
+					props.setAttributes( { userMediaFetched: true } );
+
 					if ( response.body ) {
 						$( '#' + props.id ).parent().removeClass( 'components-placeholder' );
 						$( '#' + props.id ).before( $( response.body ).html() ).remove();
@@ -45,6 +48,9 @@ window.mediaTheque = window.mediaTheque || _.extend( {}, _.pick( window.wp, 'Bac
 					}
 				} )
 				.fail( function( response ) {
+					// Avoids fetching more than once
+					props.setAttributes( { userMediaFetched: true } );
+
 					// @todo output the response error.
 				} );
 			};
@@ -146,8 +152,8 @@ window.mediaTheque = window.mediaTheque || _.extend( {}, _.pick( window.wp, 'Bac
 				];
 
 			// It's a public User Media, fetch the output.
-			} else if ( $( '#' + props.id ).length ) {
-				requestUserMedia( props.attributes.link )
+			} else if ( ! props.attributes.userMediaFetched ) {
+				requestUserMedia( props.attributes.link );
 			}
 
 			// The public User Media output is not ready yet.
