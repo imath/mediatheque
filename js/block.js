@@ -8,7 +8,9 @@ window.mediaTheque = window.mediaTheque || _.extend( {}, _.pick( window.wp, 'Bac
 	var el = wp.element.createElement,
 	    registerBlockType = wp.blocks.registerBlockType,
 	    InspectorControls = wp.blocks.InspectorControls,
-	    AlignmentToolbar  = wp.blocks.AlignmentToolbar;
+	    BlockControls     = wp.blocks.BlockControls,
+	    AlignmentToolbar  = wp.blocks.AlignmentToolbar,
+	    EditToolbar       = wp.components.Toolbar;
 
 	registerBlockType( 'mediatheque/usermedia', {
 		title: 'MediaThèque',
@@ -103,7 +105,49 @@ window.mediaTheque = window.mediaTheque || _.extend( {}, _.pick( window.wp, 'Bac
 
 			var onChangeAlignment = function( newAlignment ) {
 				props.setAttributes( { alignment: newAlignment } );
-			}
+			};
+
+			var onClickEdit = function() {
+				var frame = wp.media.embed.edit( props.attributes.link, true );
+
+				frame.state( 'embed' ).props.on( 'change:url', function( model, url ) {
+					if ( url && model.get( 'url' ) ) {
+						frame.state( 'embed' ).metadata = model.toJSON();
+					}
+				} );
+
+				frame.state( 'embed' ).on( 'select', function() {
+					var data = frame.state( 'embed' ).metadata,
+					    placeholder = $( '.editor-visual-editor__block.is-selected .editor-visual-editor__block-edit div' );
+
+					if ( data && data.url !== props.attributes.link ) {
+						/**
+						 * @todo Check if this can be improved Using the wp.element once.
+						 */
+						placeholder
+							.addClass( 'components-placeholder' )
+							.html( $( '<div></div>' )
+								.addClass( 'wp-block-embed is-loading' )
+								.html( $('<span></span>' )
+									.addClass( 'spinner is-active' )
+								)
+								.prop( 'id', props.id )
+							);
+
+						props.setAttributes( {
+							link: data.url,
+						} );
+
+						requestUserMedia( props.attributes.link );
+					}
+				} );
+
+				frame.on( 'close', function() {
+					frame.detach();
+				} );
+
+				frame.open();
+			};
 
 			// No User Media were inserted yet.
 			if ( ! props || ! props.attributes.link ) {
@@ -156,19 +200,37 @@ window.mediaTheque = window.mediaTheque || _.extend( {}, _.pick( window.wp, 'Bac
 				requestUserMedia( props.attributes.link );
 			}
 
-			// The public User Media output is not ready yet.
+			// Output the public User Media.
 			return el(
 				'div', {
 					className: 'components-placeholder'
-				}, el(
-					'div', {
-						id: props.id,
-						key: 'loading',
-						className: 'wp-block-embed is-loading'
-					}, el( 'span', {
-						className: 'spinner is-active'
-					} )
-				)
+				}, [
+					el(
+						'div', {
+							id: props.id,
+							key: 'loading',
+							className: 'wp-block-embed is-loading'
+						}, el( 'span', {
+							className: 'spinner is-active'
+						} )
+					),
+					!! focus && el(
+						BlockControls,
+						{ key: 'controls' },
+						el(
+							EditToolbar,
+							{
+								controls: [
+									{
+										icon: 'edit',
+										title: 'Edit',
+										onClick: onClickEdit
+									}
+								]
+							}
+						)
+					)
+				]
 			);
 		},
 
