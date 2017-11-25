@@ -792,6 +792,11 @@ function mediatheque_embed_style() {
  */
 function mediatheque_block_editor() {
 	wp_enqueue_script( 'mediatheque-block' );
+	wp_localize_script( 'mediatheque-block', 'mediaThequeBlock', array(
+		'insertBtn'      => _x( 'Insérer un Media d\'utilisateur.', 'Gutenberg block', 'mediatheque' ),
+		'alignmentLabel' => _x( 'Alignement du Media d\'utilisateur', 'Gutenberg block', 'mediatheque' ),
+		'editTitle'      => _x( 'Modifier', 'Gutenberg block', 'mediatheque' ),
+	) );
 }
 
 /**

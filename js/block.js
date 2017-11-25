@@ -1,11 +1,7 @@
-/* global wp, _, mediaTheque */
+/* global _, mediaThequeSettings, mediaThequeBlock */
 
-// Make sure the wp object exists.
-window.wp = window.wp || {};
-window.mediaTheque = window.mediaTheque || _.extend( {}, _.pick( window.wp, 'Backbone', 'template' ) );
-
-( function( $ ) {
-	var el = wp.element.createElement,
+( function( $, wp ) {
+	var el                = wp.element.createElement,
 	    registerBlockType = wp.blocks.registerBlockType,
 	    InspectorControls = wp.blocks.InspectorControls,
 	    BlockControls     = wp.blocks.BlockControls,
@@ -68,6 +64,11 @@ window.mediaTheque = window.mediaTheque || _.extend( {}, _.pick( window.wp, 'Bac
 			var alignment = props.attributes.alignment,
 			    focus     = props.focus;
 
+			var outputUserMedia = function( usermedia ) {
+				$( '#' + props.id ).parent().removeClass( 'components-placeholder' );
+				$( '#' + props.id ).before( usermedia ).remove();
+			};
+
 			var requestUserMedia = function( link ) {
 				wp.ajax.post( 'parse-embed', {
 					post_ID: wp.media.view.settings.post.id,
@@ -75,15 +76,18 @@ window.mediaTheque = window.mediaTheque || _.extend( {}, _.pick( window.wp, 'Bac
 					shortcode: '[embed]' + link + '[/embed]'
 				} )
 				.done( function( response ) {
-					// Avoids fetching more than once
-					props.setAttributes( { userMediaFetched: true } );
+					var userMediaFetched = true;
 
 					if ( response.body ) {
-						$( '#' + props.id ).parent().removeClass( 'components-placeholder' );
-						$( '#' + props.id ).before( $( response.body ).html() ).remove();
+						userMediaFetched = $( response.body ).html();
+
+						outputUserMedia( userMediaFetched );
 					} else {
 						// @todo output a generic error
 					}
+
+					// Avoids fetching more than once
+					props.setAttributes( { userMediaFetched: userMediaFetched } );
 				} )
 				.fail( function( response ) {
 					// Avoids fetching more than once
@@ -102,7 +106,7 @@ window.mediaTheque = window.mediaTheque || _.extend( {}, _.pick( window.wp, 'Bac
 							state:           'user-media',
 							title:           wp.media.view.l10n.addMedia,
 							isUserMediaOnly: true,
-							gutenbergBlock : true,
+							gutenbergBlock : true
 						};
 
 				/**
@@ -126,13 +130,13 @@ window.mediaTheque = window.mediaTheque || _.extend( {}, _.pick( window.wp, 'Bac
 						var link = block.data( 'link' );
 
 						props.setAttributes( {
-							link: link,
+							link: link
 						} );
 
 						var title = block.data( 'title' );
 						if ( title ) {
 							props.setAttributes( {
-								title: title,
+								title: title
 							} );
 						}
 					}
@@ -172,9 +176,8 @@ window.mediaTheque = window.mediaTheque || _.extend( {}, _.pick( window.wp, 'Bac
 
 						props.setAttributes( {
 							link: data.url,
+							userMediaFetched: false
 						} );
-
-						requestUserMedia( props.attributes.link );
 					}
 				} );
 
@@ -191,7 +194,7 @@ window.mediaTheque = window.mediaTheque || _.extend( {}, _.pick( window.wp, 'Bac
 					'div', {
 						className: 'components-placeholder'
 					}, el(
-						'button', { type: 'button', id: props.id, className: 'mediatheque-block button button-large', onClick:selectUserMedia }, 'Insérer un Media Utilisateur.'
+						'button', { type: 'button', id: props.id, className: 'mediatheque-block button button-large', onClick:selectUserMedia }, mediaThequeBlock.insertBtn
 					)
 				);
 
@@ -203,8 +206,8 @@ window.mediaTheque = window.mediaTheque || _.extend( {}, _.pick( window.wp, 'Bac
 						{ key: 'controls' },
 						[
 							el( 'h3', {
-								key: 'label',
-							}, 'User Media Alignment' ),
+								key: 'label'
+							}, mediaThequeBlock.alignmentLabel ),
 							el(
 								AlignmentToolbar,
 								{
@@ -234,6 +237,12 @@ window.mediaTheque = window.mediaTheque || _.extend( {}, _.pick( window.wp, 'Bac
 			// It's a public User Media, fetch the output.
 			} else if ( ! props.attributes.userMediaFetched ) {
 				requestUserMedia( props.attributes.link );
+
+			// Wait a few milliseconds before outputting the User Media.
+			} else {
+				window.setTimeout( function() {
+					outputUserMedia( props.attributes.userMediaFetched );
+				}, 500 );
 			}
 
 			// Output the public User Media.
@@ -259,7 +268,7 @@ window.mediaTheque = window.mediaTheque || _.extend( {}, _.pick( window.wp, 'Bac
 								controls: [
 									{
 										icon: 'edit',
-										title: 'Edit',
+										title: mediaThequeBlock.editTitle,
 										onClick: onClickEdit
 									}
 								]
@@ -280,7 +289,7 @@ window.mediaTheque = window.mediaTheque || _.extend( {}, _.pick( window.wp, 'Bac
 				return el(
 					'p', {
 						className: 'mediatheque-private',
-						style: { textAlign: props.attributes.alignment },
+						style: { textAlign: props.attributes.alignment }
 					}, el(
 						'a', {
 							href: props.attributes.link
@@ -295,4 +304,4 @@ window.mediaTheque = window.mediaTheque || _.extend( {}, _.pick( window.wp, 'Bac
 		}
 	} );
 
-} )( jQuery );
+} )( jQuery, window.wp || {} );
