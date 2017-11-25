@@ -13,9 +13,45 @@ window.mediaTheque = window.mediaTheque || _.extend( {}, _.pick( window.wp, 'Bac
 	    EditToolbar       = wp.components.Toolbar;
 
 	registerBlockType( 'mediatheque/usermedia', {
+
+		// Block Title
 		title: 'MediaThèque',
-		icon: 'admin-media',
+
+		// Block Icon
+		icon: el( 'svg', {
+			'aria-hidden': true,
+			role: 'img',
+			focusable: 'dashicons mediatheque-icon',
+			width: '20',
+			height: '20',
+			viewBox: '0 0 20 20',
+			xmlns: 'http://www.w3.org/2000/svg'
+		}, [
+				el( 'path', {
+					key: 'camera',
+					d: 'M 13 11 L 13 4 C 13 3.45 12.55 3 12 3 L 10.33 3 L 9 1 L 5 1 L 3.67 3 L 2 3 C 1.45 3 1 3.45 1 4 L 1 11 C 1 11.55 1.45 12 2 12 L 12 12 C 12.55 12 13 11.55 13 11 Z'
+				} ),
+				el( 'path', {
+					key: 'sound',
+					d: 'M 14 6 L 19 6 L 19 16.5 C 19 17.88 17.88 19 16.5 19 C 15.12 19 14 17.88 14 16.5 C 14 15.12 15.12 14 16.5 14 C 16.67 14 16.84 14.02 17 14.05 L 17 9 L 14 9 L 14 6 Z'
+				} ),
+				el( 'path', {
+					key: 'user-head',
+					d: 'M 7 4.5 C 8.38 4.5 9.5 5.62 9.5 7 C 9.5 8.38 8.38 9.5 7 9.5 C 5.62 9.5 4.5 8.38 4.5 7 C 4.5 5.62 5.62 4.5 7 4.5 Z',
+					style: { fill: 'rgb(255, 255, 255)' }
+				} ),
+				el( 'path', {
+					key: 'user-body',
+					d: 'M 7.006 11.465 L 9.121 10.05 C 10.979 10.05 12.636 11.861 12.636 13.573 L 12.636 15.508 C 12.636 15.508 9.797 16.386 7.006 16.386 C 4.168 16.386 1.376 15.508 1.376 15.508 L 1.376 13.573 C 1.376 11.823 2.885 10.089 4.852 10.089 Z',
+					style: { stroke: 'rgb(255, 255, 255)' }
+				} )
+			]
+		),
+
+		// Block Category
 		category: 'common',
+
+		// Block Attributes
 		attributes: {
 			link: {
 				type: 'string'
