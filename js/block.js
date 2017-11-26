@@ -66,6 +66,7 @@
 			    focus     = props.focus;
 
 			var outputUserMedia = function( usermedia ) {
+				$( '#' + props.id ).parent().find( '.notice-error' ).remove();
 				$( '#' + props.id ).parent().removeClass( 'components-placeholder' );
 				$( '#' + props.id ).before( usermedia ).remove();
 			};
@@ -88,17 +89,23 @@
 
 						outputUserMedia( userMediaFetched );
 					} else {
-						// @todo output a generic error
+						userMediaFetched = 'error';
+
+						props.setAttributes( {
+							link: false
+						} );
 					}
 
 					// Avoids fetching more than once
 					props.setAttributes( { userMediaFetched: userMediaFetched } );
 				} )
-				.fail( function( response ) {
+				.fail( function() {
 					// Avoids fetching more than once
-					props.setAttributes( { userMediaFetched: true } );
+					props.setAttributes( { userMediaFetched: 'error' } );
 
-					// @todo output the response error.
+					props.setAttributes( {
+						link: false
+					} );
 				} );
 			};
 
@@ -132,16 +139,18 @@
 
 				wp.media.frame.on( 'select', function() {
 					if ( block.data( 'link' ) && ! props.attributes.link ) {
-						var link = block.data( 'link' );
+						var link = block.data( 'link' ), title = block.data( 'title' );
 
-						props.setAttributes( {
-							link: link
-						} );
-
-						var title = block.data( 'title' );
 						if ( title ) {
 							props.setAttributes( {
-								title: title
+								title: title,
+								link: link,
+								userMediaFetched: true
+							} );
+						} else {
+							props.setAttributes( {
+								link: link,
+								userMediaFetched: false
 							} );
 						}
 					}
@@ -198,9 +207,25 @@
 				return el(
 					'div', {
 						className: 'components-placeholder'
-					}, el(
-						'button', { type: 'button', id: props.id, className: 'mediatheque-block button button-large', onClick:selectUserMedia }, mediaThequeBlock.insertBtn
-					)
+					}, [
+						el(
+							'button', {
+								key: 'user-media-select-button',
+								type: 'button',
+								id: props.id,
+								className: 'mediatheque-block button button-large',
+								onClick:selectUserMedia
+							}, mediaThequeBlock.insertBtn
+						),
+						'error' === props.attributes.userMediaFetched && el(
+							'div', {
+								className: 'notice notice-alt notice-error',
+								key: 'user-media-error'
+							}, el( 'p', {
+								className: null
+							}, mediaThequeBlock.genericError )
+						)
+					]
 				);
 
 			// It's a private User Media.
@@ -234,7 +259,7 @@
 							'a', {
 								href: props.attributes.link
 							},
-							 props.attributes.title
+							props.attributes.title
 						)
 					)
 				];
@@ -244,7 +269,7 @@
 				requestUserMedia( props.attributes.link );
 
 			// Wait a few milliseconds before outputting the User Media.
-			} else {
+			} else if ( 'error' !== props.attributes.userMediaFetched ) {
 				window.setTimeout( function() {
 					outputUserMedia( props.attributes.userMediaFetched );
 				}, 500 );
@@ -285,7 +310,7 @@
 		},
 
 		save: function( props ) {
-			if ( ! props || ! props.attributes.link ) {
+			if ( ! props || ! props.attributes.link || 'false' === props.attributes.link ) {
 				return;
 			}
 

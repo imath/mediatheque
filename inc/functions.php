@@ -800,6 +800,7 @@ function mediatheque_block_editor() {
 		'insertBtn'      => _x( 'Insérer un Media d\'utilisateur.', 'Gutenberg block', 'mediatheque' ),
 		'alignmentLabel' => _x( 'Alignement du Media d\'utilisateur', 'Gutenberg block', 'mediatheque' ),
 		'editTitle'      => _x( 'Modifier', 'Gutenberg block', 'mediatheque' ),
+		'genericError'   => _x( 'Une erreur est survenue, merci de réessayer.', 'Gutenberg block', 'mediatheque' ),
 	) );
 }
 
