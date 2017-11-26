@@ -790,7 +790,7 @@ function mediatheque_embed_style() {
 }
 
 /**
- * Enqueues the Gutenberg block.
+ * Enqueues the Gutenberg block script.
  *
  * @since 1.1.0
  */
@@ -804,6 +804,11 @@ function mediatheque_block_editor() {
 	) );
 }
 
+/**
+ * Enqueues the Gutenberg block style.
+ *
+ * @since 1.1.0
+ */
 function mediatheque_block_edit_style() {
 	wp_enqueue_style( 'mediatheque-block' );
 }
