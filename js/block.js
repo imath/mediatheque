@@ -80,7 +80,11 @@
 					var userMediaFetched = true;
 
 					if ( response.body ) {
-						userMediaFetched = $( response.body ).html();
+						if ( 'A' === $( response.body ).prop( 'tagName' ) ) {
+							userMediaFetched = $( response.body ).html();
+						} else {
+							userMediaFetched = response.body;
+						}
 
 						outputUserMedia( userMediaFetched );
 					} else {

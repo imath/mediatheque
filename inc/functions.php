@@ -619,6 +619,10 @@ function mediatheque_register_scripts() {
 			'location' => sprintf( '%1$sfront%2$s.css', $url, $min ),
 			'deps'     => array( 'mediatheque-editor' ),
 		),
+		'mediatheque-block' => array(
+			'location' => sprintf( '%1$sblock%2$s.css', $url, $min ),
+			'deps'     => array( 'wp-blocks' ),
+		),
 	), $url, $min, $v );
 
 	foreach ( $styles as $css_handle => $style ) {
@@ -797,6 +801,10 @@ function mediatheque_block_editor() {
 		'alignmentLabel' => _x( 'Alignement du Media d\'utilisateur', 'Gutenberg block', 'mediatheque' ),
 		'editTitle'      => _x( 'Modifier', 'Gutenberg block', 'mediatheque' ),
 	) );
+}
+
+function mediatheque_block_edit_style() {
+	wp_enqueue_style( 'mediatheque-block' );
 }
 
 /**
