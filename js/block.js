@@ -17,7 +17,8 @@
 		icon: el( 'svg', {
 			'aria-hidden': true,
 			role: 'img',
-			focusable: 'dashicons mediatheque-icon',
+			className: 'dashicons mediatheque-icon',
+			focusable: 'false',
 			width: '20',
 			height: '20',
 			viewBox: '0 0 20 20',
@@ -294,7 +295,7 @@
 						'a', {
 							href: props.attributes.link
 						},
-						 props.attributes.title
+						props.attributes.title
 					)
 				);
 			}
