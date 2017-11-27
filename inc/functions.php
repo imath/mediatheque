@@ -795,6 +795,10 @@ function mediatheque_embed_style() {
  * @since 1.1.0
  */
 function mediatheque_block_editor() {
+	if ( ! current_user_can( mediatheque_get_required_cap() ) ) {
+		return;
+	}
+
 	wp_enqueue_script( 'mediatheque-block' );
 	wp_localize_script( 'mediatheque-block', 'mediaThequeBlock', array(
 		'insertBtn'      => _x( 'Insérer un Media d\'utilisateur.', 'Gutenberg block', 'mediatheque' ),
@@ -810,6 +814,10 @@ function mediatheque_block_editor() {
  * @since 1.1.0
  */
 function mediatheque_block_edit_style() {
+	if ( ! current_user_can( mediatheque_get_required_cap() ) ) {
+		return;
+	}
+
 	wp_enqueue_style( 'mediatheque-block' );
 }
 
