@@ -690,18 +690,22 @@ window.mediaTheque = window.mediaTheque || _.extend( {}, _.pick( window.wp, 'Bac
 		init: function() {
 
 			if ( $( '.mediatheque-buttons' ).length ) {
-				var editorId = $( '.mediatheque-buttons' ).data( 'editor' ),
+				var editorId = $( '.mediatheque-buttons' ).data( 'editor' ), css = {},
 				    editorTools = $( '.mediatheque-buttons' ).prev( '#wp-' + editorId + '-editor-tools' ).find( '.wp-editor-tabs' ).first();
 
 				$( editorTools ).before( $( '.mediatheque-buttons:visible' ) );
 
-				$( '.mediatheque-insert .dashicons' ).css( {
+				if ( $( '.mediatheque-insert .dashicons' ).prop( 'style' ).cssText ) {
+					css.background = $( '.mediatheque-insert .dashicons' ).prop( 'style' ).cssText;
+				}
+
+				$( '.mediatheque-insert .dashicons' ).css( _.extend( css, {
 					display:          'inline-block',
 					width:            '18px',
 					height:           '18px',
 					'vertical-align': 'text-bottom',
 					margin:           '0 2px'
-				} );
+				} ) );
 			}
 
 			$( document.body )

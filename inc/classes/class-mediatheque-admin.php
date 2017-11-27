@@ -291,7 +291,7 @@ class MediaTheque_Admin {
 				'create_user_uploads',
 				'user-media',
 				array( $this, 'media_grid' ),
-				'dashicons-admin-media',
+				mediatheque_get_svg_icon(),
 				20 // Before comments
 			);
 

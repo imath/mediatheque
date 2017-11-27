@@ -95,7 +95,7 @@ function mediatheque_button( $args = array() ) {
 		'editor_id'           => 'content',
 		'editor_btn_classes'  => array( 'mediabrary-insert' ),
 		'editor_btn_text'     => __( 'Ajouter un media', 'mediatheque' ),
-		'editor_btn_dashicon' => 'dashicons-format-image',
+		'editor_btn_dashicon' => 'mediatheque-icon',
 		'echo'                => true,
 		'media_type'          => '',
 	) );
@@ -126,7 +126,12 @@ function mediatheque_button( $args = array() ) {
 	$output = '<a href="#"%s class="%s" data-editor="%s">%s</a>';
 
 	if ( false !== $r['editor_btn_dashicon'] ) {
-		$img = '<span class="dashicons ' . $r['editor_btn_dashicon']  . '"></span> ';
+		if ( 'mediatheque-icon' === $r['editor_btn_dashicon'] ) {
+			$img = sprintf( '<span class="dashicons" style="background: #fafafa url( %s )!important"></span> ', mediatheque_get_svg_icon( '#555d66', '#fafafa' ) );
+		} else {
+			$img = '<span class="dashicons ' . $r['editor_btn_dashicon']  . '"></span> ';
+		}
+
 		$output = '<button type="button"%s class="button %s" data-editor="%s">%s</button>';
 	}
 
