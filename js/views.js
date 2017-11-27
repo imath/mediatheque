@@ -1173,9 +1173,9 @@ window.mediaTheque = window.mediaTheque || _.extend( {}, _.pick( window.wp, 'Bac
 				if ( ! _.isUndefined( currentStatus ) ) {
 					this.manageLists( currentStatus, true );
 
-				// Set the Public status as current one.
+				// Set the first available status as current one.
 				} else {
-					o.toolbarItems.get( 'publish' ).set( { current: true } );
+					_.first( o.toolbarItems.models ).set( { current: true } );
 				}
 
 				// Make sure forms are not considered active on query changes
@@ -1186,9 +1186,11 @@ window.mediaTheque = window.mediaTheque || _.extend( {}, _.pick( window.wp, 'Bac
 
 			// The User is an admin and has selected a user.
 			} else {
-				_.each( o.toolbarItems.models, function( model ) {
+				_.each( o.toolbarItems.models, function( model, j ) {
 					var attributes = { disable: false, current: false };
-					if ( 'publish' === model.get( 'id' ) ) {
+
+					// Set the first available status as current one.
+					if ( 1 === j ) {
 						attributes.current = true;
 					}
 

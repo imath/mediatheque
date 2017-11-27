@@ -2,10 +2,10 @@
 # This file is distributed under the GNU/GPL 2.
 msgid ""
 msgstr ""
-"Project-Id-Version: MediaThèque 1.0.0-beta1\n"
+"Project-Id-Version: MediaThèque 1.0.1\n"
 "Report-Msgid-Bugs-To: https://github.com/imath/mediatheque/issues\n"
-"POT-Creation-Date: 2017-06-02 03:52:57+00:00\n"
-"PO-Revision-Date: 2017-06-02 05:55+0100\n"
+"POT-Creation-Date: 2017-11-09 05:29:14+00:00\n"
+"PO-Revision-Date: 2017-11-09 06:34+0100\n"
 "Last-Translator: imath <mathchristo@yahoo.fr>\n"
 "Language-Team: FRENCH <contact@imathi.eu>\n"
 "Language: en_US\n"
@@ -398,7 +398,7 @@ msgid ""
 msgstr ""
 "Choose the Role capabilities a user needs to be able to use the MediaBrary."
 
-#: inc/settings.php:138
+#: inc/settings.php:143
 msgid ""
 "Autoriser les utilisateurs à choisir un de leurs media comme image de profil."
 msgstr "Allow users to choose one of their images as profile image."
