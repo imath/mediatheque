@@ -320,7 +320,7 @@ function mediatheque_file_shortcode( $user_media = null, $args = array() ) {
 
 	$icon = '';
 	if ( ( false === (bool) $file_args['icon'] || 'false' === $file_args['icon'] ) && ! empty( $filedata['media_type'] ) ) {
-		$icon = sprintf( '<a href="%1$s"><img src="%2$s" class="alignleft"></a>',
+		$icon = sprintf( '<a href="%1$s" class="mediatheque-file-link"><img src="%2$s" class="alignleft"></a>',
 			esc_url_raw( $download_link ),
 			esc_url_raw( wp_mime_type_icon( $filedata['media_type'] ) )
 		);

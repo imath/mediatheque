@@ -2,10 +2,10 @@
 # This file is distributed under the GNU/GPL 2.
 msgid ""
 msgstr ""
-"Project-Id-Version: MediaThèque 1.0.1\n"
+"Project-Id-Version: MediaThèque 1.1.0\n"
 "Report-Msgid-Bugs-To: https://github.com/imath/mediatheque/issues\n"
-"POT-Creation-Date: 2017-11-09 05:29:14+00:00\n"
-"PO-Revision-Date: 2017-11-09 06:34+0100\n"
+"POT-Creation-Date: 2017-11-27 17:54:43+00:00\n"
+"PO-Revision-Date: 2017-11-27 18:58+0100\n"
 "Last-Translator: imath <mathchristo@yahoo.fr>\n"
 "Language-Team: FRENCH <contact@imathi.eu>\n"
 "Language: en_US\n"
@@ -32,11 +32,11 @@ msgstr ""
 
 #. Plugin Name of the plugin/theme
 msgid "MediaThèque"
-msgstr "MediaBrary"
+msgstr "MediaThèque"
 
 #: inc/classes/class-mediatheque-admin.php:141
 msgid "MediaThèque Utilisateurs"
-msgstr "User MediaBrary"
+msgstr "User MediaThèque"
 
 #: inc/classes/class-mediatheque-admin.php:165
 msgid "Bibliothèque partagée"
@@ -44,7 +44,7 @@ msgstr "Shared library"
 
 #: inc/classes/class-mediatheque-admin.php:424
 msgid "Réglages de la MediaThèque"
-msgstr "MediaBrary Settings"
+msgstr "MediaThèque Settings"
 
 #: inc/classes/class-mediatheque-admin.php:433
 msgid "Enregistrer les modifications"
@@ -70,7 +70,7 @@ msgstr ""
 #: inc/classes/class-mediatheque-admin.php:497
 #: inc/classes/class-mediatheque-admin.php:520
 msgid "Outils de la MediaThèque"
-msgstr "MediaBrary tools"
+msgstr "MediaThèque tools"
 
 #: inc/classes/class-mediatheque-admin.php:498
 msgid ""
@@ -278,67 +278,67 @@ msgstr "Hide file extension"
 msgid "Masquer la taille du media."
 msgstr "Hide media size."
 
-#: inc/functions.php:628
+#: inc/functions.php:644
 msgid "Media utilisateurs"
 msgstr "User Media"
 
-#: inc/functions.php:630
+#: inc/functions.php:646
 msgid "Tous les media utilisateurs"
 msgstr "All User Media"
 
-#: inc/functions.php:631
+#: inc/functions.php:647
 msgid "Media utilisateur"
 msgstr "User Media"
 
-#: inc/functions.php:632 inc/functions.php:635
+#: inc/functions.php:648 inc/functions.php:651
 msgid "Nouveau media utilisateur"
 msgstr "New User Media"
 
-#: inc/functions.php:633
+#: inc/functions.php:649
 msgid "Ajouter un media utilisateur"
 msgstr "Add a new User Media"
 
-#: inc/functions.php:634
+#: inc/functions.php:650
 msgid "Modifier le media utilisateur"
 msgstr "Edit the User Media"
 
-#: inc/functions.php:636
+#: inc/functions.php:652
 msgid "Afficher le media utilisateur"
 msgstr "Show the User Media"
 
-#: inc/functions.php:637
+#: inc/functions.php:653
 msgid "Rechercher un media utilisateur"
 msgstr "Search for User Media"
 
-#: inc/functions.php:638
+#: inc/functions.php:654
 msgid "Media utilisateur introuvable"
 msgstr "No User Media were found."
 
-#: inc/functions.php:639
+#: inc/functions.php:655
 msgid "Media utilisateur introuvable dans la corbeille"
 msgstr "No User Media were found in trash"
 
-#: inc/functions.php:640
+#: inc/functions.php:656
 msgid "Insérer dans le contenu"
 msgstr "Insert into content"
 
-#: inc/functions.php:641
+#: inc/functions.php:657
 msgid "Utiliser comme avatar"
 msgstr "Use as your avatar"
 
-#: inc/functions.php:642
+#: inc/functions.php:658
 msgid "Attaché à ce contenu"
 msgstr "Attached to this content"
 
-#: inc/functions.php:643
+#: inc/functions.php:659
 msgid "Filtrer les Media utilisateurs"
 msgstr "Filter User Media"
 
-#: inc/functions.php:644
+#: inc/functions.php:660
 msgid "Navigation des Media utilisateurs"
 msgstr "User Media navigation"
 
-#: inc/functions.php:645
+#: inc/functions.php:661
 msgid "Liste des Media utilisateurs"
 msgstr "User Media List"
 
@@ -396,7 +396,7 @@ msgid ""
 "Sélectionner les capacités du rôle qu'il faut à minima détenir pour pouvoir "
 "utiliser la MediaThèque."
 msgstr ""
-"Choose the Role capabilities a user needs to be able to use the MediaBrary."
+"Choose the Role capabilities a user needs to be able to use the MediaThèque."
 
 #: inc/settings.php:143
 msgid ""
@@ -407,7 +407,7 @@ msgstr "Allow users to choose one of their images as profile image."
 msgid "Ajouter un media"
 msgstr "Add User Media"
 
-#: inc/templates.php:401
+#: inc/templates.php:406
 msgid "Ci-dessous le titre du contenu dans lequel le media est présent :"
 msgid_plural ""
 "Ci-dessous la liste des titres de contenu dans lesquels le media est "
@@ -417,19 +417,19 @@ msgstr[0] ""
 msgstr[1] ""
 "Beneath is the list of content titles where the User Media is attached to:"
 
-#: inc/templates.php:421
+#: inc/templates.php:426
 msgid "Media disparu"
 msgstr "Vanished User Media"
 
-#: inc/templates.php:433
+#: inc/templates.php:438
 msgid "Hum hum, il semble que ce media ait mystérieusement disparu."
 msgstr "Hum hum, it looks like this media mysteriously vanished."
 
-#: inc/templates.php:541
+#: inc/templates.php:546
 msgid "Afficher"
 msgstr "Show"
 
-#: inc/templates.php:545
+#: inc/templates.php:550
 msgid "Télécharger"
 msgstr "Download"
 
@@ -442,7 +442,7 @@ msgid ""
 "MediaThèque nécessite que la structure de vos permaliens soit différente que "
 "celle définie par défaut."
 msgstr ""
-"The MediaBrary needs your permalink structure to be different than the "
+"The MediaThèque needs your permalink structure to be different than the "
 "default one."
 
 #: inc/upgrade.php:110
@@ -469,7 +469,7 @@ msgstr ""
 
 #: inc/upgrade.php:120
 msgid "Accédez à votre MediaThèque"
-msgstr "Go to your MediaBrary"
+msgstr "Go to your MediaThèque"
 
 #: inc/upgrade.php:121
 msgid ""
@@ -502,17 +502,37 @@ msgstr "imath"
 msgid "https://imathi.eu/"
 msgstr "https://imathi.eu/"
 
-#: inc/functions.php:629
+#: inc/functions.php:645
 msgctxt "Plugin submenu"
 msgid "Ma MediaThèque"
-msgstr "My MediaBrary"
+msgstr "My MediaThèque"
 
-#: inc/functions.php:675
+#: inc/functions.php:691
 msgctxt "taxonomy general name"
 msgid "Types"
 msgstr "Types"
 
-#: inc/functions.php:676
+#: inc/functions.php:692
 msgctxt "taxonomy singular name"
 msgid "Type"
 msgstr "Type"
+
+#: inc/functions.php:800
+msgctxt "Gutenberg block"
+msgid "Insérer un Media d'utilisateur."
+msgstr "Insert a User Media"
+
+#: inc/functions.php:801
+msgctxt "Gutenberg block"
+msgid "Alignement du Media d'utilisateur"
+msgstr "User Media Alignment"
+
+#: inc/functions.php:802
+msgctxt "Gutenberg block"
+msgid "Modifier"
+msgstr "Edit"
+
+#: inc/functions.php:803
+msgctxt "Gutenberg block"
+msgid "Une erreur est survenue, merci de réessayer."
+msgstr "Something went wrong. Please try again later."

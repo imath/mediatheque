@@ -1,4 +1,4 @@
-<div id="{{data.dropzone}}">
+<div id="<# if ( data.dropzone ) { #>{{data.dropzone}}<# } else { #>drag-drop-area<# } #>">
 	<button class="close dashicons dashicons-no"><span class="screen-reader-text">{{data.closeBtn}}</span></button>
 	<div class="drag-drop-inside">
 		<h2 class="drag-drop-info">{{data.dropHelp}}</h2>

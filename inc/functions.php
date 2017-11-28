@@ -552,6 +552,7 @@ function mediatheque_localize_script( $handle = 'mediatheque-views' ) {
  * Registers JavaScripts and Styles.
  *
  * @since 1.0.0
+ * @since 1.1.0 Adds a way to enqueue JavaScripts in header.
  */
 function mediatheque_register_scripts() {
 	$min = mediatheque_min_suffix();
@@ -581,10 +582,21 @@ function mediatheque_register_scripts() {
 			'location' => sprintf( '%1$sdisplay%2$s.js', $url, $min ),
 			'deps'     => array( 'mediatheque-views' ),
 		),
+		'mediatheque-block' => array(
+			'location' => sprintf( '%1$sblock%2$s.js', $url, $min ),
+			'deps'     => array( 'wp-blocks', 'wp-element' ),
+			'footer'   => false,
+		),
 	), $url, $min, $v );
 
 	foreach ( $scripts as $js_handle => $script ) {
-		wp_register_script( $js_handle, $script['location'], $script['deps'], $v, true );
+		$in_footer = true;
+
+		if ( isset( $script['footer'] ) ) {
+			$in_footer = $script['footer'];
+		}
+
+		wp_register_script( $js_handle, $script['location'], $script['deps'], $v, $in_footer );
 	}
 
 	/** Styles ***************************************************************/
@@ -606,6 +618,10 @@ function mediatheque_register_scripts() {
 		'mediatheque-front' => array(
 			'location' => sprintf( '%1$sfront%2$s.css', $url, $min ),
 			'deps'     => array( 'mediatheque-editor' ),
+		),
+		'mediatheque-block' => array(
+			'location' => sprintf( '%1$sblock%2$s.css', $url, $min ),
+			'deps'     => array( 'wp-blocks' ),
 		),
 	), $url, $min, $v );
 
@@ -771,6 +787,38 @@ function mediatheque_embed_style() {
 		array(),
 		mediatheque_version()
 	);
+}
+
+/**
+ * Enqueues the Gutenberg block script.
+ *
+ * @since 1.1.0
+ */
+function mediatheque_block_editor() {
+	if ( ! current_user_can( mediatheque_get_required_cap() ) ) {
+		return;
+	}
+
+	wp_enqueue_script( 'mediatheque-block' );
+	wp_localize_script( 'mediatheque-block', 'mediaThequeBlock', array(
+		'insertBtn'      => _x( 'Insérer un Media d\'utilisateur.', 'Gutenberg block', 'mediatheque' ),
+		'alignmentLabel' => _x( 'Alignement du Media d\'utilisateur', 'Gutenberg block', 'mediatheque' ),
+		'editTitle'      => _x( 'Modifier', 'Gutenberg block', 'mediatheque' ),
+		'genericError'   => _x( 'Une erreur est survenue, merci de réessayer.', 'Gutenberg block', 'mediatheque' ),
+	) );
+}
+
+/**
+ * Enqueues the Gutenberg block style.
+ *
+ * @since 1.1.0
+ */
+function mediatheque_block_edit_style() {
+	if ( ! current_user_can( mediatheque_get_required_cap() ) ) {
+		return;
+	}
+
+	wp_enqueue_style( 'mediatheque-block' );
 }
 
 /**
@@ -1340,4 +1388,27 @@ function mediatheque_get_attached_posts( $s = '' ) {
 function mediatheque_load_textdomain() {
 	$mediatheque = mediatheque();
 	load_plugin_textdomain( $mediatheque->domain, false, trailingslashit( basename( $mediatheque->dir ) ) . 'languages' );
+}
+
+/**
+ * Get the plugin's SVG icon.
+ *
+ * @since 1.1.0
+ *
+ * @return string Base 64 encoded string.
+ */
+function mediatheque_get_svg_icon( $color = '#23282d', $bgcolor = '#23282d' ) {
+	$fill_head = '';
+	if ( $color !== $bgcolor ) {
+		$fill_head = ' fill="' . $bgcolor . '" ';
+	}
+
+	return 'data:image/svg+xml;base64,' . base64_encode( '
+		<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="20px" height="20px" viewBox="0 0 20 20">
+			<path fill="' . $color . '" d="M 13 11 L 13 4 C 13 3.45 12.55 3 12 3 L 10.33 3 L 9 1 L 5 1 L 3.67 3 L 2 3 C 1.45 3 1 3.45 1 4 L 1 11 C 1 11.55 1.45 12 2 12 L 12 12 C 12.55 12 13 11.55 13 11 Z"/>
+			<path fill="' . $color . '" d="M 14 6 L 19 6 L 19 16.5 C 19 17.88 17.88 19 16.5 19 C 15.12 19 14 17.88 14 16.5 C 14 15.12 15.12 14 16.5 14 C 16.67 14 16.84 14.02 17 14.05 L 17 9 L 14 9 L 14 6 Z"/>
+			<path ' . $fill_head . 'd="M 7 4.5 C 8.38 4.5 9.5 5.62 9.5 7 C 9.5 8.38 8.38 9.5 7 9.5 C 5.62 9.5 4.5 8.38 4.5 7 C 4.5 5.62 5.62 4.5 7 4.5 Z"/>
+			<path fill="' . $color . '" stroke="' . $bgcolor . '" d="M 7.006 11.465 L 9.121 10.05 C 10.979 10.05 12.636 11.861 12.636 13.573 L 12.636 15.508 C 12.636 15.508 9.797 16.386 7.006 16.386 C 4.168 16.386 1.376 15.508 1.376 15.508 L 1.376 13.573 C 1.376 11.823 2.885 10.089 4.852 10.089 Z"/>
+		</svg>
+	' );
 }
