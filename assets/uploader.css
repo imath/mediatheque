@@ -1,4 +1,4 @@
-#drag-drop-area {
+#drag-drop-area.supports-drag-drop {
 	position: relative;
 	top: auto;
 	right: auto;
@@ -10,7 +10,7 @@
 	margin-bottom: 1em;
 }
 
-#drag-drop-area.drag-over {
+#drag-drop-area.supports-drag-drop.drag-over {
 	border: 4px dashed #0073aa;
 }
 
@@ -31,7 +31,11 @@
 	margin: 2em 0;
 }
 
-.drag-drop-inside p.drag-drop-info {
+#drag-drop-area .drag-drop-inside p.drag-drop-info {
+	display: none;
+}
+
+#drag-drop-area.supports-drag-drop .drag-drop-inside p.drag-drop-info {
 	display: block;
 	font-size: 12px;
 	margin: 0.5em 0;
@@ -47,9 +51,23 @@ p.drag-drop-buttons input[type="button"] {
 }
 
 #drag-drop-area h2.drag-drop-info {
+	display: none;
+}
+
+#drag-drop-area.supports-drag-drop h2.drag-drop-info {
+	display: block;
 	font-size: 20px;
 	line-height: 28px;
 	font-weight: 400;
 	margin: 0;
 	text-align: center;
+}
+
+#drag-drop-area:not( .supports-drag-drop ) {
+	position: relative;
+	width: 50%;
+	margin: 0 auto;
+	border: 1px solid #e5e5e5;
+	box-shadow: 0 1px 1px rgba(0,0,0,0.04);
+	background: #fff;
 }

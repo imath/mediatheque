@@ -2,9 +2,9 @@
 # This file is distributed under the GNU/GPL 2.
 msgid ""
 msgstr ""
-"Project-Id-Version: MediaThèque 1.0.1\n"
+"Project-Id-Version: MediaThèque 1.1.0-alpha\n"
 "Report-Msgid-Bugs-To: https://github.com/imath/mediatheque/issues\n"
-"POT-Creation-Date: 2017-11-09 05:29:14+00:00\n"
+"POT-Creation-Date: 2017-11-27 17:54:43+00:00\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -267,67 +267,67 @@ msgstr ""
 msgid "Masquer la taille du media."
 msgstr ""
 
-#: inc/functions.php:628
+#: inc/functions.php:644
 msgid "Media utilisateurs"
 msgstr ""
 
-#: inc/functions.php:630
+#: inc/functions.php:646
 msgid "Tous les media utilisateurs"
 msgstr ""
 
-#: inc/functions.php:631
+#: inc/functions.php:647
 msgid "Media utilisateur"
 msgstr ""
 
-#: inc/functions.php:632 inc/functions.php:635
+#: inc/functions.php:648 inc/functions.php:651
 msgid "Nouveau media utilisateur"
 msgstr ""
 
-#: inc/functions.php:633
+#: inc/functions.php:649
 msgid "Ajouter un media utilisateur"
 msgstr ""
 
-#: inc/functions.php:634
+#: inc/functions.php:650
 msgid "Modifier le media utilisateur"
 msgstr ""
 
-#: inc/functions.php:636
+#: inc/functions.php:652
 msgid "Afficher le media utilisateur"
 msgstr ""
 
-#: inc/functions.php:637
+#: inc/functions.php:653
 msgid "Rechercher un media utilisateur"
 msgstr ""
 
-#: inc/functions.php:638
+#: inc/functions.php:654
 msgid "Media utilisateur introuvable"
 msgstr ""
 
-#: inc/functions.php:639
+#: inc/functions.php:655
 msgid "Media utilisateur introuvable dans la corbeille"
 msgstr ""
 
-#: inc/functions.php:640
+#: inc/functions.php:656
 msgid "Insérer dans le contenu"
 msgstr ""
 
-#: inc/functions.php:641
+#: inc/functions.php:657
 msgid "Utiliser comme avatar"
 msgstr ""
 
-#: inc/functions.php:642
+#: inc/functions.php:658
 msgid "Attaché à ce contenu"
 msgstr ""
 
-#: inc/functions.php:643
+#: inc/functions.php:659
 msgid "Filtrer les Media utilisateurs"
 msgstr ""
 
-#: inc/functions.php:644
+#: inc/functions.php:660
 msgid "Navigation des Media utilisateurs"
 msgstr ""
 
-#: inc/functions.php:645
+#: inc/functions.php:661
 msgid "Liste des Media utilisateurs"
 msgstr ""
 
@@ -396,7 +396,7 @@ msgstr ""
 msgid "Ajouter un media"
 msgstr ""
 
-#: inc/templates.php:401
+#: inc/templates.php:406
 msgid "Ci-dessous le titre du contenu dans lequel le media est présent :"
 msgid_plural ""
 "Ci-dessous la liste des titres de contenu dans lesquels le media est "
@@ -404,19 +404,19 @@ msgid_plural ""
 msgstr[0] ""
 msgstr[1] ""
 
-#: inc/templates.php:421
+#: inc/templates.php:426
 msgid "Media disparu"
 msgstr ""
 
-#: inc/templates.php:433
+#: inc/templates.php:438
 msgid "Hum hum, il semble que ce media ait mystérieusement disparu."
 msgstr ""
 
-#: inc/templates.php:541
+#: inc/templates.php:546
 msgid "Afficher"
 msgstr ""
 
-#: inc/templates.php:545
+#: inc/templates.php:550
 msgid "Télécharger"
 msgstr ""
 
@@ -484,17 +484,37 @@ msgstr ""
 msgid "https://imathi.eu/"
 msgstr ""
 
-#: inc/functions.php:629
+#: inc/functions.php:645
 msgctxt "Plugin submenu"
 msgid "Ma MediaThèque"
 msgstr ""
 
-#: inc/functions.php:675
+#: inc/functions.php:691
 msgctxt "taxonomy general name"
 msgid "Types"
 msgstr ""
 
-#: inc/functions.php:676
+#: inc/functions.php:692
 msgctxt "taxonomy singular name"
 msgid "Type"
+msgstr ""
+
+#: inc/functions.php:800
+msgctxt "Gutenberg block"
+msgid "Insérer un Media d'utilisateur."
+msgstr ""
+
+#: inc/functions.php:801
+msgctxt "Gutenberg block"
+msgid "Alignement du Media d'utilisateur"
+msgstr ""
+
+#: inc/functions.php:802
+msgctxt "Gutenberg block"
+msgid "Modifier"
+msgstr ""
+
+#: inc/functions.php:803
+msgctxt "Gutenberg block"
+msgid "Une erreur est survenue, merci de réessayer."
 msgstr ""

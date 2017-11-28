@@ -59,3 +59,6 @@ if ( is_multisite() ) {
 } else {
 	add_action( 'delete_user', 'mediatheque_delete_user_data', 10, 2 );
 }
+
+add_action( 'enqueue_block_editor_assets', 'mediatheque_block_editor'     );
+add_action( 'enqueue_block_assets',        'mediatheque_block_edit_style' );
