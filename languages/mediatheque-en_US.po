@@ -4,8 +4,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: MediaThèque 1.1.0\n"
 "Report-Msgid-Bugs-To: https://github.com/imath/mediatheque/issues\n"
-"POT-Creation-Date: 2017-11-27 17:54:43+00:00\n"
-"PO-Revision-Date: 2017-11-27 18:58+0100\n"
+"POT-Creation-Date: 2017-11-28 01:20:48+00:00\n"
+"PO-Revision-Date: 2017-11-28 02:30+0100\n"
 "Last-Translator: imath <mathchristo@yahoo.fr>\n"
 "Language-Team: FRENCH <contact@imathi.eu>\n"
 "Language: en_US\n"
@@ -517,22 +517,22 @@ msgctxt "taxonomy singular name"
 msgid "Type"
 msgstr "Type"
 
-#: inc/functions.php:800
+#: inc/functions.php:804
 msgctxt "Gutenberg block"
 msgid "Insérer un Media d'utilisateur."
 msgstr "Insert a User Media"
 
-#: inc/functions.php:801
+#: inc/functions.php:805
 msgctxt "Gutenberg block"
 msgid "Alignement du Media d'utilisateur"
 msgstr "User Media Alignment"
 
-#: inc/functions.php:802
+#: inc/functions.php:806
 msgctxt "Gutenberg block"
 msgid "Modifier"
 msgstr "Edit"
 
-#: inc/functions.php:803
+#: inc/functions.php:807
 msgctxt "Gutenberg block"
 msgid "Une erreur est survenue, merci de réessayer."
 msgstr "Something went wrong. Please try again later."

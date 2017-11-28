@@ -5,6 +5,17 @@
 _Requires WordPress 4.7_
 _Tested up to WordPress 4.9_
 
+### Features
+
++ Gutenberg (1.7+) Block.
+
+---
+
+## 1.0.1
+
+_Requires WordPress 4.7_
+_Tested up to WordPress 4.9_
+
 ### Bug fixes
 
 - Improve the query performance when users delete all their user media.
