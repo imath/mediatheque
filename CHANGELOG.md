@@ -1,5 +1,16 @@
 # Change Log
 
+## 1.1.1
+
+_Requires WordPress 4.7_
+_Tested up to WordPress 4.9_
+
+### Bug fixes
+
+- Adapt to Gutenberg 1.8 className changes.
+
+---
+
 ## 1.1.0
 
 _Requires WordPress 4.7_

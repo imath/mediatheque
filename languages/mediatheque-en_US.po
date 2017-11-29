@@ -2,10 +2,10 @@
 # This file is distributed under the GNU/GPL 2.
 msgid ""
 msgstr ""
-"Project-Id-Version: MediaThèque 1.1.0\n"
+"Project-Id-Version: MediaThèque 1.1.1\n"
 "Report-Msgid-Bugs-To: https://github.com/imath/mediatheque/issues\n"
-"POT-Creation-Date: 2017-11-28 01:20:48+00:00\n"
-"PO-Revision-Date: 2017-11-28 02:30+0100\n"
+"POT-Creation-Date: 2017-11-29 01:17:53+00:00\n"
+"PO-Revision-Date: 2017-11-29 02:19+0100\n"
 "Last-Translator: imath <mathchristo@yahoo.fr>\n"
 "Language-Team: FRENCH <contact@imathi.eu>\n"
 "Language: en_US\n"
