@@ -172,7 +172,7 @@
 
 				frame.state( 'embed' ).on( 'select', function() {
 					var data = frame.state( 'embed' ).metadata,
-					    placeholder = $( '.editor-visual-editor__block.is-selected .editor-visual-editor__block-edit div' );
+					    placeholder = $( '.editor-block-list__block.is-selected .editor-block-list__block-edit div' );
 
 					if ( data && data.url !== props.attributes.link ) {
 						/**

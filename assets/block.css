@@ -1,27 +1,27 @@
 /* Inside the Gutenberg block */
-div.editor-visual-editor__block[data-type='mediatheque/usermedia'] .editor-visual-editor__block-edit div:first-child {
+div.editor-block-list__block[data-type='mediatheque/usermedia'] .editor-block-list__block-edit div:first-child {
 	clear: both;
 	overflow: hidden;
 }
 
-div.editor-visual-editor__block[data-type='mediatheque/usermedia'] .editor-visual-editor__block-edit div:first-child img,
-div.editor-visual-editor__block[data-type='mediatheque/usermedia'] .editor-visual-editor__block-edit div:first-child .wp-video-shortcode {
+div.editor-block-list__block[data-type='mediatheque/usermedia'] .editor-block-list__block-edit div:first-child img,
+div.editor-block-list__block[data-type='mediatheque/usermedia'] .editor-block-list__block-edit div:first-child .wp-video-shortcode {
 	display: block;
 }
 
-div.editor-visual-editor__block[data-type='mediatheque/usermedia'] .editor-visual-editor__block-edit div:first-child img.aligncenter,
-div.editor-visual-editor__block[data-type='mediatheque/usermedia'] .editor-visual-editor__block-edit div:first-child .wp-video-shortcode.aligncenter {
+div.editor-block-list__block[data-type='mediatheque/usermedia'] .editor-block-list__block-edit div:first-child img.aligncenter,
+div.editor-block-list__block[data-type='mediatheque/usermedia'] .editor-block-list__block-edit div:first-child .wp-video-shortcode.aligncenter {
 	margin: 0 auto;
 }
 
-div.editor-visual-editor__block[data-type='mediatheque/usermedia'] .editor-visual-editor__block-edit div:first-child .mediatheque-file-link img {
+div.editor-block-list__block[data-type='mediatheque/usermedia'] .editor-block-list__block-edit div:first-child .mediatheque-file-link img {
 	margin-right: 1.5em;
 }
 
-div.editor-visual-editor__block[data-type='mediatheque/usermedia'] .editor-visual-editor__block-edit div:first-child dl {
+div.editor-block-list__block[data-type='mediatheque/usermedia'] .editor-block-list__block-edit div:first-child dl {
 	margin-top: 0;
 }
 
-div div.editor-visual-editor__block[data-type='mediatheque/usermedia'] .editor-visual-editor__block-edit div:first-child .wp-video {
+div div.editor-block-list__block[data-type='mediatheque/usermedia'] .editor-block-list__block-edit div:first-child .wp-video {
 	width: 100%!important;
 }
