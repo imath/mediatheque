@@ -184,6 +184,8 @@ function mediatheque_the_editor( $editor = '' ) {
  * Returns the [mediatheque] shortcode output.
  *
  * @since 1.0.0
+ * @since 1.2.0 Adds a new `user_id` Shortcode attributes to get
+ *              a specific user's public media files.
  *
  * @param  array  $attr Attributes of the [mediatheque] shortcode.
  * @return string       HTML Output.
@@ -205,6 +207,7 @@ function mediatheque_get_display_content( $attr ) {
 		'directory' => 0,
 		'width'     => '100%',
 		'height'    => '450px',
+		'user_id'   => 0,
 	), $attr, 'mediatheque' );
 
 	// Globalize template tags
@@ -214,7 +217,7 @@ function mediatheque_get_display_content( $attr ) {
 
 	if ( $template ) {
 		wp_enqueue_script( 'mediatheque-display' );
-		mediatheque_localize_script();
+		mediatheque_localize_script( 'mediatheque-views', $atts['user_id'] );
 
 		wp_enqueue_style( 'mediatheque-ui' );
 

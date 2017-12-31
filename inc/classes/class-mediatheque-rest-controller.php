@@ -223,6 +223,11 @@ class MediaTheque_REST_Controller extends WP_REST_Attachments_Controller {
 				}
 			}
 
+			$post_author = $request->get_param( 'user_id' );
+			if ( $post_author ) {
+				$prepared_args['author'] = (int) $post_author;
+			}
+
 		} else {
 			$prepared_args['author'] = get_current_user_id();
 		}

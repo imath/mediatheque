@@ -416,7 +416,7 @@ function mediatheque_sort_array_fields( $f = array() ) {
  *
  * @param string $handle The Javascript script handle.
  */
-function mediatheque_localize_script( $handle = 'mediatheque-views' ) {
+function mediatheque_localize_script( $handle = 'mediatheque-views', $user_id = 0 ) {
 	$mediatheque = mediatheque();
 
 	$post_type_object     = get_post_type_object( 'user_media' );
@@ -474,6 +474,18 @@ function mediatheque_localize_script( $handle = 'mediatheque-views' ) {
 	$custom_fields = (array) apply_filters( 'mediatheque_localize_custom_fields', array() );
 	$edit_fields   = $edit_fields + $custom_fields;
 
+	/**
+	 * Filter here to edit the available major actions.
+	 *
+	 * @since  1.2.0
+	 *
+	 * @param  array $value The available major actions.
+	 */
+	$major_actions = (array) apply_filters( 'mediatheque_localize_major_actions', array(
+		'upload'    => __( 'Nouveau(x) fichier(s)', 'mediatheque' ),
+		'directory' => __( 'Nouveau répertoire', 'mediatheque' ),
+	) );
+
 	wp_localize_script( $handle, 'mediaThequeSettings', array(
 		'params' => array(
 			'container' => 'mediatheque-ui',
@@ -484,13 +496,10 @@ function mediatheque_localize_script( $handle = 'mediatheque-views' ) {
 			'btnBrowse' => __( 'Choisissez des fichiers', 'mediatheque' ),
 		),
 		'toolbarItems' => array_merge( array(
-				'users'    => __( 'Choisissez un utilisateur', 'mediatheque' )
+				'users' => __( 'Choisissez un utilisateur', 'mediatheque' )
 			),
 			$mediatheque_statuses,
-			array(
-				'upload'    => __( 'Nouveau(x) fichier(s)', 'mediatheque' ),
-				'directory' => __( 'Nouveau répertoire', 'mediatheque' ),
-			)
+			$major_actions
 		),
 		'dirmaker' => array(
 			'label'   => __( 'Nom de votre répertoire', 'mediatheque' ),
@@ -516,6 +525,7 @@ function mediatheque_localize_script( $handle = 'mediatheque-views' ) {
 				'none'   => __( 'Aucun', 'mediatheque' ),
 			),
 			'directory'       => mediatheque_get_displayed_directory(),
+			'user_id'         => $user_id,
 			'isUserMediaOnly' => ! current_user_can( 'upload_files' ) || ! empty( $mediatheque->editor_id ),
 		),
 		'fields' => array(

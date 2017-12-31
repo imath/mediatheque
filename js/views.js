@@ -725,6 +725,10 @@ window.mediaTheque = window.mediaTheque || _.extend( {}, _.pick( window.wp, 'Bac
 				qv.parent = parseInt( mediaThequeSettings.common.directory, 10 );
 			}
 
+			if ( ! _.isUndefined( mediaThequeSettings.common.user_id ) && mediaThequeSettings.common.user_id ) {
+				qv.user_id = parseInt( mediaThequeSettings.common.user_id, 10 );
+			}
+
 			// Init the view with default Query Vars.
 			this.queryUserMedia( qv );
 		},
