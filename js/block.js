@@ -15,14 +15,15 @@
 
 		// Block Icon
 		icon: el( 'svg', {
+			key          : 'mediatheque-icon',
 			'aria-hidden': true,
-			role: 'img',
-			className: 'dashicons mediatheque-icon',
-			focusable: 'false',
-			width: '20',
-			height: '20',
-			viewBox: '0 0 20 20',
-			xmlns: 'http://www.w3.org/2000/svg'
+			role         : 'img',
+			className    : 'dashicon mediatheque-icon',
+			focusable    : 'false',
+			width        : '20',
+			height       : '20',
+			viewBox      : '0 0 20 20',
+			xmlns        : 'http://www.w3.org/2000/svg'
 		}, [
 				el( 'path', {
 					key: 'camera',
@@ -63,7 +64,8 @@
 
 		edit: function( props ) {
 			var alignment = props.attributes.alignment,
-			    focus     = props.focus;
+			    focus     = props.focus,
+			    selfType  = wp.blocks.getBlockType( 'mediatheque/usermedia' );
 
 			var outputUserMedia = function( usermedia ) {
 				$( '#' + props.id ).parent().find( '.notice-error' ).remove();
@@ -208,6 +210,19 @@
 					'div', {
 						className: 'components-placeholder'
 					}, [
+						el(
+							'div', {
+								key:       'block-placeholder',
+								className: 'components-placeholder__label'
+							}, [
+								selfType.icon,
+								el(
+									'label', {
+										key: 'block-label'
+									}, 'MediaThèque'
+								)
+							]
+						),
 						el(
 							'button', {
 								key: 'user-media-select-button',

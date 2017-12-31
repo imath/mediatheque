@@ -111,7 +111,7 @@ class MediaTheque_Rest_Tests extends WP_Test_REST_Controller_Testcase {
 
 		remove_filter( 'mediatheque_map_meta_caps', array( $this, 'get_cap' ), 10, 2 );
 
-		$this->assertErrorResponse( 'rest_cannot_create', $check, 401 );
+		$this->assertErrorResponse( 'rest_cannot_create', $check );
 		$this->assertTrue( 'create_user_uploads' === $this->cap );
 	}
 
@@ -155,7 +155,7 @@ class MediaTheque_Rest_Tests extends WP_Test_REST_Controller_Testcase {
 
 		remove_filter( 'mediatheque_map_meta_caps', array( $this, 'get_cap' ), 10, 2 );
 
-		$this->assertErrorResponse( 'rest_forbidden', $response, 403 );
+		$this->assertErrorResponse( 'rest_forbidden', $response );
 		$this->assertTrue( 'read_user_upload' === $this->cap );
 	}
 
@@ -262,7 +262,7 @@ class MediaTheque_Rest_Tests extends WP_Test_REST_Controller_Testcase {
 
 		remove_filter( 'mediatheque_map_meta_caps', array( $this, 'get_cap' ), 10, 2 );
 
-		$this->assertErrorResponse( 'rest_cannot_edit', $response, 403 );
+		$this->assertErrorResponse( 'rest_cannot_edit', $response );
 		$this->assertTrue( 'edit_user_upload' === $this->cap );
 	}
 
@@ -336,7 +336,7 @@ class MediaTheque_Rest_Tests extends WP_Test_REST_Controller_Testcase {
 
 		remove_filter( 'mediatheque_map_meta_caps', array( $this, 'get_cap' ), 10, 2 );
 
-		$this->assertErrorResponse( 'rest_cannot_delete', $response, 403 );
+		$this->assertErrorResponse( 'rest_cannot_delete', $response );
 		$this->assertTrue( 'delete_user_upload' === $this->cap );
 	}
 
