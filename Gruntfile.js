@@ -103,36 +103,13 @@ module.exports = function( grunt ) {
 				args: ['-c', 'tests/phpunit/multisite.xml']
 			}
 		},
-		compress: {
-			main: {
+		'git-archive': {
+			archive: {
 				options: {
-					archive: '<%= pkg.name %>.zip'
-				},
-				files: [{
-					expand: true,
-					src: [
-						'**/*',
-						'!node_modules/**',
-						'!npm-debug.log',
-						'!tests/**',
-						'!.editorconfig',
-						'!.git/**',
-						'!.gitignore',
-						'!.gitattributes',
-						'!grunt/**',
-						'!.jshintrc',
-						'!.jshintignore',
-						'!.travis.yml',
-						'!Gruntfile.js',
-						'!package.json',
-						'!phpunit.xml.dist',
-						'!CONTRIBUTING.md',
-						'!CHANGELOG.md',
-						'!icon.png',
-						'!LICENSE'
-					],
-					dest: './'
-				}]
+					'format'  : 'zip',
+					'output'  : '<%= pkg.name %>.zip',
+					'tree-ish': 'HEAD@{0}'
+				}
 			}
 		}
 	} );
@@ -153,6 +130,8 @@ module.exports = function( grunt ) {
 	grunt.registerTask( 'jstest', ['jsvalidate', 'jshint'] );
 
 	grunt.registerTask( 'shrink', ['cssmin', 'uglify'] );
+
+	grunt.registerTask( 'compress', ['git-archive'] );
 
 	grunt.registerTask( 'release', ['checktextdomain', 'makepot', 'clean', 'jstest', 'shrink'] );
 
