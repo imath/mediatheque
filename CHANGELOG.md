@@ -1,5 +1,17 @@
 # Change Log
 
+## 1.1.2
+
+_Requires WordPress 4.7_
+_Tested up to WordPress 4.9_
+
+### Bug fixes
+
+- Make sure the MediaThèque icon is inline with the other Gutenberg's Block icons.
+- Use the MediaThèque icon as a placeholder to the Add User Media button into the Gutenberg block.
+
+---
+
 ## 1.1.1
 
 _Requires WordPress 4.7_
