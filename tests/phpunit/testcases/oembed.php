@@ -34,6 +34,10 @@ class MediaTheque_Embed_Tests extends WP_UnitTestCase {
 	}
 
 	public function test_mediatheque_oembed_user_media_id_for_image() {
+		if ( ! file_exists( ABSPATH . WPINC . '/js/wp-embed.js' ) ) {
+			$this->markTestSkipped( 'wp-embed.js is required for this test.' );
+		}
+
 		mediatheque()->user_media_oembeds = array();
 
 		$img_id = $this->mediatheque_factory->user_media_file->create( array(
@@ -73,6 +77,10 @@ class MediaTheque_Embed_Tests extends WP_UnitTestCase {
 	}
 
 	public function test_mediatheque_oembed_user_media_id_for_document() {
+		if ( ! file_exists( ABSPATH . WPINC . '/js/wp-embed.js' ) ) {
+			$this->markTestSkipped( 'wp-embed.js is required for this test.' );
+		}
+
 		mediatheque()->user_media_oembeds = array();
 
 		$doc_id = $this->mediatheque_factory->user_media_file->create( array(

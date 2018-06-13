@@ -66,7 +66,7 @@
 			}
 		},
 
-		edit: function( props, other ) {
+		edit: function( props ) {
 			var alignment = props.attributes.alignment,
 				focus     = props.isSelected;
 
@@ -263,7 +263,7 @@
 									value: alignment,
 									onChange: onChangeAlignment
 								}
-							) ),
+							) )
 						]
 					),
 					el(

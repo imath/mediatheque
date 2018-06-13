@@ -15,6 +15,7 @@ class MediaTheque_Rest_Tests extends WP_Test_REST_Controller_Testcase {
 	protected $controller;
 	protected $user_media_ids = array();
 	protected $term_id = 0;
+	protected $rest_server;
 
 	public function setUp() {
 		parent::setUp();
@@ -59,6 +60,12 @@ class MediaTheque_Rest_Tests extends WP_Test_REST_Controller_Testcase {
 
 		$post_ID = end( $this->user_media_ids );
 		wp_set_post_terms( $post_ID, array( $this->term_id ), 'user_media_types' );
+
+		if ( ! $this->server ) {
+			$this->rest_server = rest_get_server();
+		} else {
+			$this->rest_server = $this->server;
+		}
 	}
 
 	public function tearDown() {
@@ -97,7 +104,7 @@ class MediaTheque_Rest_Tests extends WP_Test_REST_Controller_Testcase {
 	 * Routes
 	 */
 	public function test_register_routes() {
-		$routes = $this->server->get_routes();
+		$routes = $this->rest_server->get_routes();
 
 		$this->assertArrayHasKey( '/wp/v2/' . $this->rb, $routes );
 	}
@@ -121,7 +128,7 @@ class MediaTheque_Rest_Tests extends WP_Test_REST_Controller_Testcase {
 		wp_set_current_user( 0 );
 
 		$request  = new WP_REST_Request( 'GET', '/wp/v2/' . $this->rb );
-		$response = $this->server->dispatch( $request );
+		$response = $this->rest_server->dispatch( $request );
 		$results  = $response->get_data();
 
 		$public_user_media = wp_list_filter( $results, array( 'status' => 'publish' ) );
@@ -138,7 +145,7 @@ class MediaTheque_Rest_Tests extends WP_Test_REST_Controller_Testcase {
 		wp_set_current_user( 0 );
 
 		$request  = new WP_REST_Request( 'GET', '/wp/v2/' . $this->rb . '/' . $this->user_media_ids[0] );
-		$response = $this->server->dispatch( $request );
+		$response = $this->rest_server->dispatch( $request );
 
 		$this->assertNotInstanceOf( 'WP_Error', $response );
 		$response = rest_ensure_response( $response );
@@ -151,7 +158,7 @@ class MediaTheque_Rest_Tests extends WP_Test_REST_Controller_Testcase {
 		add_filter( 'mediatheque_map_meta_caps', array( $this, 'get_cap' ), 10, 2 );
 
 		$request  = new WP_REST_Request( 'GET', '/wp/v2/' . $this->rb . '/' . $this->user_media_ids[1] );
-		$response = $this->server->dispatch( $request );
+		$response = $this->rest_server->dispatch( $request );
 
 		remove_filter( 'mediatheque_map_meta_caps', array( $this, 'get_cap' ), 10, 2 );
 
@@ -165,7 +172,7 @@ class MediaTheque_Rest_Tests extends WP_Test_REST_Controller_Testcase {
 		add_filter( 'mediatheque_map_meta_caps', array( $this, 'get_cap' ), 10, 2 );
 
 		$request  = new WP_REST_Request( 'GET', '/wp/v2/' . $this->rb . '/' . $this->user_media_ids[1] );
-		$response = $this->server->dispatch( $request );
+		$response = $this->rest_server->dispatch( $request );
 
 		remove_filter( 'mediatheque_map_meta_caps', array( $this, 'get_cap' ), 10, 2 );
 
@@ -184,7 +191,7 @@ class MediaTheque_Rest_Tests extends WP_Test_REST_Controller_Testcase {
 			'action' => 'mkdir_user_media',
 		) );
 		$request->set_body_params( $params );
-		$response = $this->server->dispatch( $request );
+		$response = $this->rest_server->dispatch( $request );
 
 		$user_media = $response->get_data();
 
@@ -207,7 +214,7 @@ class MediaTheque_Rest_Tests extends WP_Test_REST_Controller_Testcase {
 			'post_status' => 'private',
 		) );
 		$request->set_body_params( $params );
-		$response = $this->server->dispatch( $request );
+		$response = $this->rest_server->dispatch( $request );
 
 		$user_media = $response->get_data();
 
@@ -233,7 +240,7 @@ class MediaTheque_Rest_Tests extends WP_Test_REST_Controller_Testcase {
 		) );
 
 		$request->set_body_params( $params );
-		$response = $this->server->dispatch( $request );
+		$response = $this->rest_server->dispatch( $request );
 
 		remove_filter( 'mediatheque_map_meta_caps', array( $this, 'get_cap' ), 10, 2 );
 
@@ -258,7 +265,7 @@ class MediaTheque_Rest_Tests extends WP_Test_REST_Controller_Testcase {
 		) );
 
 		$request->set_body_params( $params );
-		$response = $this->server->dispatch( $request );
+		$response = $this->rest_server->dispatch( $request );
 
 		remove_filter( 'mediatheque_map_meta_caps', array( $this, 'get_cap' ), 10, 2 );
 
@@ -279,7 +286,7 @@ class MediaTheque_Rest_Tests extends WP_Test_REST_Controller_Testcase {
 		) );
 
 		$request->set_body_params( $params );
-		$response = $this->server->dispatch( $request );
+		$response = $this->rest_server->dispatch( $request );
 
 		remove_filter( 'mediatheque_map_meta_caps', array( $this, 'get_cap' ), 10, 2 );
 
@@ -307,7 +314,7 @@ class MediaTheque_Rest_Tests extends WP_Test_REST_Controller_Testcase {
 		wp_set_current_user( $this->user_id );
 
 		$request = new WP_REST_Request( 'DELETE', '/wp/v2/' . $this->rb . '/' . $user_media_id );
-		$response = $this->server->dispatch( $request );
+		$response = $this->rest_server->dispatch( $request );
 		$data = $response->get_data();
 
 		remove_filter( 'mediatheque_map_meta_caps', array( $this, 'get_cap' ), 10, 2 );
@@ -332,7 +339,7 @@ class MediaTheque_Rest_Tests extends WP_Test_REST_Controller_Testcase {
 		wp_set_current_user( $this->user_id );
 
 		$request = new WP_REST_Request( 'DELETE', '/wp/v2/' . $this->rb . '/' . $user_media_id );
-		$response = $this->server->dispatch( $request );
+		$response = $this->rest_server->dispatch( $request );
 
 		remove_filter( 'mediatheque_map_meta_caps', array( $this, 'get_cap' ), 10, 2 );
 
@@ -355,7 +362,7 @@ class MediaTheque_Rest_Tests extends WP_Test_REST_Controller_Testcase {
 		wp_set_current_user( $this->admin_id );
 
 		$request = new WP_REST_Request( 'DELETE', '/wp/v2/' . $this->rb . '/' . $user_media_id );
-		$response = $this->server->dispatch( $request );
+		$response = $this->rest_server->dispatch( $request );
 		$data = $response->get_data();
 
 		remove_filter( 'mediatheque_map_meta_caps', array( $this, 'get_cap' ), 10, 2 );
@@ -384,7 +391,7 @@ class MediaTheque_Rest_Tests extends WP_Test_REST_Controller_Testcase {
 			'user_media_edit' => true,
 		);
 		$request->set_query_params( $params );
-		$response = $this->server->dispatch( $request );
+		$response = $this->rest_server->dispatch( $request );
 		$response = rest_ensure_response( $response );
 
 		$this->assertEquals( 200, $response->get_status() );
@@ -425,7 +432,7 @@ class MediaTheque_Rest_Tests extends WP_Test_REST_Controller_Testcase {
 			'user_media_edit' => true,
 		);
 		$request->set_query_params( $params );
-		$response = $this->server->dispatch( $request );
+		$response = $this->rest_server->dispatch( $request );
 		$response = rest_ensure_response( $response );
 
 		$this->assertEquals( 200, $response->get_status() );
