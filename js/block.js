@@ -348,7 +348,7 @@
 			}
 
 			// Content to save for a Public User Media
-			return '<p>' + props.attributes.link + '</p>';
+			return el( 'p', {}, props.attributes.link );
 		}
 	} );
 
