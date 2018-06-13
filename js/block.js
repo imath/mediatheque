@@ -3,18 +3,12 @@
 ( function( $, wp ) {
 	var el                = wp.element.createElement,
 	    registerBlockType = wp.blocks.registerBlockType,
-	    InspectorControls = wp.blocks.InspectorControls,
-	    BlockControls     = wp.blocks.BlockControls,
-	    AlignmentToolbar  = wp.blocks.AlignmentToolbar,
-	    EditToolbar       = wp.components.Toolbar;
-
-	registerBlockType( 'mediatheque/usermedia', {
-
-		// Block Title
-		title: 'MediaThèque',
-
-		// Block Icon
-		icon: el( 'svg', {
+	    InspectorControls = wp.editor.InspectorControls,
+	    BlockControls     = wp.editor.BlockControls,
+	    AlignmentToolbar  = wp.editor.AlignmentToolbar,
+		EditToolbar       = wp.components.Toolbar,
+		PanelBody         = wp.components.PanelBody,
+		mediaThequeIcon   = el( 'svg', {
 			key          : 'mediatheque-icon',
 			'aria-hidden': true,
 			role         : 'img',
@@ -44,7 +38,17 @@
 					style: { stroke: 'rgb(255, 255, 255)' }
 				} )
 			]
-		),
+		);
+
+	registerBlockType( 'mediatheque/usermedia', {
+
+		// Block Title
+		title: 'MediaThèque',
+
+		// Block Icon
+		icon: function() {
+			return mediaThequeIcon;
+		},
 
 		// Block Category
 		category: 'common',
@@ -62,10 +66,9 @@
 			}
 		},
 
-		edit: function( props ) {
+		edit: function( props, other ) {
 			var alignment = props.attributes.alignment,
-			    focus     = props.focus,
-			    selfType  = wp.blocks.getBlockType( 'mediatheque/usermedia' );
+				focus     = props.isSelected;
 
 			var outputUserMedia = function( usermedia ) {
 				$( '#' + props.id ).parent().find( '.notice-error' ).remove();
@@ -116,12 +119,12 @@
 
 				var block = $( event.currentTarget ),
 				    options = {
-							frame:           'post',
-							state:           'user-media',
-							title:           wp.media.view.l10n.addMedia,
-							isUserMediaOnly: true,
-							gutenbergBlock : true
-						};
+						frame:           'post',
+						state:           'user-media',
+						title:           wp.media.view.l10n.addMedia,
+						isUserMediaOnly: true,
+						gutenbergBlock : true
+					};
 
 				/**
 				 * Overrides to make sure:
@@ -215,7 +218,7 @@
 								key:       'block-placeholder',
 								className: 'components-placeholder__label'
 							}, [
-								selfType.icon,
+								mediaThequeIcon,
 								el(
 									'label', {
 										key: 'block-label'
@@ -250,24 +253,24 @@
 						InspectorControls,
 						{ key: 'controls' },
 						[
-							el( 'h3', {
-								key: 'label'
-							}, mediaThequeBlock.alignmentLabel ),
-							el(
+							el( PanelBody, {
+								key: 'label',
+								title: mediaThequeBlock.alignmentLabel
+							}, el(
 								AlignmentToolbar,
 								{
 									key: 'aligncontrol',
 									value: alignment,
 									onChange: onChangeAlignment
 								}
-							)
+							) ),
 						]
 					),
 					el(
 						'p', {
 							key: 'editable',
 							className: 'mediatheque-private',
-							focus: focus,
+							focus: focus.toString(),
 							style: { textAlign: alignment },
 							onFocus: props.setFocus
 						}, el(
