@@ -311,11 +311,12 @@ function mediatheque_file_shortcode( $user_media = null, $args = array() ) {
 	}
 
 	$file_args = wp_parse_args( $args, array(
-		'icon'          => false,
-		'ext'           => false,
-		'media_type'    => false,
-		'file_size'     => false,
-		'use_file_name' => false,
+		'icon'           => false,
+		'ext'            => false,
+		'media_type'     => false,
+		'file_size'      => false,
+		'use_file_name'  => false,
+		'object_wrapper' => false,
 	) );
 
 	$icon = '';
@@ -353,7 +354,7 @@ function mediatheque_file_shortcode( $user_media = null, $args = array() ) {
 		$file_size = '<dd><small>' . mediatheque_format_file_size( $file_size ) . '</small></dd>';
 	}
 
-	return sprintf(
+	$template = sprintf(
 		'<div class="mediatheque-file">%1$s<dl><dt>%2$s<br/><small>%3$s%4$s</small></dt>%5$s</dl></div>',
 		$icon,
 		$title,
@@ -361,6 +362,28 @@ function mediatheque_file_shortcode( $user_media = null, $args = array() ) {
 		$file_ext,
 		$file_size
 	);
+
+	if ( in_array( $user_media->post_mime_type, mediatheque_get_object_wrapper_mimes(), true ) && 'true' === $file_args['object_wrapper'] && 'private' !== get_post_status( $user_media ) ) {
+		$template = sprintf(
+			'<object data="%1$s" type="%2$s" width="%3$s" height="400px" typemustmatch>%4$s</object>',
+			esc_url( $user_media->guid ),
+			esc_attr( $user_media->post_mime_type ),
+			'100%',
+			$template
+		);
+	}
+
+	/**
+	 * Use this filter to edit the template Used to display the file.
+	 *
+	 * @since 1.2.0
+	 *
+	 * @param string  $template   The HTML output.
+	 * @param WP_Post $user_media The user media Object.
+	 * @param array   $filedata   Information about the file (extension, type, size).
+	 * @param array   $file_args  The options requested for the output.
+	 */
+	return apply_filters( 'mediatheque_file_shortcode_output', $template, $user_media, $filedata, $file_args );
 }
 
 /**

@@ -183,7 +183,7 @@ function mediatheque_attachment_link( $link = '' ) {
 
 		// It's not an image.
 		if ( empty( $count ) ) {
-			$link = mediatheque_file_shortcode( null, array( 'use_file_name' => true ) );
+			$link = mediatheque_file_shortcode( null, array( 'use_file_name' => true, 'object_wrapper' => 'true' ) );
 		} else {
 			$link = preg_replace( '/(?<=href=\').+(?=\')/', $user_media_link, $link );
 		}
@@ -410,6 +410,28 @@ function mediatheque_sort_array_fields( $f = array() ) {
 }
 
 /**
+ * Get allowed mime types for the <object> wrapper tag.
+ *
+ * @since  1.2.0
+ *
+ * @return array A list of allowed mime types. Defaults to PDF files.
+ *               Use an empty array to completely disable this feature.
+ */
+function mediatheque_get_object_wrapper_mimes() {
+	/**
+	 * Filter here to add mimes to allow wrapping the file into an object tag.
+	 *
+	 * @since  1.2.0
+	 *
+	 * @param  array $value A list of allowed mime types. Defaults to PDF files.
+	 *                      Use an empty array to completely disable this feature.
+	 */
+	return (array) apply_filters( 'mediatheque_object_wrapper_mimes', array(
+		'application/pdf',
+	) );
+}
+
+/**
  * Loacalizes scripts data.
  *
  * @since 1.0.0
@@ -486,6 +508,45 @@ function mediatheque_localize_script( $handle = 'mediatheque-views', $user_id = 
 		'directory' => __( 'Nouveau répertoire', 'mediatheque' ),
 	) );
 
+	$preference_fields = array(
+		'icon' => array(
+			'caption'  => __( 'Masquer l\'icone', 'mediatheque' ),
+			'position' => 0,
+			'type'     => 'checkbox',
+			'classes'  => array( 'setting', 'checkbox-setting' ),
+		),
+		'media_type' => array(
+			'caption'  => __( 'Masquer le type de media.', 'mediatheque' ),
+			'position' => 1,
+			'type'     => 'checkbox',
+			'classes'  => array( 'setting', 'checkbox-setting' ),
+		),
+		'ext' => array(
+			'caption'  => __( 'Masquer l\'extension', 'mediatheque' ),
+			'position' => 2,
+			'type'     => 'checkbox',
+			'classes'  => array( 'setting', 'checkbox-setting' ),
+		),
+		'file_size' => array(
+			'caption'  => __( 'Masquer la taille du media.', 'mediatheque' ),
+			'position' => 3,
+			'type'     => 'checkbox',
+			'classes'  => array( 'setting', 'checkbox-setting' ),
+		),
+	);
+
+	$object_wrapper_mimes = mediatheque_get_object_wrapper_mimes();
+
+	if ( $preference_fields ) {
+		$preference_fields['object_wrapper'] = array(
+			'caption'  => __( 'Incorporer le media.', 'mediatheque' ),
+			'position' => 4,
+			'type'     => 'checkbox',
+			'classes'  => array( 'setting', 'checkbox-setting' ),
+			'validate' => $object_wrapper_mimes,
+		);
+	}
+
 	wp_localize_script( $handle, 'mediaThequeSettings', array(
 		'params' => array(
 			'container' => 'mediatheque-ui',
@@ -528,32 +589,7 @@ function mediatheque_localize_script( $handle = 'mediatheque-views', $user_id = 
 			'user_id'         => $user_id,
 			'isUserMediaOnly' => ! current_user_can( 'upload_files' ) || ! empty( $mediatheque->editor_id ),
 		),
-		'fields' => array(
-			'icon' => array(
-				'caption'  => __( 'Masquer l\'icone', 'mediatheque' ),
-				'position' => 0,
-				'type'     => 'checkbox',
-				'classes'  => array( 'setting', 'checkbox-setting' ),
-			),
-			'media_type' => array(
-				'caption'  => __( 'Masquer le type de media.', 'mediatheque' ),
-				'position' => 1,
-				'type'     => 'checkbox',
-				'classes'  => array( 'setting', 'checkbox-setting' ),
-			),
-			'ext' => array(
-				'caption'  => __( 'Masquer l\'extension', 'mediatheque' ),
-				'position' => 2,
-				'type'     => 'checkbox',
-				'classes'  => array( 'setting', 'checkbox-setting' ),
-			),
-			'file_size' => array(
-				'caption'  => __( 'Masquer la taille du media.', 'mediatheque' ),
-				'position' => 3,
-				'type'     => 'checkbox',
-				'classes'  => array( 'setting', 'checkbox-setting' ),
-			),
-		),
+		'fields' => $preference_fields,
 		'editFields' => mediatheque_sort_array_fields( $edit_fields ),
 	) );
 }

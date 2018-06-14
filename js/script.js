@@ -300,6 +300,13 @@ window.mediaTheque = window.mediaTheque || _.extend( {}, _.pick( window.wp, 'Bac
 
 			_.extend( this.queryString, _.pick( model.attributes, this.options.query_keys ) );
 
+			// Loop to update checkboxes.
+			_.each( this.options.query_keys, function( key ) {
+				if ( ! model.get( key ) ) {
+					this.$el.find( '[data-setting="' + key + '"]' ).prop( 'checked', false );
+				}
+			}, this );
+
 			this.model.metadata = {
 				url: this.model.get( 'base_url' ) + '?' + $.param( this.queryString )
 			};
@@ -308,7 +315,7 @@ window.mediaTheque = window.mediaTheque || _.extend( {}, _.pick( window.wp, 'Bac
 
 	mediaTheque.media.view.customizeFile = mediaTheque.media.view.customizeUserMedia.extend( {
 		initialize: function() {
-			var o = this.options || {}, position = 0,
+			var o = this.options || {}, position = 0, media = o.model.get( 'media' ),
 			    fields = o.fields || [], query_vars = {};
 
 			this.options.query_keys = [];
@@ -329,6 +336,10 @@ window.mediaTheque = window.mediaTheque || _.extend( {}, _.pick( window.wp, 'Bac
 
 			_.each( fields, function( field, id ) {
 				position += 1;
+
+				if ( field.validate && -1 === _.indexOf( field.validate, media.get( 'mime_type' ) ) ) {
+					return;
+				}
 
 				this.collection.add( {
 					id:       id,
