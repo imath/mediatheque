@@ -591,6 +591,7 @@ function mediatheque_localize_script( $handle = 'mediatheque-views', $user_id = 
 		),
 		'fields' => $preference_fields,
 		'editFields' => mediatheque_sort_array_fields( $edit_fields ),
+		'nonce'      => ( wp_installing() && ! is_multisite() ) ? '' : wp_create_nonce( 'wp_rest' ),
 	) );
 }
 
