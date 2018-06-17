@@ -456,10 +456,6 @@ function mediatheque_delete_dir( $dir = null ) {
 	$dirpath    = get_post_meta( $dir_id, '_mediatheque_relative_path', true );
 	$dirpath    = trailingslashit( $uploadpath['basedir'] ) . $dirpath;
 
-	if ( ! is_dir( $dirpath ) ) {
-		return false;
-	}
-
 	$children = get_children( array(
 		'post_type' => 'user_media',
 		'post_parent' => $dir->ID,
@@ -482,8 +478,10 @@ function mediatheque_delete_dir( $dir = null ) {
 		}
 	}
 
-	// Remove the empty directory
-	@ rmdir( $dirpath );
+	// Remove the directory.
+	if ( is_dir( $dirpath ) ) {
+		@ rmdir( $dirpath );
+	}
 
 	$dir = wp_delete_post( $dir_id, true );
 
