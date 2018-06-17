@@ -591,6 +591,13 @@ function mediatheque_localize_script( $handle = 'mediatheque-views', $user_id = 
 		),
 		'fields' => $preference_fields,
 		'editFields' => mediatheque_sort_array_fields( $edit_fields ),
+
+		/**
+		 * Add the Rest Nonce in case Gutenberg is active.
+		 *
+		 * @see https://github.com/WordPress/gutenberg/pull/7329
+		 */
+		'restNonce' => ( wp_installing() && ! is_multisite() ) ? '' : wp_create_nonce( 'wp_rest' ),
 	) );
 }
 

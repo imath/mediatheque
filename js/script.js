@@ -1,4 +1,4 @@
-/* global wp, _, mediaTheque, mediaThequeSettings, JSON, wpApiSettings */
+/* global wp, _, mediaTheque, mediaThequeSettings, JSON */
 
 // Make sure the wp object exists.
 window.wp = window.wp || {};
@@ -744,7 +744,7 @@ window.mediaTheque = window.mediaTheque || _.extend( {}, _.pick( window.wp, 'Bac
 	$( mediaTheque.media.lightEditor.init );
 
 	mediaTheque.App = {
-		init: function( restUrl, rootUrl ) {
+		init: function( restUrl, rootUrl, restNonce ) {
 			this.views        = new Backbone.Collection();
 			this.userMedia    = new wp.api.collections.UserMedia();
 			this.toolbarItems = new Backbone.Collection();
@@ -755,7 +755,7 @@ window.mediaTheque = window.mediaTheque || _.extend( {}, _.pick( window.wp, 'Bac
 				url: restUrl,
 				'file_data_name': 'mediatheque_upload',
 				headers: {
-					'X-WP-Nonce' : wpApiSettings.nonce
+					'X-WP-Nonce' : restNonce
 				}
 			};
 
@@ -796,14 +796,21 @@ window.mediaTheque = window.mediaTheque || _.extend( {}, _.pick( window.wp, 'Bac
 	};
 
 	wp.api.loadPromise.done( function( api ) {
-		var restUrl, rootUrl;
+		var restUrl, rootUrl, restNonce;
 
 		if ( api.get( 'apiRoot' ) && api.get( 'versionString' ) ) {
 			rootUrl = api.get( 'apiRoot' );
 			restUrl = rootUrl + api.get( 'versionString' ) + 'user-media';
+			restNonce = api.get( 'nonce' );
+
+			// If Gutenberg is active, we have to set the nonce.
+			if ( ! restNonce ) {
+				restNonce = mediaThequeSettings.restNonce;
+				api.set( 'nonce', restNonce );
+			}
 		}
 
-		mediaTheque.App.init( restUrl, rootUrl );
+		mediaTheque.App.init( restUrl, rootUrl, restNonce );
 	} );
 
 } )( wp, jQuery );
