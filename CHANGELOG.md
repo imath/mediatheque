@@ -1,5 +1,17 @@
 # Change Log
 
+## 1.2.1
+
+_Requires WordPress 4.7_
+_Tested up to WordPress 5.0_
+
+### Bug fixes
+
+- Make sure the file exists when trying to get its size.
+
+
+---
+
 ## 1.2.0
 
 _Requires WordPress 4.7_

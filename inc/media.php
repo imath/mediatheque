@@ -133,7 +133,11 @@ function mediatheque_get_media_info( $user_media = null, $arg = 'media_type' ) {
 	}
 
 	$filedata['media_type'] = wp_ext2type( $filedata['ext'] );
-	$filedata['size']       = filesize( $file );
+	$filedata['size']       = 0;
+
+	if ( file_exists( $file ) ) {
+		$filedata['size'] = filesize( $file );
+	}
 
 	if ( ! $is_main_site ) {
 		restore_current_blog();
