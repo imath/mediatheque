@@ -80,14 +80,6 @@ class MediaTheque_Rest_Tests extends WP_Test_REST_Controller_Testcase {
 		parent::tearDown();
 	}
 
-	public function get_cap( $caps, $cap ) {
-		if ( in_array( $cap, mediatheque_get_all_caps(), true ) ) {
-			$this->cap = $cap;
-		}
-
-		return $caps;
-	}
-
 	protected function set_post_data( $args = array() ) {
 		$defaults = array(
 			'title'       => 'User Media Title',
@@ -110,16 +102,11 @@ class MediaTheque_Rest_Tests extends WP_Test_REST_Controller_Testcase {
 	}
 
 	public function test_create_items_permissions_check() {
-		add_filter( 'mediatheque_map_meta_caps', array( $this, 'get_cap' ), 10, 2 );
-
 		wp_set_current_user( 0 );
 		$request = new WP_REST_Request( WP_REST_Server::CREATABLE, '/wp/v2/' . $this->rb );
 		$check   = $this->controller->create_item_permissions_check( $request );
 
-		remove_filter( 'mediatheque_map_meta_caps', array( $this, 'get_cap' ), 10, 2 );
-
 		$this->assertErrorResponse( 'rest_cannot_create', $check );
-		$this->assertTrue( 'create_user_uploads' === $this->cap );
 	}
 
 	public function test_context_param() {}
@@ -155,31 +142,21 @@ class MediaTheque_Rest_Tests extends WP_Test_REST_Controller_Testcase {
 	public function test_get_private_item_cant() {
 		wp_set_current_user( 0 );
 
-		add_filter( 'mediatheque_map_meta_caps', array( $this, 'get_cap' ), 10, 2 );
-
 		$request  = new WP_REST_Request( 'GET', '/wp/v2/' . $this->rb . '/' . $this->user_media_ids[1] );
 		$response = $this->rest_server->dispatch( $request );
 
-		remove_filter( 'mediatheque_map_meta_caps', array( $this, 'get_cap' ), 10, 2 );
-
 		$this->assertErrorResponse( 'rest_forbidden', $response );
-		$this->assertTrue( 'read_user_upload' === $this->cap );
 	}
 
 	public function test_get_private_item_can() {
 		wp_set_current_user( $this->user_id );
 
-		add_filter( 'mediatheque_map_meta_caps', array( $this, 'get_cap' ), 10, 2 );
-
 		$request  = new WP_REST_Request( 'GET', '/wp/v2/' . $this->rb . '/' . $this->user_media_ids[1] );
 		$response = $this->rest_server->dispatch( $request );
-
-		remove_filter( 'mediatheque_map_meta_caps', array( $this, 'get_cap' ), 10, 2 );
 
 		$this->assertNotInstanceOf( 'WP_Error', $response );
 		$response = rest_ensure_response( $response );
 		$this->assertEquals( 200, $response->get_status() );
-		$this->assertTrue( 'read_user_upload' === $this->cap );
 	}
 
 	public function test_create_item() {
@@ -230,8 +207,6 @@ class MediaTheque_Rest_Tests extends WP_Test_REST_Controller_Testcase {
 	public function test_update_item() {
 		wp_set_current_user( $this->user_id );
 
-		add_filter( 'mediatheque_map_meta_caps', array( $this, 'get_cap' ), 10, 2 );
-
 		$request = new WP_REST_Request( 'PUT', '/wp/v2/' . $this->rb . '/' . $this->user_media_ids[1] );
 		$request->add_header( 'content-type', 'application/x-www-form-urlencoded' );
 		$params = $this->set_post_data( array(
@@ -242,21 +217,16 @@ class MediaTheque_Rest_Tests extends WP_Test_REST_Controller_Testcase {
 		$request->set_body_params( $params );
 		$response = $this->rest_server->dispatch( $request );
 
-		remove_filter( 'mediatheque_map_meta_caps', array( $this, 'get_cap' ), 10, 2 );
-
 		$this->assertNotInstanceOf( 'WP_Error', $response );
 		$response = rest_ensure_response( $response );
 		$this->assertEquals( 200, $response->get_status() );
 
 		$edited = $response->get_data();
 		$this->assertTrue( 'Edited User Media' === $edited['title']['raw'] );
-		$this->assertTrue( 'publish_user_uploads' === $this->cap );
 	}
 
 	public function test_update_item_cant() {
 		wp_set_current_user( $this->user_id );
-
-		add_filter( 'mediatheque_map_meta_caps', array( $this, 'get_cap' ), 10, 2 );
 
 		$request = new WP_REST_Request( 'PUT', '/wp/v2/' . $this->rb . '/' . $this->user_media_ids[0] );
 		$request->add_header( 'content-type', 'application/x-www-form-urlencoded' );
@@ -267,16 +237,11 @@ class MediaTheque_Rest_Tests extends WP_Test_REST_Controller_Testcase {
 		$request->set_body_params( $params );
 		$response = $this->rest_server->dispatch( $request );
 
-		remove_filter( 'mediatheque_map_meta_caps', array( $this, 'get_cap' ), 10, 2 );
-
 		$this->assertErrorResponse( 'rest_cannot_edit', $response );
-		$this->assertTrue( 'edit_user_upload' === $this->cap );
 	}
 
 	public function test_update_item_can() {
 		wp_set_current_user( $this->admin_id );
-
-		add_filter( 'mediatheque_map_meta_caps', array( $this, 'get_cap' ), 10, 2 );
 
 		$request = new WP_REST_Request( 'PUT', '/wp/v2/' . $this->rb . '/' . $this->user_media_ids[1] );
 		$request->add_header( 'content-type', 'application/x-www-form-urlencoded' );
@@ -288,15 +253,12 @@ class MediaTheque_Rest_Tests extends WP_Test_REST_Controller_Testcase {
 		$request->set_body_params( $params );
 		$response = $this->rest_server->dispatch( $request );
 
-		remove_filter( 'mediatheque_map_meta_caps', array( $this, 'get_cap' ), 10, 2 );
-
 		$this->assertNotInstanceOf( 'WP_Error', $response );
 		$response = rest_ensure_response( $response );
 		$this->assertEquals( 200, $response->get_status() );
 
 		$edited = $response->get_data();
 		$this->assertTrue( 'Edited by admin User Media' === $edited['title']['raw'] );
-		$this->assertTrue( 'publish_user_uploads' === $this->cap );
 	}
 
 	public function test_delete_item() {
@@ -309,19 +271,14 @@ class MediaTheque_Rest_Tests extends WP_Test_REST_Controller_Testcase {
 
 		wp_set_post_terms( $user_media_id, array( $this->term_id ), 'user_media_types' );
 
-		add_filter( 'mediatheque_map_meta_caps', array( $this, 'get_cap' ), 10, 2 );
-
 		wp_set_current_user( $this->user_id );
 
 		$request = new WP_REST_Request( 'DELETE', '/wp/v2/' . $this->rb . '/' . $user_media_id );
 		$response = $this->rest_server->dispatch( $request );
 		$data = $response->get_data();
 
-		remove_filter( 'mediatheque_map_meta_caps', array( $this, 'get_cap' ), 10, 2 );
-
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertTrue( $data['deleted'] );
-		$this->assertTrue( 'delete_user_upload' === $this->cap );
 	}
 
 	public function test_delete_item_cant() {
@@ -334,17 +291,12 @@ class MediaTheque_Rest_Tests extends WP_Test_REST_Controller_Testcase {
 
 		wp_set_post_terms( $user_media_id, array( $this->term_id ), 'user_media_types' );
 
-		add_filter( 'mediatheque_map_meta_caps', array( $this, 'get_cap' ), 10, 2 );
-
 		wp_set_current_user( $this->user_id );
 
 		$request = new WP_REST_Request( 'DELETE', '/wp/v2/' . $this->rb . '/' . $user_media_id );
 		$response = $this->rest_server->dispatch( $request );
 
-		remove_filter( 'mediatheque_map_meta_caps', array( $this, 'get_cap' ), 10, 2 );
-
 		$this->assertErrorResponse( 'rest_cannot_delete', $response );
-		$this->assertTrue( 'delete_user_upload' === $this->cap );
 	}
 
 	public function test_delete_item_can() {
@@ -357,19 +309,14 @@ class MediaTheque_Rest_Tests extends WP_Test_REST_Controller_Testcase {
 
 		wp_set_post_terms( $user_media_id, array( $this->term_id ), 'user_media_types' );
 
-		add_filter( 'mediatheque_map_meta_caps', array( $this, 'get_cap' ), 10, 2 );
-
 		wp_set_current_user( $this->admin_id );
 
 		$request = new WP_REST_Request( 'DELETE', '/wp/v2/' . $this->rb . '/' . $user_media_id );
 		$response = $this->rest_server->dispatch( $request );
 		$data = $response->get_data();
 
-		remove_filter( 'mediatheque_map_meta_caps', array( $this, 'get_cap' ), 10, 2 );
-
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertTrue( $data['deleted'] );
-		$this->assertTrue( 'delete_user_upload' === $this->cap );
 	}
 
 	public function test_prepare_item_for_edit_response() {
