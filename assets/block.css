@@ -22,6 +22,10 @@ div.editor-block-list__block[data-type='mediatheque/usermedia'] .editor-block-li
 	margin-top: 0;
 }
 
-div div.editor-block-list__block[data-type='mediatheque/usermedia'] .editor-block-list__block-edit div:first-child .wp-video {
+div.editor-block-list__block[data-type='mediatheque/usermedia'] .editor-block-list__block-edit div:first-child .wp-video {
 	width: 100%!important;
+}
+
+div.editor-block-list__block[data-type='mediatheque/usermedia'] .wp-block-embed.is-loading {
+	background: none;
 }
