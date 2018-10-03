@@ -8,6 +8,7 @@ _Tested up to WordPress 5.0_
 ### Bug fixes
 
 - Fix the Gutenberg block.
+- Update node modules to latest stable.
 
 ---
 
