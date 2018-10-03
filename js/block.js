@@ -45,6 +45,9 @@
 		// Block Title
 		title: 'MediaThèque',
 
+		// Block Description
+		description: mediaThequeBlock.description,
+
 		// Block Icon
 		icon: function() {
 			return mediaThequeIcon;
@@ -71,9 +74,9 @@
 				focus     = props.isSelected;
 
 			var outputUserMedia = function( usermedia ) {
-				$( '#' + props.id ).parent().find( '.notice-error' ).remove();
-				$( '#' + props.id ).parent().removeClass( 'components-placeholder' );
-				$( '#' + props.id ).before( usermedia ).remove();
+				$( '#' + props.clientId ).parent().find( '.notice-error' ).remove();
+				$( '#' + props.clientId ).parent().removeClass( 'components-placeholder' );
+				$( '#' + props.clientId ).before( usermedia ).remove();
 			};
 
 			var requestUserMedia = function( link ) {
@@ -190,7 +193,7 @@
 								.html( $('<span></span>' )
 									.addClass( 'spinner is-active' )
 								)
-								.prop( 'id', props.id )
+								.prop( 'id', props.clientId )
 							);
 
 						props.setAttributes( {
@@ -230,7 +233,7 @@
 							'button', {
 								key: 'user-media-select-button',
 								type: 'button',
-								id: props.id,
+								id: props.clientId,
 								className: 'mediatheque-block button button-large',
 								onClick:selectUserMedia
 							}, mediaThequeBlock.insertBtn
@@ -300,7 +303,7 @@
 				}, [
 					el(
 						'div', {
-							id: props.id,
+							id: props.clientId,
 							key: 'loading',
 							className: 'wp-block-embed is-loading'
 						}, el( 'span', {

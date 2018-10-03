@@ -1,5 +1,16 @@
 # Change Log
 
+## 1.2.2
+
+_Requires WordPress 4.7_
+_Tested up to WordPress 5.0_
+
+### Bug fixes
+
+- Fix the Gutenberg block.
+
+---
+
 ## 1.2.1
 
 _Requires WordPress 4.7_
@@ -10,7 +21,6 @@ _Tested up to WordPress 5.0_
 - Make sure the file exists when trying to get its size.
 - Make sure a directory still exists on the server before deleting it.
 - Add a fallback to wpApiSettings in case Gutenberg is active.
-
 
 ---
 

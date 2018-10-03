@@ -858,6 +858,7 @@ function mediatheque_block_editor() {
 		'alignmentLabel' => _x( 'Alignement du Media d\'utilisateur', 'Gutenberg block', 'mediatheque' ),
 		'editTitle'      => _x( 'Modifier', 'Gutenberg block', 'mediatheque' ),
 		'genericError'   => _x( 'Une erreur est survenue, merci de réessayer.', 'Gutenberg block', 'mediatheque' ),
+		'description'    => _x( 'Un Media de votre MediaThèque personnelle.', 'Gutenberg block', 'mediatheque' )
 	) );
 }
 
