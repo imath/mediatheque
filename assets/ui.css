@@ -304,7 +304,7 @@
 	vertical-align: top;
 }
 
-[draggable] {
+[draggable="true"] {
 	-moz-user-select: none;
 	-khtml-user-select: none;
 	-webkit-user-select: none;
