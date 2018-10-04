@@ -10,6 +10,7 @@ _Tested up to WordPress 5.0_
 - Fix the Gutenberg block.
 - Update node modules to latest stable.
 - Improve Quicktags support.
+- Improve font-end media rendering in WP Editor.
 - Make sure hovering an image only displays the move cursor in MediaThèque Media UI.
 
 ---
