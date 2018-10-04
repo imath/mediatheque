@@ -437,8 +437,9 @@ window.mediaTheque = window.mediaTheque || _.extend( {}, _.pick( window.wp, 'Bac
 		},
 
 		insertUserMedia: function() {
-			var selection = this.get( 'userMediaSelection' ),
-			    userMedia, link, title, output;
+			var selection  = this.get( 'userMediaSelection' ),
+				hasTinymce = typeof window.tinymce !== 'undefined',
+				userMedia, link, title, output;
 
 			if ( ! selection.length ) {
 				return false;
@@ -449,8 +450,12 @@ window.mediaTheque = window.mediaTheque || _.extend( {}, _.pick( window.wp, 'Bac
 
 			if ( 'publish' === userMedia.get( 'status' ) ) {
 				link  += '?attached=true';
-				output = '<p>' + link + '</p>';
 
+				if ( hasTinymce && window.tinymce.activeEditor && ! window.tinymce.activeEditor.isHidden() ) {
+					output = '<p>' + link + '</p>';
+				} else {
+					output = "\n\n" + link + "\n\n"; // jshint ignore:line
+				}
 			} else {
 				title = userMedia.get( 'title' ).rendered;
 
