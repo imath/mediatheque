@@ -62,3 +62,5 @@ if ( is_multisite() ) {
 
 add_action( 'enqueue_block_editor_assets', 'mediatheque_block_editor'     );
 add_action( 'enqueue_block_assets',        'mediatheque_block_edit_style' );
+
+add_filter( 'subdirectory_reserved_names', 'mediatheque_reserved_name' );

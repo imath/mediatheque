@@ -1205,10 +1205,8 @@ function mediatheque_oembed_user_media_id( $id = 0, $url = '' ) {
 	$_id = $id;
 
 	/**
-	 * On Multisite embedding an URL of the main site in a subsite
+	 * On Multisite embedding a user media in a subsite
 	 * fails to fetch the embed html.
-	 *
-	 * @see https://core.trac.wordpress.org/ticket/40673
 	 */
 	if ( ! $id && is_multisite() ) {
 		$network_url = trailingslashit( network_site_url() ) . mediatheque_get_root_slug();
@@ -1465,4 +1463,18 @@ function mediatheque_get_svg_icon( $color = '#23282d', $bgcolor = '#23282d' ) {
 			<path fill="' . $color . '" stroke="' . $bgcolor . '" d="M 7.006 11.465 L 9.121 10.05 C 10.979 10.05 12.636 11.861 12.636 13.573 L 12.636 15.508 C 12.636 15.508 9.797 16.386 7.006 16.386 C 4.168 16.386 1.376 15.508 1.376 15.508 L 1.376 13.573 C 1.376 11.823 2.885 10.089 4.852 10.089 Z"/>
 		</svg>
 	' );
+}
+
+/**
+ * Makes sure a Sub site of the network won't use the User Media Slug.
+ *
+ * @since  1.2.2
+ *
+ * @param  array  $names The subdirectory reserved names.
+ * @return array         The subdirectory reserved names.
+ */
+function mediatheque_reserved_name( $names = array() ) {
+	$names[] = mediatheque_get_root_slug();
+
+	return $names;
 }
