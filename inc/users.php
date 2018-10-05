@@ -115,6 +115,16 @@ function mediatheque_map_meta_caps( $caps = array(), $cap = '', $user_id = 0, $a
 				}
 			}
 		}
+
+	// Allow regular users to set the User Media display preference if WP Editor is used from front-end.
+	} elseif ( wp_doing_ajax() && isset( $_POST['action'] ) && 'parse-embed' === $_POST['action'] ) {
+		if ( $user_id && ! empty( $_POST['shortcode'] ) ) {
+			$url = str_replace( array( '[embed]', '[/embed]' ), '', $_POST['shortcode'] );
+
+			if ( 0 === strpos( $url, trailingslashit( network_site_url() ) . mediatheque_get_root_slug() ) ) {
+				$caps = array( mediatheque_get_required_cap() );
+			}
+		}
 	}
 
 	/**

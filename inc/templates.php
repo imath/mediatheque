@@ -76,7 +76,7 @@ function mediatheque_print_containers( $editor = true ) {
  *
  * The paste plugin is required as the wpview one is using it.
  *
- * @since 1.2.2
+ * @since 1.3.0
  *
  * @param  array $tinymce_plugins The tiny or Teeny MCE plugins.
  * @return array                  The tiny or Teeny MCE plugins.

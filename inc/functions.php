@@ -1222,6 +1222,16 @@ function mediatheque_oembed_user_media_id( $id = 0, $url = '' ) {
 		$_id = mediatheque_get_post_by_slug( $slug );
 	}
 
+	/**
+	 * Filter the object ID to disable it or use a custom logic.
+	 *
+	 * @since 1.3.0
+	 *
+	 * @param integer|WP_Post $_id The object ID or the full object.
+	 * @param string          $url The embeddable URL.
+	 */
+	$_id = apply_filters( 'mediatheque_oembed_object_id', $_id, $url );
+
 	if ( ! $_id ) {
 		return $id;
 	} elseif ( is_a( $_id, 'WP_Post' ) ) {
@@ -1468,7 +1478,7 @@ function mediatheque_get_svg_icon( $color = '#23282d', $bgcolor = '#23282d' ) {
 /**
  * Makes sure a Sub site of the network won't use the User Media Slug.
  *
- * @since  1.2.2
+ * @since  1.3.0
  *
  * @param  array  $names The subdirectory reserved names.
  * @return array         The subdirectory reserved names.
