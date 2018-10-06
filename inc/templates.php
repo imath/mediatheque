@@ -25,6 +25,37 @@ function mediatheque_can_enqueue_user_media() {
 }
 
 /**
+ * Loads the wpview & the paste TinyMCE plugins when MediaThèque is used on front-end.
+ *
+ * The paste plugin is required as the wpview one is using it.
+ *
+ * @since 1.3.0
+ *
+ * @param  array $tinymce_plugins The tiny or Teeny MCE plugins.
+ * @return array                  The tiny or Teeny MCE plugins.
+ */
+function mediatheque_load_tinymce_plugins( $tinymce_plugins = array() ) {
+	if ( ! in_array( 'wpview', $tinymce_plugins, true ) ) {
+		$tinymce_plugins = array_merge( $tinymce_plugins, array( 'wpview', 'paste' ) );
+	}
+
+	return $tinymce_plugins;
+}
+
+/**
+ * On front-end MCE Views are not loaded.
+ *
+ * These scripts make sure the media are rendered on front-end.
+ *
+ * @since  1.3.0
+ */
+function mediatheque_load_mce_views() {
+	wp_enqueue_script( 'mce-view' );
+	add_filter( 'tiny_mce_plugins',  'mediatheque_load_tinymce_plugins' );
+	add_filter( 'teeny_mce_plugins', 'mediatheque_load_tinymce_plugins' );
+}
+
+/**
  * Enqueues User Media Scripts and styles for the WP Editor.
  *
  * @since 1.0.0
@@ -38,7 +69,13 @@ function mediatheque_enqueue_user_media() {
 	wp_enqueue_script( 'mediatheque-editor' );
 	mediatheque_localize_script();
 
-	wp_enqueue_style( 'mediatheque-editor' );
+	if ( ! mediatheque_is_post_type_admin_screen() ) {
+		mediatheque_load_mce_views();
+
+		wp_enqueue_style( 'mediatheque-front' );
+	} else {
+		wp_enqueue_style( 'mediatheque-editor' );
+	}
 }
 
 /**
@@ -69,24 +106,6 @@ function mediatheque_print_containers( $editor = true ) {
 	}
 
 	return $base_layout;
-}
-
-/**
- * Loads the wpview & the paste TinyMCE plugins when MediaThèque is used on front-end.
- *
- * The paste plugin is required as the wpview one is using it.
- *
- * @since 1.3.0
- *
- * @param  array $tinymce_plugins The tiny or Teeny MCE plugins.
- * @return array                  The tiny or Teeny MCE plugins.
- */
-function mediatheque_load_tinymce_plugins( $tinymce_plugins = array() ) {
-	if ( ! in_array( 'wpview', $tinymce_plugins, true ) ) {
-		$tinymce_plugins = array_merge( $tinymce_plugins, array( 'wpview', 'paste' ) );
-	}
-
-	return $tinymce_plugins;
 }
 
 /**
@@ -137,11 +156,7 @@ function mediatheque_button( $args = array() ) {
 
 	if ( ! is_admin() ) {
 		wp_enqueue_style( 'mediatheque-front' );
-
-		// These scripts make sure the media are rendered on front-end.
-		wp_enqueue_script( 'mce-view' );
-		add_filter( 'tiny_mce_plugins',  'mediatheque_load_tinymce_plugins' );
-		add_filter( 'teeny_mce_plugins', 'mediatheque_load_tinymce_plugins' );
+		mediatheque_load_mce_views();
 	}
 
 	$img = '';

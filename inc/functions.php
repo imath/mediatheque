@@ -124,6 +124,23 @@ function mediatheque_is_main_site( $site_id = 0 ) {
 }
 
 /**
+ * is the current screen a Post Type Admin screen?
+ *
+ * @since  1.3.0
+ *
+ * @return boolean True if the current screen is a Post Type Admin screen.
+ *                 False otherwise.
+ */
+function mediatheque_is_post_type_admin_screen() {
+	$screen = null;
+	if ( function_exists( 'get_current_screen' ) ) {
+		$screen = get_current_screen();
+	}
+
+	return ! empty( $screen->post_type );
+}
+
+/**
  * Get the download url for a User Media Item.
  *
  * @since 1.0.0
@@ -1091,12 +1108,7 @@ function mediatheque_editor_settings( $settings = array(), $editor_id = '' ) {
 		return $settings;
 	}
 
-	$screen = null;
-	if ( function_exists( 'get_current_screen' ) ) {
-		$screen = get_current_screen();
-	}
-
-	if ( empty( $screen->post_type ) && mediatheque_disable_front_end_button() ) {
+	if ( ! mediatheque_is_post_type_admin_screen() && mediatheque_disable_front_end_button() ) {
 		return $settings;
 	}
 
