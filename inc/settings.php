@@ -143,3 +143,12 @@ function mediatheque_settings_field_avatars() {
 	<label for="mediatheque-personal-avatar"><?php esc_html_e( 'Autoriser les utilisateurs à choisir un de leurs media comme image de profil.', 'mediatheque' ); ?></label>
 	<?php
 }
+
+function mediatheque_settings_field_front_end_button() {
+	$disable_front_end_button = mediatheque_disable_front_end_button();
+
+	?>
+	<input name="mediatheque_disable_on_front_end" id="mediatheque-disable-on-front_end" type="checkbox" value="1" <?php checked( mediatheque_disable_front_end_button() ); ?> />
+	<label for="mediatheque-disable-on-front_end"><?php esc_html_e( 'Désactiver son ajout automatique.', 'mediatheque' ); ?></label>
+	<?php
+}

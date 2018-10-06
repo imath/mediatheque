@@ -81,6 +81,27 @@ function mediatheque_use_personal_avatar( $default = true ) {
 }
 
 /**
+ * Is the MediaThèque button disabled on front-end?
+ *
+ * @since 1.3.0
+ *
+ * @param  boolean $default Defaults to enabled.
+ * @return boolean          True if the MediaThèque button is disabled.
+ *                          False otherwise.
+ */
+function mediatheque_disable_front_end_button( $default = false ) {
+	/**
+	 * Filter here to allow/disallow the MediaThèque button on front-end.
+	 *
+	 * @since 1.3.0
+	 *
+	 * @param boolean $value True if the MediaThèque button is disabled.
+	 *                       False otherwise.
+	 */
+	return (bool) apply_filters( 'mediatheque_disable_front_end_button', get_network_option( 0, 'mediatheque_disable_on_front_end', $default ) );
+}
+
+/**
  * Default values for the options (used at Install step).
  *
  * @since 1.0.0
@@ -96,8 +117,9 @@ function mediatheque_get_default_options() {
 	 * @param array $value The default values for the options.
 	 */
 	return apply_filters( 'mediatheque_get_default_options', array(
-		'mediatheque_capability'      => 'exist',
-		'mediatheque_mime_types'      => mediatheque_get_default_mime_types(),
-		'mediatheque_personal_avatar' => 1,
+		'mediatheque_capability'           => 'exist',
+		'mediatheque_mime_types'           => mediatheque_get_default_mime_types(),
+		'mediatheque_personal_avatar'      => 1,
+		'mediatheque_disable_on_front_end' => 0,
 	) );
 }

@@ -133,7 +133,9 @@ module.exports = function( grunt ) {
 
 	grunt.registerTask( 'compress', ['git-archive'] );
 
-	grunt.registerTask( 'release', ['checktextdomain', 'makepot', 'clean', 'jstest', 'shrink'] );
+	grunt.registerTask( 'translate', ['checktextdomain', 'makepot'] );
+
+	grunt.registerTask( 'release', ['translate', 'clean', 'jstest', 'shrink'] );
 
 	// Travis CI Tasks.
 	grunt.registerTask( 'travis:phpunit', ['jstest', 'checktextdomain', 'phpunit'] );

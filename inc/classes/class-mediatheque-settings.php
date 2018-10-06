@@ -60,6 +60,11 @@ class MediaTheque_Settings {
 					'callback'          => 'mediatheque_settings_field_avatars',
 					'sanitize_callback' => 'absint',
 				),
+				'mediatheque_disable_on_front_end' => array(
+					'title'             => __( 'Bouton MediaThèque en frontal.', 'mediatheque' ),
+					'callback'          => 'mediatheque_settings_field_front_end_button',
+					'sanitize_callback' => 'absint',
+				),
 			),
 		) );
 

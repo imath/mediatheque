@@ -1091,6 +1091,15 @@ function mediatheque_editor_settings( $settings = array(), $editor_id = '' ) {
 		return $settings;
 	}
 
+	$screen = null;
+	if ( function_exists( 'get_current_screen' ) ) {
+		$screen = get_current_screen();
+	}
+
+	if ( empty( $screen->post_type ) && mediatheque_disable_front_end_button() ) {
+		return $settings;
+	}
+
 	mediatheque()->editor_id = $editor_id;
 
 	return $settings;
