@@ -130,7 +130,7 @@ function mediatheque_button( $args = array() ) {
 
 	$r = wp_parse_args( $args, array(
 		'editor_id'           => 'content',
-		'editor_btn_classes'  => array( 'mediabrary-insert' ),
+		'editor_btn_classes'  => array( 'mediatheque-insert' ),
 		'editor_btn_text'     => __( 'Ajouter un media', 'mediatheque' ),
 		'editor_btn_dashicon' => 'mediatheque-icon',
 		'echo'                => true,

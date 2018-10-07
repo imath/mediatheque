@@ -604,7 +604,7 @@ function mediatheque_localize_script( $handle = 'mediatheque-views', $user_id = 
 			),
 			'directory'       => mediatheque_get_displayed_directory(),
 			'user_id'         => $user_id,
-			'isUserMediaOnly' => ! current_user_can( 'upload_files' ) || ! empty( $mediatheque->editor_id ),
+			'isUserMediaOnly' => ! current_user_can( 'upload_files' ) || ! empty( $mediatheque->editor_id ) || ! mediatheque_is_post_type_admin_screen(),
 		),
 		'fields' => $preference_fields,
 		'editFields' => mediatheque_sort_array_fields( $edit_fields ),
