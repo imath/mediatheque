@@ -79,7 +79,8 @@ function mediatheque_map_meta_caps( $caps = array(), $cap = '', $user_id = 0, $a
 	if ( in_array( $cap, mediatheque_get_all_caps(), true ) ) {
 		if ( $user_id ) {
 			$required_cap = mediatheque_get_required_cap();
-			$admin_caps   = array_diff_key( mediatheque_types_capabilities(), array( 'assign_terms' => false ) );
+			$admin_caps   = mediatheque_types_capabilities();;
+			unset( $admin_caps['assign_terms'] );
 			$admin_caps   = array_merge( $admin_caps, array(
 				'edit_user_uploads',
 				'edit_others_user_uploads',
