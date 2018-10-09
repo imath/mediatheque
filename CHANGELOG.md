@@ -9,7 +9,7 @@ _Tested up to WordPress 5.0_
 
 - Fix the Gutenberg block.
 - Update node modules to latest stable.
-- Make sure hovering an image only displays the move cursor in MediaThèque Media UI.
+- Make sure hovering an image only displays the move cursor in MediaThèque Admin UI.
 
 ### Features
 
