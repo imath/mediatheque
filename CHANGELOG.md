@@ -1,5 +1,16 @@
 # Change Log
 
+## 1.3.1
+
+_Requires WordPress 4.7_
+_Tested up to WordPress 5.0_
+
+### Bug fixes
+
+- Make sure the block's JavaScript is loaded in footer.
+
+---
+
 ## 1.3.0
 
 _Requires WordPress 4.7_

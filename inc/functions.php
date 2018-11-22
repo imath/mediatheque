@@ -655,7 +655,6 @@ function mediatheque_register_scripts() {
 		'mediatheque-block' => array(
 			'location' => sprintf( '%1$sblock%2$s.js', $url, $min ),
 			'deps'     => array( 'wp-blocks', 'wp-element' ),
-			'footer'   => false,
 		),
 	), $url, $min, $v );
 
