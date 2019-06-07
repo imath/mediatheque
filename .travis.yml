@@ -3,19 +3,28 @@ sudo: false
 
 language: php
 
+dist: trusty
+
+cache:
+  apt: true
+  directories:
+    - $HOME/.composer/cache/files
+    - $HOME/.npm
+    - /tmp/node
+
 php:
   - 7.2
   - 7.1
   - 7.0
-  - 5.6
 
 # WordPress comes from the Git mirror, where 'master' mirrors svn 'trunk' and
 # x.y mirrors the latest from the x.y branch
 env:
   - WP_VERSION=master MT_TRAVISCI=travis:phpunit
+  - WP_VERSION=5.2 MT_TRAVISCI=travis:phpunit
+  - WP_VERSION=5.1 MT_TRAVISCI=travis:phpunit
+  - WP_VERSION=5.0 MT_TRAVISCI=travis:phpunit
   - WP_VERSION=4.9 MT_TRAVISCI=travis:phpunit
-  - WP_VERSION=4.8 MT_TRAVISCI=travis:phpunit
-  - WP_VERSION=4.7 MT_TRAVISCI=travis:phpunit
 
 before_install:
   # set up WP install
@@ -39,7 +48,7 @@ before_install:
   - cd $plugin_dir
   # setup NodeJS version using NVM
   - node --version
-  - nvm install 6
+  - nvm install 10.13.0
   - node --version
   - npm install -g grunt-cli
   - npm --version
@@ -56,13 +65,11 @@ before_install:
 
 # before_script: Failures in this section will result in build status 'errored'
 before_script:
-  - export PATH="$HOME/.composer/vendor/bin:$PATH"
-  - |
-    if [[ ${TRAVIS_PHP_VERSION:0:2} == "7." ]]; then
-      composer global require "phpunit/phpunit=5.7.*"
-    elif [[ ${TRAVIS_PHP_VERSION:0:3} != "5.2" ]]; then
-      composer global require "phpunit/phpunit=4.8.*"
-    fi
+  - composer global require --dev phpunit/phpunit:^6;
+  - composer install;
+  - mkdir -p /tmp/node/node_modules
+  - ln -s /tmp/node/node_modules $plugin_dir/node_modules
   - npm install
+
 # Run tests
 script: grunt $MT_TRAVISCI
