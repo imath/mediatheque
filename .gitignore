@@ -6,5 +6,7 @@ pids
 logs
 
 node_modules
+vendor
+composer.lock
 npm-debug.log
 mediatheque.zip

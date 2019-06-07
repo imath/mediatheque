@@ -1,0 +1,26 @@
+{
+	"name": "mediatheque/mediatheque",
+	"description": "An alternative Media Library for every WordPress user!",
+	"type": "wordpress-plugin",
+	"keywords": [
+        "media",
+        "users"
+	],
+	"homepage": "https://github.com/imath/mediatheque",
+	"license": "GPL-2.0+",
+	"authors": [ {
+		"name": "imath",
+		"homepage": "https://imathi.eu/"
+	} ],
+	"support": {
+		"issues": "https://github.com/imath/mediatheque/issues"
+	},
+	"require": {
+		"composer/installers": "~1.0",
+		"php": ">=5.6.0"
+	},
+	"require-dev": {
+		"phpcompatibility/phpcompatibility-wp": "*",
+		"dealerdirect/phpcodesniffer-composer-installer": "^0.4.3"
+	}
+}
