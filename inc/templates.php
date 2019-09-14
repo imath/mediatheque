@@ -383,7 +383,18 @@ function mediatheque_prepend_user_media( $content = '' ) {
 
 	// Single User Media display
 	} else {
-		if ( ! is_embed() ){
+		if ( ! is_embed() ) {
+			/**
+			 * Some themes are first outputing the Attachment image before the content.
+			 *
+			 * eg: Twenty Nineteen, TwentySixteen.
+			 *
+			 * If the image has been output, no need to prepend the content with it.
+			 */
+			if ( did_action( 'mediatheque_image_downsized' ) )  {
+				return $content;
+			}
+
 			$mediatheque->user_media_link = mediatheque_get_download_url( $GLOBALS['post'] );
 
 			// Overrides

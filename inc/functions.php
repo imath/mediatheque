@@ -1025,6 +1025,86 @@ function mediatheque_embed_template( $template = '' ) {
 }
 
 /**
+ * Filter to replace the Image Attachment url with the download one.
+ *
+ * @since 1.3.2
+ *
+ * @param  string  $url The attachment URL.
+ * @param  integer $id  The attachment ID.
+ * @return string       The User Media download URL if needed. Unchanged otherwise.
+ */
+function mediatheque_get_image_download_url( $url = '', $id = 0 ) {
+	// Prevent infinite loops.
+	remove_filter( 'wp_get_attachment_url', 'mediatheque_get_image_download_url', 10, 2 );
+
+	// Get the plugin main instance.
+	$mediatheque = mediatheque();
+
+	if ( ! isset( $mediatheque->user_media_image_attachment ) || (int) $mediatheque->user_media_image_attachment->ID !== (int) $id ) {
+		return $url;
+	}
+
+	$user_media = $mediatheque->user_media_image_attachment;
+
+	// Resets
+	$GLOBALS['post'] = $user_media;
+	wp_cache_set( $user_media->ID, $user_media, 'posts' );
+	unset( $mediatheque->user_media_image_attachment );
+
+	return mediatheque_get_download_url( $user_media );
+}
+
+/**
+ * Filter to let image_downsize() do its work for the User Media post type.
+ *
+ * @since 1.3.2
+ *
+ * @param boolean      $out  Whether to shortcircuit image_downsize(). Default false.
+ * @param integer      $id   User Media ID for image.
+ * @param array|string $size Optional. Image size to scale to. Accepts any valid image size,
+ *                           or an array of width and height values in pixels (in that order).
+ *                           Default 'medium'.
+ * @return false|array       Array containing the image URL, width, height, and boolean for whether
+ *                           the image is an intermediate size. False on failure.
+ */
+function mediatheque_image_downsize( $out = false, $id = 0, $size = '' ) {
+	// Prevent infinite loops.
+	remove_filter( 'image_downsize', 'mediatheque_image_downsize', 10, 3 );
+
+	// Get the plugin main instance.
+	$mediatheque = mediatheque();
+
+	if ( ! isset( $mediatheque->user_media_image_attachment ) || (int) $mediatheque->user_media_image_attachment->ID !== (int) $id ) {
+		return $out;
+	}
+
+	$user_media = $mediatheque->user_media_image_attachment;
+	$GLOBALS['post']->post_type = 'attachment';
+	wp_cache_set( $user_media->ID, $GLOBALS['post'], 'posts' );
+
+	$out = image_downsize( false, $id, $size );
+
+	add_filter( 'wp_get_attachment_url', 'mediatheque_get_image_download_url', 10, 2 );
+
+	/**
+	 * Allow the modification of the output for images.
+	 *
+	 * @since 1.3.2
+	 *
+	 * @param false|array  $out        Array containing the image URL, width, height, and boolean for whether
+	 *                                 the image is an intermediate size. False on failure.
+	 * @param integer      $id         User Media ID for image.
+	 * @param array|string $size       Optional. Image size to scale to. Accepts any valid image size,
+	 *                                 or an array of width and height values in pixels (in that order).
+	 *                                 Default 'medium'.
+	 * @param WP_Post      $user_media The User Media object.
+	 */
+	do_action_ref_array( 'mediatheque_image_downsized', array( $out, $id, $size, $user_media ) );
+
+	return $out;
+}
+
+/**
  * Set some WP_Query parameters so that the Attachment template is used.
  *
  * @since  1.0.0
@@ -1054,14 +1134,15 @@ function mediatheque_parse_query( WP_Query $query ) {
 		return;
 	}
 
+	// Set the user media being requested.
+	$user_media = mediatheque_get_post_by_slug( $query->get( 'mediatheque' ) );
+
+	if ( false === $user_media ) {
+		$query->set_404();
+		return;
+	}
+
 	if ( 1 === (int) $query->get( mediatheque_get_download_rewrite_tag() ) ) {
-		$user_media = mediatheque_get_post_by_slug( $query->get( 'mediatheque' ) );
-
-		if ( false === $user_media ) {
-			$query->set_404();
-			return;
-		}
-
 		if ( 'publish' !== get_post_status( $user_media ) && ! current_user_can( 'read_private_user_uploads' ) ) {
 			$query->set_404();
 			return;
@@ -1082,7 +1163,16 @@ function mediatheque_parse_query( WP_Query $query ) {
 		}
 	}
 
+	// Set the Attachment flag.
 	$query->is_attachment = true;
+
+	if ( wp_attachment_is( 'image', $user_media ) ) {
+		// Object cache the image.
+		mediatheque()->user_media_image_attachment = $user_media;
+
+		add_filter( 'image_downsize', 'mediatheque_image_downsize', 10, 3 );
+	}
+
 	add_filter( 'the_content', 'mediatheque_prepend_user_media', 11 );
 }
 

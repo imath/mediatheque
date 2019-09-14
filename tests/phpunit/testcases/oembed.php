@@ -16,7 +16,12 @@ class MediaTheque_Embed_Tests extends WP_UnitTestCase {
 
 		$this->mediatheque_factory = new MediaTheque_UnitTest_Factory;
 
-		require_once ABSPATH . WPINC . '/class-oembed.php';
+		if ( file_exists( ABSPATH . WPINC . '/class-wp-oembed.php' ) ) {
+			require_once ABSPATH . WPINC . '/class-wp-oembed.php';
+		} else {
+			require_once ABSPATH . WPINC . '/class-oembed.php';
+		}
+
 		$this->oembed = _wp_oembed_get_object();
 	}
 
