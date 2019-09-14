@@ -4,7 +4,7 @@
  * Plugin URI: https://imathi.eu/tag/mediatheque/
  * Description: Une gestion alternative des media dans WordPress, pour tous.
  * Version: 1.3.2
- * Requires at least: 5.0
+ * Requires at least: 4.7
  * Tested up to: 5.3
  * License: GNU/GPL 2
  * Author: imath
