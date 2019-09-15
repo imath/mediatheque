@@ -690,7 +690,7 @@ function mediatheque_register_scripts() {
 		),
 		'mediatheque-block' => array(
 			'location' => sprintf( '%1$sblock%2$s.css', $url, $min ),
-			'deps'     => array( 'wp-blocks' ),
+			'deps'     => array( 'wp-block-editor' ),
 		),
 	), $url, $min, $v );
 
