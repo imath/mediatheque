@@ -204,7 +204,7 @@ window.mediaTheque = window.mediaTheque || _.extend( {}, _.pick( window.wp, 'Bac
 		},
 
 		setFormElements: function() {
-			this.$el.find( '.caption, .alt-text, .advanced-toggle' ).css( { display: 'none' } );
+			this.$el.find( '.caption, .alt-text, .advanced-toggle, #alt-text-description' ).css( { display: 'none' } );
 			this.$el.find( 'input.link-to-custom' ).val( this.options.attachment.get( 'url' ) );
 			this.$el.find( 'select.size' ).val( 'full' );
 			this.$el.find( 'select.size option[value="full"]' ).prop( 'selected', 'selected' );

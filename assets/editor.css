@@ -81,6 +81,19 @@
 	width: 48%;
 }
 
+.media-frame .user-media-preferences .embed-media-settings .column-settings label,
+.media-modal .media-frame .user-media-preferences .embed-media-settings .column-settings .legend-inline {
+	display: block;
+	position: static;
+	transform: inherit;
+	margin: 0;
+	line-height: 1.84615384;
+}
+
+.media-frame .user-media-preferences .embed-media-settings .column-image {
+	margin-top: 2em;
+}
+
 .media-frame .user-media-preferences .embed-audio-settings .setting {
 	width: calc( 100% - 430px );
 }
