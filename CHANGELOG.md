@@ -3,7 +3,7 @@
 ## 1.3.2
 
 _Requires WordPress 4.7_
-_Tested up to WordPress 5.0_
+_Tested up to WordPress 5.3_
 
 ### Bug fixes
 
