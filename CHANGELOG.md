@@ -1,5 +1,18 @@
 # Change Log
 
+## 1.3.2
+
+_Requires WordPress 4.7_
+_Tested up to WordPress 5.0_
+
+### Bug fixes
+
+- Make sure to get the image when themes are first outputing the Attachment image before the content (eg: Twenty Nineteen, TwentySixteen).
+- Adapt the MediaThèque Block to latest stable Block Editor.
+- Improve the appearance of user media preferences for images, audio files and video files.
+
+---
+
 ## 1.3.1
 
 _Requires WordPress 4.7_
