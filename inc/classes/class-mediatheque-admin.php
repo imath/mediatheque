@@ -11,35 +11,35 @@
 defined( 'ABSPATH' ) || exit;
 
 /**
- * The admin class
+ * The admin class.
  *
  * @since  1.0.0
  */
 class MediaTheque_Admin {
 
 	/**
-	 * The title used in various screens
+	 * The title used in various screens.
 	 *
 	 * @var string
 	 */
 	public $title = null;
 
 	/**
-	 * The Post Type object
+	 * The Post Type object.
 	 *
 	 * @var WP_Post_Type
 	 */
 	public $post_type_object = null;
 
 	/**
-	 * The MediaThèque settings
+	 * The MediaThèque settings.
 	 *
 	 * @var MediaTheque_Settings
 	 */
 	public $settings = null;
 
 	/**
-	 * The MediaThèque vanished user media logs
+	 * The MediaThèque vanished user media logs.
 	 *
 	 * @var array
 	 */
@@ -90,7 +90,7 @@ class MediaTheque_Admin {
 	}
 
 	/**
-	 * Starts the Admin class
+	 * Starts the Admin class.
 	 *
 	 * @since 1.0.0
 	 */
@@ -102,28 +102,28 @@ class MediaTheque_Admin {
 		$mediatheque = mediatheque();
 
 		if ( empty( $mediatheque->admin ) ) {
-			$mediatheque->admin = new self;
+			$mediatheque->admin = new self();
 		}
 
 		return $mediatheque->admin;
 	}
 
 	/**
-	 * Setups hooks
+	 * Setups hooks.
 	 *
 	 * @since 1.0.0
 	 */
 	private function hooks() {
-		add_action( 'admin_menu',         array( $this, 'menus'   )     );
-		add_action( 'network_admin_menu', array( $this, 'menus'   )     );
-		add_action( 'user_admin_menu',    array( $this, 'menus'   )     );
-		add_action( 'init',               array( $this, 'globals' ), 14 );
+		add_action( 'admin_menu', array( $this, 'menus' ) );
+		add_action( 'network_admin_menu', array( $this, 'menus' ) );
+		add_action( 'user_admin_menu', array( $this, 'menus' ) );
+		add_action( 'init', array( $this, 'globals' ), 14 );
 
-		/** Settings *********************************************************/
+		// Settings.
 		add_action( 'admin_enqueue_scripts', array( $this, 'inline_scripts' ) );
 
 		if ( ! is_multisite() ) {
-			add_action( 'admin_head',                                  array( $this, 'admin_head'              ) );
+			add_action( 'admin_head', array( $this, 'admin_head' ) );
 			add_action( 'admin_head-settings_page_user-media-options', array( $this, 'settings_menu_highlight' ) );
 		}
 	}
@@ -159,20 +159,22 @@ class MediaTheque_Admin {
 		if ( ! is_multisite() ) {
 			if ( 'options-media' === $screen->id || 'settings_page_user-media-options' === $screen->id ) {
 				$links = array(
-					sprintf( '<a href="%1$s"%2$s>%3$s</a>',
+					sprintf(
+						'<a href="%1$s"%2$s>%3$s</a>',
 						esc_url( admin_url( 'options-media.php' ) ),
 						'options-media' === $screen->id ? ' class="current"' : '',
 						esc_html__( 'Bibliothèque partagée', 'mediatheque' )
 					),
-					sprintf( '<a href="%1$s"%2$s>%3$s</a>',
+					sprintf(
+						'<a href="%1$s"%2$s>%3$s</a>',
 						esc_url( add_query_arg( 'page', 'user-media-options', admin_url( 'options-general.php' ) ) ),
 						'settings_page_user-media-options' === $screen->id ? ' class="current"' : '',
 						esc_html( $this->title )
 					),
 				);
 
-				$inline_scripts['media-tabs'] = sprintf( '
-					$( \'.wrap h1\' ).first().after( $( \'<div></div>\' )
+				$inline_scripts['media-tabs'] = sprintf(
+					'$( \'.wrap h1\' ).first().after( $( \'<div></div>\' )
 						.addClass( \'wp-filter\')
 						.html(
 							$( \'<ul></ul>\' )
@@ -181,7 +183,9 @@ class MediaTheque_Admin {
 								%s
 							)
 						)
-					);', '\'<li>' . join( '</li><li>', $links ) . '</li>\'' );
+					);',
+					'\'<li>' . join( '</li><li>', $links ) . '</li>\''
+				);
 			}
 		}
 
@@ -199,7 +203,7 @@ class MediaTheque_Admin {
 			';
 		}
 
-		$pointer = '';
+		$pointer              = '';
 		$pointer_placeholders = '
 			$( document ).ready( function( $ ) {
 				$( \'#%1$s\' ).pointer( {
@@ -219,7 +223,7 @@ class MediaTheque_Admin {
 		$pointers = mediatheque_get_pointers();
 
 		if ( $pointers ) {
-			$can_manage_options  = current_user_can( $this->capability );
+			$can_manage_options = current_user_can( $this->capability );
 
 			if ( ! is_multisite() ) {
 				$permalink_structure = get_option( 'permalink_structure' );
@@ -232,7 +236,7 @@ class MediaTheque_Admin {
 				if ( 'toplevel_page_user-media' !== $key && ! $can_manage_options ) {
 					continue;
 
-				// Permalink is specific
+					// Permalink is specific.
 				} elseif ( ! isset( $permalink_structure ) && 'user-media-permalinks' === $key ) {
 					continue;
 				} elseif ( 'user-media-permalinks' === $key && $can_manage_options ) {
@@ -283,7 +287,7 @@ class MediaTheque_Admin {
 	public function menus() {
 		$menu_title = $this->title;
 
-		// Regular user
+		// Regular user.
 		if ( ( is_user_logged_in() && ! current_user_can( 'upload_files' ) ) || is_network_admin() ) {
 			add_menu_page(
 				$this->title,
@@ -292,10 +296,10 @@ class MediaTheque_Admin {
 				'user-media',
 				array( $this, 'media_grid' ),
 				mediatheque_get_svg_icon(),
-				20 // Before comments
+				20 // Before comments.
 			);
 
-		// Contributors and Up.
+			// Contributors and Up.
 		} else {
 			add_media_page(
 				$this->title,
@@ -306,7 +310,7 @@ class MediaTheque_Admin {
 			);
 		}
 
-		// User Media options
+		// User Media options.
 		$screen_id = add_submenu_page(
 			$this->settings_page,
 			$this->title,
@@ -332,7 +336,7 @@ class MediaTheque_Admin {
 				add_action( 'tool_box', array( $this, 'tools_card' ), 100 );
 			}
 
-		// Save MediaThèque settings on specific page load
+			// Save MediaThèque settings on specific page load.
 		} else {
 			add_action( "load-{$screen_id}", array( $this, 'load_mediatheque_settings' ) );
 		}
@@ -353,7 +357,7 @@ class MediaTheque_Admin {
 	 * @since 1.0.0
 	 */
 	public function settings_menu_highlight() {
-		$GLOBALS['submenu_file'] = 'options-media.php';
+		$GLOBALS['submenu_file'] = 'options-media.php'; // phpcs:ignore
 	}
 
 	/**
@@ -363,7 +367,7 @@ class MediaTheque_Admin {
 	 * @since 1.0.0
 	 */
 	public function restore_settings_feedback() {
-		require( ABSPATH . 'wp-admin/options-head.php' );
+		require ABSPATH . 'wp-admin/options-head.php';
 	}
 
 	/**
@@ -375,7 +379,7 @@ class MediaTheque_Admin {
 		add_action( 'all_admin_notices', array( $this, 'restore_settings_feedback' ) );
 
 		if ( ! empty( $_POST['mediatheque_settings'] ) && ! empty( $_POST['option_page'] ) ) {
-			$option_page = $_POST['option_page'];
+			$option_page = sanitize_key( $_POST['option_page'] );
 
 			check_admin_referer( $option_page . '-options' );
 
@@ -383,36 +387,37 @@ class MediaTheque_Admin {
 
 			if ( isset( $options[ $option_page ] ) ) {
 
-				foreach ( $options[$option_page] as $option ) {
+				foreach ( $options[ $option_page ] as $option ) {
 
 					$option = trim( $option );
-					$value = null;
+					$value  = null;
 
 					if ( isset( $_POST[ $option ] ) ) {
-						$value = $_POST[ $option ];
+						$value = wp_unslash( $_POST[ $option ] ); // phpcs:ignore
 
 						if ( ! is_array( $value ) ) {
 							$value = trim( $value );
+							$value = esc_html( $value );
+						} else {
+							$value = array_map( 'esc_html', $value );
 						}
-
-						$value = wp_unslash( $value );
 					}
 
 					update_network_option( 0, $option, $value );
 				}
 			}
 
-			wp_redirect( add_query_arg( 'updated', 'true',  wp_get_referer() ) );
+			wp_safe_redirect( add_query_arg( 'updated', 'true', wp_get_referer() ) );
 			exit;
 		}
 	}
 
 	/**
-	 * Media options' form
+	 * Media options' form.
 	 *
 	 * @since 1.0.0
 	 */
-	function do_settings() {
+	public function do_settings() {
 		$form_url = self_admin_url( 'options.php' );
 		if ( is_multisite() ) {
 			$form_url = add_query_arg( 'page', 'user-media-options', self_admin_url( 'settings.php' ) );
@@ -435,21 +440,26 @@ class MediaTheque_Admin {
 			</form>
 
 			<?php if ( ! empty( $GLOBALS['is_nginx'] ) ) : ?>
-				<h2><?php esc_html_e( 'Configuration complémentaire Nginx', 'mediatheque' ) ;?></h2>
+				<h2><?php esc_html_e( 'Configuration complémentaire Nginx', 'mediatheque' ); ?></h2>
 
 				<table class="form-table">
 					<tbody>
 						<tr>
-							<th scope="row"><?php esc_html_e( 'Configuration de votre serveur', 'mediatheque' ) ;?></th>
+							<th scope="row"><?php esc_html_e( 'Configuration de votre serveur', 'mediatheque' ); ?></th>
 							<td>
-								<?php printf(
+								<?php
+								printf(
 									'<textarea class="code" readonly="readonly" cols="100" rows="5">%s</textarea>',
-sprintf( '
-location ~* /(?:uploads|files)/mediatheque/private/.* {
-	if ($http_cookie !~* "wordpress_logged_in") {
-		return 301 %s;
-	}
-}', wp_login_url() ) ); ?>
+									sprintf(
+										'location ~* /(?:uploads|files)/mediatheque/private/.* {
+											if ($http_cookie !~* "wordpress_logged_in") {
+												return 301 %s;
+											}
+										}',
+										esc_url( wp_login_url() )
+									)
+								);
+								?>
 								<p class="description"><?php esc_html_e( 'Vous utilisez Nginx. Si vous souhaitez protéger les media privés partagés par vos utilisateurs, ajoutez le code ci-dessus au fichier de configuration de votre serveur.', 'mediatheque' ); ?></p>
 							</td>
 						</tr>
@@ -474,13 +484,15 @@ location ~* /(?:uploads|files)/mediatheque/private/.* {
 
 		wp_plupload_default_settings();
 
-		printf( '
-			<div class="wrap">
+		printf(
+			'<div class="wrap">
 				<h1 id="mediatheque-title">%1$s</h1>
 				<div id="mediatheque-backdrop"></div>
 				%2$s
-			</div>
-		', esc_html( $this->title ), mediatheque_print_containers( false ) );
+			</div>',
+			esc_html( $this->title ),
+			mediatheque_print_containers( false ) // phpcs:ignore
+		);
 
 		mediatheque_print_template_parts();
 	}
@@ -494,8 +506,20 @@ location ~* /(?:uploads|files)/mediatheque/private/.* {
 		$page = add_query_arg( 'page', 'user-media-tools', self_admin_url( 'tools.php' ) );
 		?>
 		<div class="card">
-			<h2 class="title"><?php esc_html_e( 'Outils de la MediaThèque', 'mediatheque' ) ?></h2>
-			<p><?php printf( __( 'Vous pouvez gérer les media d\'utilisateur qui sont attachés à vos contenus et qui ont disparu depuis cet <a href="%s">outil</a>.', 'mediatheque' ), esc_url( $page ) ); ?></p>
+			<h2 class="title"><?php esc_html_e( 'Outils de la MediaThèque', 'mediatheque' ); ?></h2>
+			<p>
+				<?php
+				printf(
+					/* translators: the %s placeholder is used to output the tool's link */
+					esc_html__( 'Vous pouvez gérer les media d\'utilisateur qui sont attachés à vos contenus et qui ont disparu depuis cet %s', 'mediatheque' ),
+					sprintf(
+						'<a href="%1$s">%2$s</a>',
+						esc_url( $page ),
+						esc_html__( 'outil', 'mediatheque' )
+					)
+				);
+				?>
+			</p>
 		</div>
 		<?php
 	}
@@ -506,12 +530,17 @@ location ~* /(?:uploads|files)/mediatheque/private/.* {
 	 * @since 1.0.0
 	 */
 	public function do_tools() {
-		$page = add_query_arg( array(
-			'page'  => 'user-media-tools',
-			'reset' => 1,
-		) , self_admin_url( 'tools.php' ) );
+		$page = add_query_arg(
+			array(
+				'page'  => 'user-media-tools',
+				'reset' => 1,
+			),
+			self_admin_url( 'tools.php' )
+		);
 
 		if ( ! empty( $_GET['reset'] ) ) {
+			check_admin_referer( 'mediatheque-empty-vanished-media-list' );
+
 			delete_option( '_mediatheque_vanished_media' );
 			$this->vanished_logs = array();
 		}
@@ -541,19 +570,19 @@ location ~* /(?:uploads|files)/mediatheque/private/.* {
 							<td colspan="2"><?php esc_html_e( 'Aucun media disparu n\'a tenté de s\'afficher à vos visiteurs', 'mediatheque' ); ?></td>
 						</tr>
 
-					<?php else : foreach ( $this->vanished_logs as $url ) : ?>
-
-						<tr>
-							<td><code><?php echo esc_html( $url ) ;?></code></td>
-						</tr>
-
-					<?php endforeach; endif; ?>
+					<?php else : ?>
+						<?php foreach ( $this->vanished_logs as $url ) : ?>
+							<tr>
+								<td><code><?php echo esc_html( $url ); ?></code></td>
+							</tr>
+						<?php endforeach; ?>
+					<?php endif; ?>
 
 				</tbody>
 			</table>
 
 			<div class="submit">
-				<a href="<?php echo esc_url( $page ); ?>" class="button button-primary large"><?php esc_html_e( 'Vider', 'mediatheque' ); ?></a>
+				<a href="<?php echo esc_url( wp_nonce_url( $page, 'mediatheque-empty-vanished-media-list' ) ); ?>" class="button button-primary large"><?php esc_html_e( 'Vider', 'mediatheque' ); ?></a>
 			</div>
 		</div>
 		<?php
