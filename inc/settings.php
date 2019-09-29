@@ -13,14 +13,14 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Settings section callback.
  *
- * @since 1.0.0.
+ * @since 1.0.0
  */
 function mediatheque_settings_section_callback() {}
 
 /**
  * Capability Setting field callback.
  *
- * @since 1.0.0.
+ * @since 1.0.0
  */
 function mediatheque_settings_field_capability() {
 	$role_names = wp_roles()->role_names;
@@ -38,7 +38,7 @@ function mediatheque_settings_field_capability() {
 		$caps['edit_posts'] = translate_user_role( $role_names['contributor'] );
 	}
 	?>
-	<select name="mediatheque_capability" id="mediatheque_capability"<?php echo is_network_admin() ? ' disabled' : '' ;?>>
+	<select name="mediatheque_capability" id="mediatheque_capability"<?php echo is_network_admin() ? ' disabled' : ''; ?>>
 
 		<?php foreach ( (array) apply_filters( 'mediatheque_caps', $caps ) as $cap => $role ) : ?>
 			<option value="<?php echo esc_attr( $cap ); ?>" <?php selected( $setting, $cap ); ?>>
@@ -54,10 +54,10 @@ function mediatheque_settings_field_capability() {
 /**
  * Sanitizes the Capability Setting field before saving it to DB.
  *
- * @since 1.0.0.
+ * @since 1.0.0
  *
  * @param string $capability The new capability.
- * @param string             The sanitized capability.
+ * @return string            The sanitized capability.
  */
 function mediatheque_sanitize_capability( $capability ) {
 	if ( empty( $capability ) ) {
@@ -70,7 +70,7 @@ function mediatheque_sanitize_capability( $capability ) {
 /**
  * Allowed Mime Types Setting field callback.
  *
- * @since 1.0.0.
+ * @since 1.0.0
  */
 function mediatheque_settings_field_mime_types() {
 	$types            = wp_get_ext_types();
@@ -93,7 +93,8 @@ function mediatheque_settings_field_mime_types() {
 
 			<ul style="margin: 1em 2em 1em;">
 
-			<?php foreach ( $types[ $k_type ] as $wp_type ) {
+			<?php
+			foreach ( $types[ $k_type ] as $wp_type ) {
 				$ext_mime = wp_check_filetype( '.' . $wp_type, $mimes );
 
 				if ( $ext_mime['type'] && ! in_array( $ext_mime['type'], $printed_mime, true ) ) {
@@ -102,12 +103,13 @@ function mediatheque_settings_field_mime_types() {
 					?>
 					<li>
 						<label for="mediatheque_mime_type-<?php echo esc_attr( $sub_type_id ); ?>">
-							<input id="mediatheque_mime_type-<?php echo esc_attr( $sub_type_id ); ?>" type="checkbox" name="mediatheque_mime_types[]" data-mime-type="<?php echo esc_attr( $k_type );?>" value="<?php echo esc_attr( $ext_mime['type'] );?>" <?php checked( true, in_array( $ext_mime['type'], $setting, true ) );?>> <?php echo esc_html( $ext_mime['type'] ) ;?>
+							<input id="mediatheque_mime_type-<?php echo esc_attr( $sub_type_id ); ?>" type="checkbox" name="mediatheque_mime_types[]" data-mime-type="<?php echo esc_attr( $k_type ); ?>" value="<?php echo esc_attr( $ext_mime['type'] ); ?>" <?php checked( true, in_array( $ext_mime['type'], $setting, true ) ); ?>> <?php echo esc_html( $ext_mime['type'] ); ?>
 						</label>
 					</li>
 					<?php
 				}
-			} ?>
+			}
+			?>
 
 		</fieldset>
 		<?php
@@ -117,10 +119,10 @@ function mediatheque_settings_field_mime_types() {
 /**
  * Sanitizes the Allowed Mime Types Setting field before saving it to DB.
  *
- * @since 1.0.0.
+ * @since 1.0.0
  *
  * @param array $mime_types The new Allowed Mime Types.
- * @param array             The sanitized Allowed Mime Types.
+ * @return array            The sanitized Allowed Mime Types.
  */
 function mediatheque_sanitize_mime_types( $mime_types ) {
 	if ( ! is_array( $mime_types ) ) {
@@ -133,7 +135,7 @@ function mediatheque_sanitize_mime_types( $mime_types ) {
 /**
  * Personal Avatar Feature Setting field callback.
  *
- * @since 1.0.0.
+ * @since 1.0.0
  */
 function mediatheque_settings_field_avatars() {
 	$use_avatars = mediatheque_use_personal_avatar();
@@ -144,6 +146,11 @@ function mediatheque_settings_field_avatars() {
 	<?php
 }
 
+/**
+ * Front-end button Setting Field callback.
+ *
+ * @since 1.0.0
+ */
 function mediatheque_settings_field_front_end_button() {
 	$disable_front_end_button = mediatheque_disable_front_end_button();
 

@@ -7,7 +7,7 @@
  * @since 1.0.0
  */
 
-// Exit if accessed directly
+// Exit if accessed directly.
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -51,7 +51,7 @@ function mediatheque_upgrade() {
 
 	if ( mediatheque_is_install() ) {
 
-		// Create the two available terms
+		// Create the two available terms.
 		foreach ( array(
 			'mediatheque-file',
 			'mediatheque-directory',
@@ -80,7 +80,7 @@ function mediatheque_upgrade() {
 		do_action( 'mediatheque_upgrade', $db_version );
 	}
 
-	// Force rewrite rules to be refreshed
+	// Force rewrite rules to be refreshed.
 	if ( get_option( 'permalink_structure' ) ) {
 		delete_option( 'rewrite_rules' );
 	}
@@ -101,17 +101,17 @@ add_action( 'admin_init', 'mediatheque_upgrade', 999 );
  */
 function mediatheque_get_pointers() {
 	$pointers = array(
-		'user-media-permalinks' => array(
+		'user-media-permalinks'    => array(
 			'title'    => __( 'Modifiez la structure de vos permaliens.', 'mediatheque' ),
 			'content'  => __( 'MediaThèque nécessite que la structure de vos permaliens soit différente que celle définie par défaut.', 'mediatheque' ),
 			'position' => 'bottom',
 		),
-		'menu-settings' => array(
+		'menu-settings'            => array(
 			'title'    => __( 'Options des media utilisateurs', 'mediatheque' ),
 			'content'  => __( 'Personnalisez les options des media utilisateurs depuis les réglages des media.', 'mediatheque' ),
 			'position' => 'bottom',
 		),
-		'menu-media' => array(
+		'menu-media'               => array(
 			'title'    => __( 'Gestion des media utilisateurs', 'mediatheque' ),
 			'content'  => __( 'Vous pouvez gérer les media utilisateurs depuis le sous-menu de la bibliothèque de media correspondant.', 'mediatheque' ),
 			'position' => 'top',

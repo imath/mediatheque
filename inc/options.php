@@ -116,10 +116,13 @@ function mediatheque_get_default_options() {
 	 *
 	 * @param array $value The default values for the options.
 	 */
-	return apply_filters( 'mediatheque_get_default_options', array(
-		'mediatheque_capability'           => 'exist',
-		'mediatheque_mime_types'           => mediatheque_get_default_mime_types(),
-		'mediatheque_personal_avatar'      => 1,
-		'mediatheque_disable_on_front_end' => 0,
-	) );
+	return apply_filters(
+		'mediatheque_get_default_options',
+		array(
+			'mediatheque_capability'           => 'exist',
+			'mediatheque_mime_types'           => mediatheque_get_default_mime_types(),
+			'mediatheque_personal_avatar'      => 1,
+			'mediatheque_disable_on_front_end' => 0,
+		)
+	);
 }

@@ -18,13 +18,16 @@ defined( 'ABSPATH' ) || exit;
  * @return array The potential User Media mime types.
  */
 function mediatheque_get_mime_types() {
-	return array_diff_key( wp_get_mime_types(), array(
-		'swf'      => false,
-		'exe'      => false,
-		'htm|html' => false,
-		'js'       => false,
-		'css'      => false,
-	) );
+	return array_diff_key(
+		wp_get_mime_types(),
+		array(
+			'swf'      => false,
+			'exe'      => false,
+			'htm|html' => false,
+			'js'       => false,
+			'css'      => false,
+		)
+	);
 }
 
 /**
@@ -37,15 +40,18 @@ function mediatheque_get_mime_types() {
  * @return array The default available mime types for User Media (for regular users).
  */
 function mediatheque_get_default_mime_types() {
-	$mime_types = array_intersect_key( mediatheque_get_mime_types(), array(
-		'jpg|jpeg|jpe' => true,
-		'gif'          => true,
-		'png'          => true,
-		'mp4|m4v'      => true,
-		'mp3|m4a|m4b'  => true,
-		'pdf'          => true,
-		'rtf'          => true,
-	) );
+	$mime_types = array_intersect_key(
+		mediatheque_get_mime_types(),
+		array(
+			'jpg|jpeg|jpe' => true,
+			'gif'          => true,
+			'png'          => true,
+			'mp4|m4v'      => true,
+			'mp3|m4a|m4b'  => true,
+			'pdf'          => true,
+			'rtf'          => true,
+		)
+	);
 
 	return array_values( $mime_types );
 }
@@ -108,9 +114,9 @@ function mediatheque_get_i18n_media_type( $media_type = '' ) {
  *
  * @since 1.0.0
  *
- * @param  WP_Post      $user_media The User Media object.
- * @param  string       $arg        'all' to get all infos or the key of the needed info.
- * @return string|array             The requested info or the all infos list.
+ * @param  WP_Post $user_media The User Media object.
+ * @param  string  $arg        'all' to get all infos or the key of the needed info.
+ * @return string|array         The requested info or the all infos list.
  */
 function mediatheque_get_media_info( $user_media = null, $arg = 'media_type' ) {
 	$is_main_site = mediatheque_is_main_site();
@@ -155,7 +161,7 @@ function mediatheque_get_media_info( $user_media = null, $arg = 'media_type' ) {
  *
  * @since 1.0.0
  *
- * @param  int     $user_media_id The User Media ID.
+ * @param  integer $user_media_id The User Media ID.
  * @param  array   $size          The width and height in pixels.
  * @return array                  The User Media intermediate size data.
  */
@@ -177,7 +183,7 @@ function mediatheque_image_get_intermediate_size( $user_media_id = 0, $size = ar
 		$size = 'full';
 	}
 
-	// Get the full image
+	// Get the full image.
 	if ( 'full' === $size ) {
 		$meta_data = wp_get_attachment_metadata( $user_media->ID );
 
@@ -192,7 +198,7 @@ function mediatheque_image_get_intermediate_size( $user_media_id = 0, $size = ar
 			$size_data['height'] = $meta_data['height'];
 		}
 
-	// Get the the intermediate size
+		// Get the the intermediate size.
 	} else {
 		$size_data = image_get_intermediate_size( $user_media->ID, $size );
 	}
@@ -205,7 +211,7 @@ function mediatheque_image_get_intermediate_size( $user_media_id = 0, $size = ar
 		return $size_data;
 	}
 
-	$uploads = mediatheque_get_upload_dir();
+	$uploads           = mediatheque_get_upload_dir();
 	$size_data['url']  = trailingslashit( $uploads['baseurl'] ) . $size_data['path'];
 	$size_data['path'] = trailingslashit( $uploads['basedir'] ) . $size_data['path'];
 
@@ -217,8 +223,8 @@ function mediatheque_image_get_intermediate_size( $user_media_id = 0, $size = ar
  *
  * @since 1.0.0
  *
- * @param  string        $slug The term slug.
- * @return integer|false       The term ID or false if not found.
+ * @param  string $slug  The term slug.
+ * @return integer|false The term ID or false if not found.
  */
 function mediatheque_get_user_media_type_id( $slug = '' ) {
 	$is_main_site = mediatheque_is_main_site();
@@ -247,8 +253,8 @@ function mediatheque_get_user_media_type_id( $slug = '' ) {
  *
  * @since 1.0.0
  *
- * @param  string        $slug The User Media slug.
- * @return WP_Post|false       The User Media object or false if not found.
+ * @param  string $slug  The User Media slug.
+ * @return WP_Post|false The User Media object or false if not found.
  */
 function mediatheque_get_post_by_slug( $slug = '' ) {
 	if ( ! $slug ) {
@@ -263,11 +269,13 @@ function mediatheque_get_post_by_slug( $slug = '' ) {
 
 	$mediatheque_statuses = wp_list_pluck( mediatheque_get_post_statuses( 'all' ), 'name' );
 
-	$posts = get_posts( array(
-		'name'        => $slug,
-		'post_type'   => 'user_media',
-		'post_status' => $mediatheque_statuses,
-	) );
+	$posts = get_posts(
+		array(
+			'name'        => $slug,
+			'post_type'   => 'user_media',
+			'post_status' => $mediatheque_statuses,
+		)
+	);
 
 	if ( ! $is_main_site ) {
 		restore_current_blog();
@@ -314,18 +322,22 @@ function mediatheque_file_shortcode( $user_media = null, $args = array() ) {
 		$download_link = mediatheque_get_download_url( $user_media );
 	}
 
-	$file_args = wp_parse_args( $args, array(
-		'icon'           => false,
-		'ext'            => false,
-		'media_type'     => false,
-		'file_size'      => false,
-		'use_file_name'  => false,
-		'object_wrapper' => false,
-	) );
+	$file_args = wp_parse_args(
+		$args,
+		array(
+			'icon'           => false,
+			'ext'            => false,
+			'media_type'     => false,
+			'file_size'      => false,
+			'use_file_name'  => false,
+			'object_wrapper' => false,
+		)
+	);
 
 	$icon = '';
 	if ( ( false === (bool) $file_args['icon'] || 'false' === $file_args['icon'] ) && ! empty( $filedata['media_type'] ) ) {
-		$icon = sprintf( '<a href="%1$s" class="mediatheque-file-link"><img src="%2$s" class="alignleft"></a>',
+		$icon = sprintf(
+			'<a href="%1$s" class="mediatheque-file-link"><img src="%2$s" class="alignleft"></a>',
 			esc_url_raw( $download_link ),
 			esc_url_raw( wp_mime_type_icon( $filedata['media_type'] ) )
 		);
@@ -337,13 +349,14 @@ function mediatheque_file_shortcode( $user_media = null, $args = array() ) {
 		$title = basename( $user_media->guid );
 	}
 
-	$title = sprintf( '<a href="%1$s"><strong>%2$s</strong></a>',
+	$title = sprintf(
+		'<a href="%1$s"><strong>%2$s</strong></a>',
 		esc_url_raw( $download_link ),
 		esc_html( $title )
 	);
 
 	$file_type = '';
-	if ( ( false === (bool) $file_args['media_type'] || 'false' === $file_args['media_type'] )  && ! empty( $filedata['media_type'] ) ) {
+	if ( ( false === (bool) $file_args['media_type'] || 'false' === $file_args['media_type'] ) && ! empty( $filedata['media_type'] ) ) {
 		$file_type = mediatheque_get_i18n_media_type( $filedata['media_type'] );
 	}
 
@@ -354,7 +367,7 @@ function mediatheque_file_shortcode( $user_media = null, $args = array() ) {
 
 	$file_size = '';
 	if ( ( false === (bool) $file_args['file_size'] || 'false' === $file_args['file_size'] ) && ! empty( $filedata['size'] ) ) {
-		$file_size = absint( $filedata['size'] ) / 1000; // Size in kylobytes
+		$file_size = absint( $filedata['size'] ) / 1000; // Size in kylobytes.
 		$file_size = '<dd><small>' . mediatheque_format_file_size( $file_size ) . '</small></dd>';
 	}
 
@@ -403,10 +416,15 @@ function mediatheque_download( $user_media = null ) {
 	}
 
 	$file_info = mediatheque_get_media_info( $user_media, 'all' );
-	$filename = basename( $user_media->mediatheque_file );
+	$filename  = basename( $user_media->mediatheque_file );
 
 	/**
 	 * Hook here to run custom actions before download.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param WP_Post $user_media The User Media object.
+	 * @param array   $file_info  List of information about the file.
 	 */
 	do_action( 'mediatheque_download', $user_media, $file_info );
 
@@ -422,6 +440,7 @@ function mediatheque_download( $user_media = null ) {
 		ob_end_flush();
 	}
 
+	// phpcs:ignore
 	readfile( $user_media->mediatheque_file );
 	die();
 }
@@ -431,8 +450,8 @@ function mediatheque_download( $user_media = null ) {
  *
  * @since 1.0.0
  *
- * @param  integer|WP_Post     $dir  Required. The User Media Directory ID or Object.
- * @return array|false|WP_Post       False on failure.
+ * @param  integer|WP_Post $dir Required. The User Media Directory ID or Object.
+ * @return array|false|WP_Post  False on failure.
  */
 function mediatheque_delete_dir( $dir = null ) {
 	if ( empty( $dir ) ) {
@@ -456,10 +475,12 @@ function mediatheque_delete_dir( $dir = null ) {
 	$dirpath    = get_post_meta( $dir_id, '_mediatheque_relative_path', true );
 	$dirpath    = trailingslashit( $uploadpath['basedir'] ) . $dirpath;
 
-	$children = get_children( array(
-		'post_type' => 'user_media',
-		'post_parent' => $dir->ID,
-	) );
+	$children = get_children(
+		array(
+			'post_type'   => 'user_media',
+			'post_parent' => $dir->ID,
+		)
+	);
 
 	/**
 	 * Fires before a directory of User Media is deleted.
@@ -480,7 +501,7 @@ function mediatheque_delete_dir( $dir = null ) {
 
 	// Remove the directory.
 	if ( is_dir( $dirpath ) ) {
-		@ rmdir( $dirpath );
+		@ rmdir( $dirpath ); // phpcs:ignore
 	}
 
 	$dir = wp_delete_post( $dir_id, true );
@@ -506,8 +527,8 @@ function mediatheque_delete_dir( $dir = null ) {
  *
  * @since 1.0.0
  *
- * @param  integer|WP_Post     $media Required. The User Media ID or Object.
- * @return array|false|WP_Post        False on failure.
+ * @param  integer|WP_Post $media Required. The User Media ID or Object.
+ * @return array|false|WP_Post    False on failure.
  */
 function mediatheque_delete_media( $media = null ) {
 	if ( empty( $media ) ) {
@@ -526,7 +547,7 @@ function mediatheque_delete_media( $media = null ) {
 		return false;
 	}
 
-	$user_media_type = wp_get_object_terms( $user_media->ID, 'user_media_types',  array( 'fields' => 'id=>slug' ) );
+	$user_media_type = wp_get_object_terms( $user_media->ID, 'user_media_types', array( 'fields' => 'id=>slug' ) );
 	$user_media_type = reset( $user_media_type );
 
 	if ( 'mediatheque-directory' === $user_media_type ) {
@@ -559,7 +580,7 @@ function mediatheque_delete_media( $media = null ) {
 			$intermediate_file = str_replace( basename( $file ), $sizeinfo['file'], $file );
 			/** This filter is documented in wp-includes/functions.php */
 			$intermediate_file = apply_filters( 'wp_delete_file', $intermediate_file );
-			@ unlink( path_join( $uploadpath['basedir'], $intermediate_file ) );
+			@ unlink( path_join( $uploadpath['basedir'], $intermediate_file ) ); // phpcs:ignore
 		}
 	}
 
@@ -588,9 +609,9 @@ function mediatheque_delete_media( $media = null ) {
  *
  * @since 1.0.0
  *
- * @param  int|WP_Post  $media  Required. The User Media ID or Object.
- * @param  integer      $parent Required. The User Media's new parent ID.
- * @return false|string         False on failure, the new file path on success.
+ * @param int|WP_Post $media  Required. The User Media ID or Object.
+ * @param integer     $parent Required. The User Media's new parent ID.
+ * @return false|string       False on failure, the new file path on success.
  */
 function mediatheque_move_media( $media = null, $parent = null ) {
 	if ( empty( $media ) || is_null( $parent ) ) {
@@ -624,10 +645,9 @@ function mediatheque_move_media( $media = null, $parent = null ) {
 	$user_media_id = (int) $user_media->ID;
 	$meta          = wp_get_attachment_metadata( $user_media_id );
 	$file          = get_attached_file( $user_media_id );
-
-	$newdir     = $uploadpath['basedir'] . $path;
-	$filename   = wp_unique_filename( $newdir, basename( $file ) );
-	$new_file   = trailingslashit( $newdir ) . $filename;
+	$newdir        = $uploadpath['basedir'] . $path;
+	$filename      = wp_unique_filename( $newdir, basename( $file ) );
+	$new_file      = trailingslashit( $newdir ) . $filename;
 
 	/**
 	 * Fires before a media is moved to another place.
@@ -640,7 +660,7 @@ function mediatheque_move_media( $media = null, $parent = null ) {
 	 */
 	do_action( 'mediatheque_move_media', $user_media, $newdir, $filename );
 
-	$moved = @ copy( $file, $new_file );
+	$moved = @ copy( $file, $new_file ); // phpcs:ignore
 
 	if ( false === $moved ) {
 		return false;
@@ -653,7 +673,7 @@ function mediatheque_move_media( $media = null, $parent = null ) {
 			$intermediate_file = str_replace( basename( $file ), $sizeinfo['file'], $file );
 			/** This filter is documented in wp-includes/functions.php */
 			$intermediate_file = apply_filters( 'wp_delete_file', $intermediate_file );
-			@ unlink( path_join( $uploadpath['basedir'], $intermediate_file ) );
+			@ unlink( path_join( $uploadpath['basedir'], $intermediate_file ) ); // phpcs:ignore
 		}
 	}
 

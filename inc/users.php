@@ -23,7 +23,7 @@ function mediatheque_capabilities() {
 		'read_post'              => 'read_user_upload',
 		'delete_post'            => 'delete_user_upload',
 		'edit_posts'             => 'edit_user_uploads',
-		'edit_others_posts'	     => 'edit_others_user_uploads',
+		'edit_others_posts'      => 'edit_others_user_uploads',
 		'publish_posts'          => 'publish_user_uploads',
 		'read_private_posts'     => 'read_private_user_uploads',
 		'read'                   => 'read_user_upload',
@@ -69,11 +69,11 @@ function mediatheque_get_all_caps() {
  *
  * @since 1.0.0
  *
- * @param  array  $caps    Capabilities for meta capability
- * @param  string $cap     Capability name
- * @param  int    $user_id User id
- * @param  mixed  $args    Arguments
- * @return array           Actual capabilities for meta capability
+ * @param  array   $caps    Capabilities for meta capability.
+ * @param  string  $cap     Capability name.
+ * @param  integer $user_id User id.
+ * @param  mixed   $args    Arguments.
+ * @return array            Actual capabilities for meta capability.
  */
 function mediatheque_map_meta_caps( $caps = array(), $cap = '', $user_id = 0, $args = array() ) {
 	if ( in_array( $cap, mediatheque_get_all_caps(), true ) ) {
@@ -81,16 +81,20 @@ function mediatheque_map_meta_caps( $caps = array(), $cap = '', $user_id = 0, $a
 			$required_cap = mediatheque_get_required_cap();
 			$admin_caps   = mediatheque_types_capabilities();
 			unset( $admin_caps['assign_terms'] );
-			$admin_caps   = array_merge( $admin_caps, array(
-				'edit_user_uploads',
-				'edit_others_user_uploads',
-				'delete_user_uploads',
-				'delete_private_user_uploads',
-				'delete_published_user_uploads',
-				'delete_others_user_uploads',
-				'edit_private_user_uploads',
-				'edit_published_user_uploads',
-			) );
+
+			$admin_caps = array_merge(
+				$admin_caps,
+				array(
+					'edit_user_uploads',
+					'edit_others_user_uploads',
+					'delete_user_uploads',
+					'delete_private_user_uploads',
+					'delete_published_user_uploads',
+					'delete_others_user_uploads',
+					'edit_private_user_uploads',
+					'edit_published_user_uploads',
+				)
+			);
 
 			$admin_cap = 'manage_options';
 			if ( is_multisite() ) {
@@ -100,7 +104,7 @@ function mediatheque_map_meta_caps( $caps = array(), $cap = '', $user_id = 0, $a
 			if ( in_array( $cap, $admin_caps, true ) ) {
 				$caps = array( $admin_cap );
 			} else {
-				$caps = array( $required_cap );
+				$caps        = array( $required_cap );
 				$manage_caps = array(
 					'edit_user_upload',
 					'delete_user_upload',
@@ -117,10 +121,10 @@ function mediatheque_map_meta_caps( $caps = array(), $cap = '', $user_id = 0, $a
 			}
 		}
 
-	// Allow regular users to set the User Media display preference if WP Editor is used from front-end.
-	} elseif ( wp_doing_ajax() && isset( $_POST['action'] ) && 'parse-embed' === $_POST['action'] ) {
-		if ( $user_id && ! empty( $_POST['shortcode'] ) ) {
-			$url = str_replace( array( '[embed]', '[/embed]' ), '', $_POST['shortcode'] );
+		// Allow regular users to set the User Media display preference if WP Editor is used from front-end.
+	} elseif ( wp_doing_ajax() && isset( $_POST['action'] ) && 'parse-embed' === $_POST['action'] ) { // phpcs:ignore
+		if ( $user_id && ! empty( $_POST['shortcode'] ) ) { // phpcs:ignore
+			$url = str_replace( array( '[embed]', '[/embed]' ), '', $_POST['shortcode'] ); // phpcs:ignore
 
 			if ( 0 === strpos( $url, trailingslashit( network_site_url() ) . mediatheque_get_root_slug() ) ) {
 				$caps = array( mediatheque_get_required_cap() );
@@ -163,11 +167,11 @@ function mediatheque_meta_sanitize_value( $value = '', $meta_key = '' ) {
  *
  * @since 1.0.0
  *
- * @param boolean  $auth      True to allow edit. False otherwise.
- * @param  string  $meta_key  The usermeta key.
- * @param  integer $object_id The Object Id.
- * @param  integer $user_id   The User ID.
- * @return boolean            True to allow edit. False otherwise.
+ * @param boolean $auth      True to allow edit. False otherwise.
+ * @param string  $meta_key  The usermeta key.
+ * @param integer $object_id The Object Id.
+ * @param integer $user_id   The User ID.
+ * @return boolean           True to allow edit. False otherwise.
  */
 function mediatheque_meta_auth_personal_avatar( $auth = false, $meta_key = '', $object_id = 0, $user_id = 0 ) {
 	if ( 'personal_avatar' !== $meta_key ) {
@@ -196,9 +200,10 @@ function mediatheque_disk_usage_prepare( $value, WP_REST_Request $request, $args
  *
  * @since  1.0.0
  *
- * @param  int     $user_id  The ID of the user.
- * @param  int     $bytes    The number of bytes to add to user's disk usage.
- * @return bool              True on success, false otherwise.
+ * @param integer $user_id  The ID of the user.
+ * @param integer $bytes    The number of bytes to add to user's disk usage.
+ * @param string  $remove   True when the file is removed, false otherwise.
+ * @return boolean          True on success, false otherwise.
  */
 function mediatheque_disk_usage_update( $user_id = 0, $bytes = 0, $remove = false ) {
 	if ( empty( $user_id ) || empty( $bytes ) ) {
@@ -212,7 +217,7 @@ function mediatheque_disk_usage_update( $user_id = 0, $bytes = 0, $remove = fals
 		return true;
 	}
 
-	// Get the user's disk usage
+	// Get the user's disk usage.
 	$disk_usage = (int) get_user_meta( $user_id, '_mediatheque_disk_usage', true );
 
 	if ( $disk_usage ) {
@@ -221,7 +226,6 @@ function mediatheque_disk_usage_update( $user_id = 0, $bytes = 0, $remove = fals
 		} else {
 			$disk_usage = $disk_usage + $kilo_bytes;
 		}
-
 	} elseif ( true !== $remove ) {
 		$disk_usage = $kilo_bytes;
 	}
@@ -230,7 +234,7 @@ function mediatheque_disk_usage_update( $user_id = 0, $bytes = 0, $remove = fals
 	if ( $disk_usage < 0 ) {
 		delete_user_meta( $user_id, '_mediatheque_disk_usage' );
 
-	// Update user's disk usage.
+		// Update user's disk usage.
 	} else {
 		update_user_meta( $user_id, '_mediatheque_disk_usage', absint( $disk_usage ) );
 	}
@@ -243,16 +247,19 @@ function mediatheque_disk_usage_update( $user_id = 0, $bytes = 0, $remove = fals
  *
  * @since  1.0.0
  *
- * @param  array $query_params  The query params for the users collection
+ * @param  array $query_params  The query params for the users collection.
  * @return array                The query params for the users collection.
  */
 function mediatheque_additionnal_user_rest_param( $query_params = array() ) {
-	return array_merge( $query_params, array(
-		'has_disk_usage' => array(
-			'description' => __( 'True pour limiter les résultats aux utilisateurs ayant soumis des fichiers.', 'mediatheque' ),
-			'type'        => 'boolean',
+	return array_merge(
+		$query_params,
+		array(
+			'has_disk_usage' => array(
+				'description' => __( 'True pour limiter les résultats aux utilisateurs ayant soumis des fichiers.', 'mediatheque' ),
+				'type'        => 'boolean',
+			),
 		)
-	) );
+	);
 }
 
 /**
@@ -282,10 +289,10 @@ function mediatheque_rest_user_query( $prepared_args = array(), WP_REST_Request 
 		if ( ! current_user_can( $capacity ) || empty( $is_network_admin ) ) {
 			return array_merge( $prepared_args, array( 'login' => '0' ) );
 
-		// Authorized users can browse and edit other users files.
+			// Authorized users can browse and edit other users files.
 		} else {
 			$p_args = array(
-				'meta_key'     => '_mediatheque_disk_usage',
+				'meta_key'     => '_mediatheque_disk_usage', // phpcs:ignore
 				'meta_compare' => 'EXISTS',
 			);
 
@@ -335,13 +342,15 @@ function mediatheque_delete_user_data( $user_id = 0, $reassign = 0 ) {
 
 	$mediatheque_statuses = wp_list_pluck( mediatheque_get_post_statuses( 'all' ), 'name' );
 
-	$d_user_media = get_posts( array(
-		'post_type'     => 'user_media',
-		'author'        => $user_id,
-		'nopaging'      => true,
-		'no_found_rows' => true,
-		'post_status'   => $mediatheque_statuses,
-	) );
+	$d_user_media = get_posts(
+		array(
+			'post_type'     => 'user_media',
+			'author'        => $user_id,
+			'nopaging'      => true,
+			'no_found_rows' => true,
+			'post_status'   => $mediatheque_statuses,
+		)
+	);
 
 	/**
 	 * Hook here to use your own way of dealing with user deletion.
@@ -372,8 +381,8 @@ function mediatheque_delete_user_data( $user_id = 0, $reassign = 0 ) {
 			continue;
 		}
 
-		// Remove the empty directory
-		@ rmdir( $dirpath );
+		// Remove the empty directory.
+		@ rmdir( $dirpath ); //phpcs:ignore
 	}
 
 	if ( ! $is_main_site ) {
