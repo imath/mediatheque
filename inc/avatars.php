@@ -29,9 +29,9 @@ add_filter( 'rest_avatar_sizes', 'mediatheque_rest_avatar_sizes', 10, 1 );
  *
  * @since 1.0.0
  *
- * @param  int     $user_media_id The User Media ID.
- * @param  int     $size          The size in pixels for the avatar.
- * @return string                 The avatar URL.
+ * @param integer $user_media_id The User Media ID.
+ * @param integer $size          The size in pixels for the avatar.
+ * @return string                The avatar URL.
  */
 function mediatheque_get_personal_avatar( $user_media_id = 0, $size = 96 ) {
 	$mediatheque = mediatheque();
@@ -66,13 +66,13 @@ function mediatheque_get_avatar_data( $args = array(), $id_or_email ) {
 
 	if ( is_numeric( $id_or_email ) ) {
 		$user = get_user_by( 'id', (int) $id_or_email );
-	} else if ( is_a( $id_or_email, 'WP_User' ) ) {
+	} elseif ( is_a( $id_or_email, 'WP_User' ) ) {
 		$user = $id_or_email;
-	} else if ( is_a( $id_or_email, 'WP_Post' ) ) {
+	} elseif ( is_a( $id_or_email, 'WP_Post' ) ) {
 		$user = get_user_by( 'id', (int) $id_or_email->post_author );
-	} else if ( is_a( $id_or_email, 'WP_Comment' ) ) {
+	} elseif ( is_a( $id_or_email, 'WP_Comment' ) ) {
 		$user = get_user_by( 'id', (int) $id_or_email->user_id );
-	} else if ( is_email( $id_or_email ) ) {
+	} elseif ( is_email( $id_or_email ) ) {
 		$user = get_user_by( 'email', $id_or_email );
 	}
 
@@ -126,7 +126,8 @@ function mediatheque_profile_personal_avatar( $user = null ) {
 
 	if ( $user->personal_avatar ) {
 		$message = sprintf(
-			__( 'Pour supprimer votre avatar local, vous pouvez %s.', 'mediatheque' ),
+			/* translators: %s is the placeholder for the link to remove the user avatar. */
+			esc_html__( 'Pour supprimer votre avatar local, vous pouvez %s.', 'mediatheque' ),
 			sprintf( '<a href="#" class="mediabrary-remove">%s</a>', __( 'cliquer ici', 'mediatheque' ) )
 		);
 	}
@@ -134,18 +135,25 @@ function mediatheque_profile_personal_avatar( $user = null ) {
 	add_filter( 'mediatheque_media_statuses', 'mediatheque_avatar_user_media_statuses', 10, 1 );
 	?>
 	<div id="personal-avatar-editor">
-		<p class="description"><?php printf(
-			__( 'Vous pouvez également utiliser une des images de votre %1$s comme avatar pour ce site. %2$s', 'mediatheque' ),
-			mediatheque_button( array(
-				'editor_id'           => 'personal_avatar',
-				'editor_btn_classes'  => array( 'mediabrary-insert' ),
-				'editor_btn_text'     => __( 'MediaThèque', 'mediatheque' ),
-				'editor_btn_dashicon' => false,
-				'echo'                => false,
-				'media_type'          => 'image',
-			) ),
-			'<span id="mediabrary-remove-message">' . $message . '</span>'
-		); ?></p>
+		<p class="description">
+		<?php
+			printf(
+				/* translators: %1$s is the placeholder for the MediaThèque link and %2$s is the one for the remove message */
+				esc_html__( 'Vous pouvez également utiliser une des images de votre %1$s comme avatar pour ce site. %2$s', 'mediatheque' ),
+				mediatheque_button( // phpcs:ignore
+					array(
+						'editor_id'           => 'personal_avatar',
+						'editor_btn_classes'  => array( 'mediabrary-insert' ),
+						'editor_btn_text'     => esc_html__( 'MediaThèque', 'mediatheque' ),
+						'editor_btn_dashicon' => false,
+						'echo'                => false,
+						'media_type'          => 'image',
+					)
+				),
+				'<span id="mediabrary-remove-message">' . $message . '</span>' // phpcs:ignore
+			);
+		?>
+		</p>
 
 	</div>
 	<?php

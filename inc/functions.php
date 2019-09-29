@@ -102,8 +102,8 @@ function mediatheque_get_download_rewrite_slug() {
  *
  * @since  1.0.0
  *
- * @param  int  $site_id The site ID to check. Optional. Defaults to the current site ID.
- * @return bool True if the site is the main site of the network. False otherwise.
+ * @param integer $site_id The site ID to check. Optional. Defaults to the current site ID.
+ * @return boolean True if the site is the main site of the network. False otherwise.
  */
 function mediatheque_is_main_site( $site_id = 0 ) {
 	$return = ! is_multisite();
@@ -124,9 +124,9 @@ function mediatheque_is_main_site( $site_id = 0 ) {
 }
 
 /**
- * is the current screen a Post Type Admin screen?
+ * Is the current screen a Post Type Admin screen?
  *
- * @since  1.3.0
+ * @since 1.3.0
  *
  * @return boolean True if the current screen is a Post Type Admin screen.
  *                 False otherwise.
@@ -145,8 +145,8 @@ function mediatheque_is_post_type_admin_screen() {
  *
  * @since 1.0.0
  *
- * @param  WP_Post|integer $user_media The User Media object or the ID of the User Media item.
- * @return string                      The download url for the User Media Item.
+ * @param WP_Post|integer $user_media The User Media object or the ID of the User Media item.
+ * @return string                     The download url for the User Media Item.
  */
 function mediatheque_get_download_url( $user_media = null ) {
 	$is_main_site = mediatheque_is_main_site();
@@ -178,8 +178,8 @@ function mediatheque_get_download_url( $user_media = null ) {
 	 *
 	 * @since 1.0.0
 	 *
-	 * @param  string          $download_url The download url for the User Media Item.
-	 * @param  WP_Post|integer $user_media   The User Media object of the User Media item.
+	 * @param string          $download_url The download url for the User Media Item.
+	 * @param WP_Post|integer $user_media   The User Media object of the User Media item.
 	 */
 	return apply_filters( 'mediatheque_get_download_url', $download_url, $user_media );
 }
@@ -189,8 +189,8 @@ function mediatheque_get_download_url( $user_media = null ) {
  *
  * @since  1.0.0
  *
- * @param  string  $link The Attachment Link.
- * @return string        The User Media link.
+ * @param string $link The Attachment Link.
+ * @return string      The User Media link.
  */
 function mediatheque_attachment_link( $link = '' ) {
 	$user_media_link = mediatheque_get_download_url( null );
@@ -200,7 +200,13 @@ function mediatheque_attachment_link( $link = '' ) {
 
 		// It's not an image.
 		if ( empty( $count ) ) {
-			$link = mediatheque_file_shortcode( null, array( 'use_file_name' => true, 'object_wrapper' => 'true' ) );
+			$link = mediatheque_file_shortcode(
+				null,
+				array(
+					'use_file_name'  => true,
+					'object_wrapper' => 'true',
+				)
+			);
 		} else {
 			$link = preg_replace( '/(?<=href=\').+(?=\')/', $user_media_link, $link );
 		}
@@ -219,7 +225,7 @@ function mediatheque_attachment_link( $link = '' ) {
 function mediatheque_min_suffix() {
 	$min = '.min';
 
-	if ( defined( 'SCRIPT_DEBUG' ) && true === SCRIPT_DEBUG )  {
+	if ( defined( 'SCRIPT_DEBUG' ) && true === SCRIPT_DEBUG ) {
 		$min = '';
 	}
 
@@ -283,14 +289,14 @@ function mediatheque_get_upload_dir() {
 /**
  * Set the User Media base Uploads dir data.
  *
- * @since  1.0.0
+ * @since 1.0.0
  *
- * @param  array  $dir The wp_upload_dir() data.
- * @return array       The User Media base Uploads dir data.
+ * @param array $dir The wp_upload_dir() data.
+ * @return array     The User Media base Uploads dir data.
  */
 function mediatheque_set_upload_base_dir( $dir = array() ) {
 	if ( empty( $dir['basedir'] ) || empty( $dir['baseurl'] ) ) {
-		_doing_it_wrong( __FUNCTION__, __( 'Paramètres manquants.', 'mediatheque' ) );
+		_doing_it_wrong( __FUNCTION__, esc_html__( 'Paramètres manquants.', 'mediatheque' ) );
 		return $dir;
 	}
 
@@ -303,7 +309,7 @@ function mediatheque_set_upload_base_dir( $dir = array() ) {
 	 * @todo explore this issue a bit more.
 	 */
 	if ( is_multisite() && ms_is_switched() ) {
-		$parse_base_url = parse_url( $dir['baseurl'] );
+		$parse_base_url = wp_parse_url( $dir['baseurl'] );
 
 		if ( is_subdomain_install() ) {
 			$dir['baseurl'] = trailingslashit( network_site_url() ) . ltrim( $parse_base_url['path'], '/' );
@@ -318,11 +324,14 @@ function mediatheque_set_upload_base_dir( $dir = array() ) {
 		}
 	}
 
-	return array_merge( $dir, array(
-		'path'   => $dir['basedir'] . '/mediatheque',
-		'url'    => $dir['baseurl'] . '/mediatheque',
-		'subdir' => '/mediatheque',
-	) );
+	return array_merge(
+		$dir,
+		array(
+			'path'   => $dir['basedir'] . '/mediatheque',
+			'url'    => $dir['baseurl'] . '/mediatheque',
+			'subdir' => '/mediatheque',
+		)
+	);
 }
 
 /**
@@ -354,14 +363,25 @@ function mediatheque_register_upload_dir() {
  * @since  1.0.0
  */
 function mediatheque_register_post_statuses() {
-	$supported     = (array) apply_filters( 'mediatheque_supported_post_statuses', array( 'publish', 'private' ) );
-	$mediatheque = mediatheque();
+	/**
+	 * Use this filter to edit the supported statuses for the user media.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param array $value The list of available statuses.
+	 */
+	$supported = (array) apply_filters(
+		'mediatheque_supported_post_statuses',
+		array( 'publish', 'private' )
+	);
+
+	$mediatheque           = mediatheque();
 	$mediatheque->statuses = array();
 
 	foreach ( $supported as $status ) {
 		$mediatheque->statuses[ $status ] = get_post_status_object( $status );
 
-		// Override the Publish status label
+		// Override the Publish status label.
 		if ( 'publish' === $status ) {
 			$mediatheque->statuses[ $status ]->label = __( 'Public', 'mediatheque' );
 		}
@@ -377,8 +397,8 @@ function mediatheque_register_post_statuses() {
  *
  * @since  1.0.0
  *
- * @param  string       $status Name of the status (or All to get all post statuses).
- * @return object|array         A specific status object or all status objects.
+ * @param string $status Name of the status (or All to get all post statuses).
+ * @return object|array  A specific status object or all status objects.
  */
 function mediatheque_get_post_statuses( $status = '' ) {
 	$mediatheque = mediatheque();
@@ -443,9 +463,12 @@ function mediatheque_get_object_wrapper_mimes() {
 	 * @param  array $value A list of allowed mime types. Defaults to PDF files.
 	 *                      Use an empty array to completely disable this feature.
 	 */
-	return (array) apply_filters( 'mediatheque_object_wrapper_mimes', array(
-		'application/pdf',
-	) );
+	return (array) apply_filters(
+		'mediatheque_object_wrapper_mimes',
+		array(
+			'application/pdf',
+		)
+	);
 }
 
 /**
@@ -453,13 +476,24 @@ function mediatheque_get_object_wrapper_mimes() {
  *
  * @since 1.0.0
  *
- * @param string $handle The Javascript script handle.
+ * @param string  $handle The JavaScript script handle.
+ * @param integer $user_id The user ID.
  */
 function mediatheque_localize_script( $handle = 'mediatheque-views', $user_id = 0 ) {
 	$mediatheque = mediatheque();
 
-	$post_type_object     = get_post_type_object( 'user_media' );
-	$mediatheque_statuses = apply_filters( 'mediatheque_media_statuses',
+	$post_type_object = get_post_type_object( 'user_media' );
+
+	/**
+	 * Filter here to edit the media statuses.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param array $value The list of statuses.
+	 * @param string $handle The JavaScript handle of the loaded script.
+	 */
+	$mediatheque_statuses = apply_filters(
+		'mediatheque_media_statuses',
 		wp_list_pluck( mediatheque_get_post_statuses( 'all' ), 'label', 'name' ),
 		$handle
 	);
@@ -469,16 +503,16 @@ function mediatheque_localize_script( $handle = 'mediatheque-views', $user_id = 
 		$network_root_url = trailingslashit( network_site_url() ) . mediatheque_get_root_slug();
 	}
 
-	// Set editFields
+	// Set editFields.
 	$edit_fields = array(
-		'title' => array(
-			'name'  => __( 'Titre', 'mediatheque' ),
+		'title'          => array(
+			'name'     => __( 'Titre', 'mediatheque' ),
 			'position' => 0,
 			'type'     => 'text',
 			'classes'  => array( 'title' ),
 		),
-		'description' => array(
-			'name'  => __( 'Description', 'mediatheque' ),
+		'description'    => array(
+			'name'     => __( 'Description', 'mediatheque' ),
 			'position' => 1,
 			'type'     => 'contenteditable',
 			'classes'  => array( 'description' ),
@@ -489,13 +523,13 @@ function mediatheque_localize_script( $handle = 'mediatheque-views', $user_id = 
 			'type'     => 'list',
 			'classes'  => array( 'posts' ),
 		),
-		'reset' => array(
+		'reset'          => array(
 			'caption'  => __( 'Annuler', 'mediatheque' ),
 			'position' => 21,
 			'type'     => 'reset',
 			'classes'  => array( 'button-secondary', 'reset' ),
 		),
-		'submit' => array(
+		'submit'         => array(
 			'caption'  => __( 'Modifier', 'mediatheque' ),
 			'position' => 22,
 			'type'     => 'submit',
@@ -520,13 +554,16 @@ function mediatheque_localize_script( $handle = 'mediatheque-views', $user_id = 
 	 *
 	 * @param  array $value The available major actions.
 	 */
-	$major_actions = (array) apply_filters( 'mediatheque_localize_major_actions', array(
-		'upload'    => __( 'Nouveau(x) fichier(s)', 'mediatheque' ),
-		'directory' => __( 'Nouveau répertoire', 'mediatheque' ),
-	) );
+	$major_actions = (array) apply_filters(
+		'mediatheque_localize_major_actions',
+		array(
+			'upload'    => __( 'Nouveau(x) fichier(s)', 'mediatheque' ),
+			'directory' => __( 'Nouveau répertoire', 'mediatheque' ),
+		)
+	);
 
 	$preference_fields = array(
-		'icon' => array(
+		'icon'       => array(
 			'caption'  => __( 'Masquer l\'icone', 'mediatheque' ),
 			'position' => 0,
 			'type'     => 'checkbox',
@@ -538,13 +575,13 @@ function mediatheque_localize_script( $handle = 'mediatheque-views', $user_id = 
 			'type'     => 'checkbox',
 			'classes'  => array( 'setting', 'checkbox-setting' ),
 		),
-		'ext' => array(
+		'ext'        => array(
 			'caption'  => __( 'Masquer l\'extension', 'mediatheque' ),
 			'position' => 2,
 			'type'     => 'checkbox',
 			'classes'  => array( 'setting', 'checkbox-setting' ),
 		),
-		'file_size' => array(
+		'file_size'  => array(
 			'caption'  => __( 'Masquer la taille du media.', 'mediatheque' ),
 			'position' => 3,
 			'type'     => 'checkbox',
@@ -564,58 +601,63 @@ function mediatheque_localize_script( $handle = 'mediatheque-views', $user_id = 
 		);
 	}
 
-	wp_localize_script( $handle, 'mediaThequeSettings', array(
-		'params' => array(
-			'container' => 'mediatheque-ui',
-			'browser'   => 'mediatheque-browse',
-			'dropzone'  => 'drag-drop-area',
-			'dropHelp'  => __( 'Déposez vos fichiers pour les mettre en ligne', 'mediatheque' ),
-			'dropOr'    => __( 'ou', 'mediatheque' ),
-			'btnBrowse' => __( 'Choisissez des fichiers', 'mediatheque' ),
-		),
-		'toolbarItems' => array_merge( array(
-				'users' => __( 'Choisissez un utilisateur', 'mediatheque' )
+	wp_localize_script(
+		$handle,
+		'mediaThequeSettings',
+		array(
+			'params'       => array(
+				'container' => 'mediatheque-ui',
+				'browser'   => 'mediatheque-browse',
+				'dropzone'  => 'drag-drop-area',
+				'dropHelp'  => __( 'Déposez vos fichiers pour les mettre en ligne', 'mediatheque' ),
+				'dropOr'    => __( 'ou', 'mediatheque' ),
+				'btnBrowse' => __( 'Choisissez des fichiers', 'mediatheque' ),
 			),
-			$mediatheque_statuses,
-			$major_actions
-		),
-		'dirmaker' => array(
-			'label'   => __( 'Nom de votre répertoire', 'mediatheque' ),
-			'saveBtn' => __( 'Créer', 'mediatheque' ),
-		),
-		'common' => array(
-			'rootSlug'        => mediatheque_get_root_slug(),
-			'networkRootUrl'  => $network_root_url,
-			'downloadSlug'    => mediatheque_get_download_rewrite_slug(),
-			'closeBtn'        => __( 'Fermer', 'mediatheque' ),
-			'noUserMedia'     => __( 'Aucun media utilisateur ne correspond à votre requête.', 'mediatheque' ),
-			'dismissibleText' => __( 'Rejeter', 'mediatheque' ),
-			'insertBtn'       => $post_type_object->labels->insert_into_item,
-			'avatarBtn'       => $post_type_object->labels->use_as_avatar,
-			'frameTitle'      => $post_type_object->labels->menu_name,
-			'embedTitle'      => __( 'Définissez vos préférences d\'affichage du media', 'mediatheque' ),
-			'embedBtn'        => __( 'Définir', 'mediatheque' ),
-			'alignLabel'      => __( 'Alignement', 'mediatheque' ),
-			'alignBtns'       => array(
-				'left'   => __( 'Gauche', 'mediatheque' ),
-				'center' => __( 'Centre', 'mediatheque' ),
-				'right'  => __( 'Droite', 'mediatheque' ),
-				'none'   => __( 'Aucun', 'mediatheque' ),
+			'toolbarItems' => array_merge(
+				array(
+					'users' => __( 'Choisissez un utilisateur', 'mediatheque' ),
+				),
+				$mediatheque_statuses,
+				$major_actions
 			),
-			'directory'       => mediatheque_get_displayed_directory(),
-			'user_id'         => $user_id,
-			'isUserMediaOnly' => ! current_user_can( 'upload_files' ) || ! empty( $mediatheque->editor_id ) || ! mediatheque_is_post_type_admin_screen(),
-		),
-		'fields' => $preference_fields,
-		'editFields' => mediatheque_sort_array_fields( $edit_fields ),
+			'dirmaker'     => array(
+				'label'   => __( 'Nom de votre répertoire', 'mediatheque' ),
+				'saveBtn' => __( 'Créer', 'mediatheque' ),
+			),
+			'common'       => array(
+				'rootSlug'        => mediatheque_get_root_slug(),
+				'networkRootUrl'  => $network_root_url,
+				'downloadSlug'    => mediatheque_get_download_rewrite_slug(),
+				'closeBtn'        => __( 'Fermer', 'mediatheque' ),
+				'noUserMedia'     => __( 'Aucun media utilisateur ne correspond à votre requête.', 'mediatheque' ),
+				'dismissibleText' => __( 'Rejeter', 'mediatheque' ),
+				'insertBtn'       => $post_type_object->labels->insert_into_item,
+				'avatarBtn'       => $post_type_object->labels->use_as_avatar,
+				'frameTitle'      => $post_type_object->labels->menu_name,
+				'embedTitle'      => __( 'Définissez vos préférences d\'affichage du media', 'mediatheque' ),
+				'embedBtn'        => __( 'Définir', 'mediatheque' ),
+				'alignLabel'      => __( 'Alignement', 'mediatheque' ),
+				'alignBtns'       => array(
+					'left'   => __( 'Gauche', 'mediatheque' ),
+					'center' => __( 'Centre', 'mediatheque' ),
+					'right'  => __( 'Droite', 'mediatheque' ),
+					'none'   => __( 'Aucun', 'mediatheque' ),
+				),
+				'directory'       => mediatheque_get_displayed_directory(),
+				'user_id'         => $user_id,
+				'isUserMediaOnly' => ! current_user_can( 'upload_files' ) || ! empty( $mediatheque->editor_id ) || ! mediatheque_is_post_type_admin_screen(),
+			),
+			'fields'       => $preference_fields,
+			'editFields'   => mediatheque_sort_array_fields( $edit_fields ),
 
-		/**
-		 * Add the Rest Nonce in case Gutenberg is active.
-		 *
-		 * @see https://github.com/WordPress/gutenberg/pull/7329
-		 */
-		'restNonce' => ( wp_installing() && ! is_multisite() ) ? '' : wp_create_nonce( 'wp_rest' ),
-	) );
+			/**
+			 * Add the Rest Nonce in case Gutenberg is active.
+			 *
+			 * @see https://github.com/WordPress/gutenberg/pull/7329
+			 */
+			'restNonce'    => ( wp_installing() && ! is_multisite() ) ? '' : wp_create_nonce( 'wp_rest' ),
+		)
+	);
 }
 
 /**
@@ -628,35 +670,48 @@ function mediatheque_register_scripts() {
 	$min = mediatheque_min_suffix();
 	$v   = mediatheque_version();
 
-	/** JavaScripts **********************************************************/
+	// JavaScripts.
 	$url = mediatheque_js_url();
 
-	$scripts = apply_filters( 'mediatheque_register_javascripts', array(
-		'mediatheque-uploader' => array(
-			'location' => sprintf( '%1$suploader%2$s.js', $url, $min ),
-			'deps'     => array( 'wp-api', 'wp-backbone', 'wp-plupload' ),
+	/**
+	 * Use this filter to edit the JavaScript data.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param $value the JavaScript data.
+	 */
+	$scripts = apply_filters(
+		'mediatheque_register_javascripts',
+		array(
+			'mediatheque-uploader' => array(
+				'location' => sprintf( '%1$suploader%2$s.js', $url, $min ),
+				'deps'     => array( 'wp-api', 'wp-backbone', 'wp-plupload' ),
+			),
+			'mediatheque-views'    => array(
+				'location' => sprintf( '%1$sviews%2$s.js', $url, $min ),
+				'deps'     => array( 'wp-api', 'wp-backbone', 'underscore' ),
+			),
+			'mediatheque-editor'   => array(
+				'location' => sprintf( '%1$sscript%2$s.js', $url, $min ),
+				'deps'     => array( 'media-editor', 'mediatheque-uploader', 'mediatheque-views' ),
+			),
+			'mediatheque-manage'   => array(
+				'location' => sprintf( '%1$smanage%2$s.js', $url, $min ),
+				'deps'     => array( 'mediatheque-uploader', 'mediatheque-views' ),
+			),
+			'mediatheque-display'  => array(
+				'location' => sprintf( '%1$sdisplay%2$s.js', $url, $min ),
+				'deps'     => array( 'mediatheque-views' ),
+			),
+			'mediatheque-block'    => array(
+				'location' => sprintf( '%1$sblock%2$s.js', $url, $min ),
+				'deps'     => array( 'wp-blocks', 'wp-element' ),
+			),
 		),
-		'mediatheque-views' => array(
-			'location' => sprintf( '%1$sviews%2$s.js', $url, $min ),
-			'deps'     => array( 'wp-api', 'wp-backbone', 'underscore' ),
-		),
-		'mediatheque-editor' => array(
-			'location' => sprintf( '%1$sscript%2$s.js', $url, $min ),
-			'deps'     => array( 'media-editor', 'mediatheque-uploader', 'mediatheque-views' ),
-		),
-		'mediatheque-manage' => array(
-			'location' => sprintf( '%1$smanage%2$s.js', $url, $min ),
-			'deps'     => array( 'mediatheque-uploader', 'mediatheque-views' ),
-		),
-		'mediatheque-display' => array(
-			'location' => sprintf( '%1$sdisplay%2$s.js', $url, $min ),
-			'deps'     => array( 'mediatheque-views' ),
-		),
-		'mediatheque-block' => array(
-			'location' => sprintf( '%1$sblock%2$s.js', $url, $min ),
-			'deps'     => array( 'wp-blocks', 'wp-element' ),
-		),
-	), $url, $min, $v );
+		$url,
+		$min,
+		$v
+	);
 
 	foreach ( $scripts as $js_handle => $script ) {
 		$in_footer = true;
@@ -668,31 +723,44 @@ function mediatheque_register_scripts() {
 		wp_register_script( $js_handle, $script['location'], $script['deps'], $v, $in_footer );
 	}
 
-	/** Styles ***************************************************************/
+	// Styles.
 	$url = mediatheque_assets_url();
 
-	$styles = apply_filters( 'mediatheque_register_styles', array(
-		'mediatheque-ui' => array(
-			'location' => sprintf( '%1$sui%2$s.css', $url, $min ),
-			'deps'     => array( 'dashicons' ),
+	/**
+	 * Use this filter to edit CSS data.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param array $value The CSS data.
+	 */
+	$styles = apply_filters(
+		'mediatheque_register_styles',
+		array(
+			'mediatheque-ui'       => array(
+				'location' => sprintf( '%1$sui%2$s.css', $url, $min ),
+				'deps'     => array( 'dashicons' ),
+			),
+			'mediatheque-uploader' => array(
+				'location' => sprintf( '%1$suploader%2$s.css', $url, $min ),
+				'deps'     => array( 'mediatheque-ui' ),
+			),
+			'mediatheque-editor'   => array(
+				'location' => sprintf( '%1$seditor%2$s.css', $url, $min ),
+				'deps'     => array( 'mediatheque-uploader' ),
+			),
+			'mediatheque-front'    => array(
+				'location' => sprintf( '%1$sfront%2$s.css', $url, $min ),
+				'deps'     => array( 'mediatheque-editor' ),
+			),
+			'mediatheque-block'    => array(
+				'location' => sprintf( '%1$sblock%2$s.css', $url, $min ),
+				'deps'     => array( 'wp-block-editor' ),
+			),
 		),
-		'mediatheque-uploader' => array(
-			'location' => sprintf( '%1$suploader%2$s.css', $url, $min ),
-			'deps'     => array( 'mediatheque-ui' ),
-		),
-		'mediatheque-editor' => array(
-			'location' => sprintf( '%1$seditor%2$s.css', $url, $min ),
-			'deps'     => array( 'mediatheque-uploader' ),
-		),
-		'mediatheque-front' => array(
-			'location' => sprintf( '%1$sfront%2$s.css', $url, $min ),
-			'deps'     => array( 'mediatheque-editor' ),
-		),
-		'mediatheque-block' => array(
-			'location' => sprintf( '%1$sblock%2$s.css', $url, $min ),
-			'deps'     => array( 'wp-block-editor' ),
-		),
-	), $url, $min, $v );
+		$url,
+		$min,
+		$v
+	);
 
 	foreach ( $styles as $css_handle => $style ) {
 		wp_register_style( $css_handle, $style['location'], $style['deps'], $v );
@@ -706,88 +774,90 @@ function mediatheque_register_scripts() {
  */
 function mediatheque_register_objects() {
 
-	/** Post Type ************************************************************/
+	// Post Type.
+	register_post_type(
+		'user_media',
+		array(
+			'labels'                => array(
+				'name'                  => __( 'Media utilisateurs', 'mediatheque' ),
+				'menu_name'             => _x( 'Ma MediaThèque', 'Plugin submenu', 'mediatheque' ),
+				'all_items'             => __( 'Tous les media utilisateurs', 'mediatheque' ),
+				'singular_name'         => __( 'Media utilisateur', 'mediatheque' ),
+				'add_new'               => __( 'Nouveau media utilisateur', 'mediatheque' ),
+				'add_new_item'          => __( 'Ajouter un media utilisateur', 'mediatheque' ),
+				'edit_item'             => __( 'Modifier le media utilisateur', 'mediatheque' ),
+				'new_item'              => __( 'Nouveau media utilisateur', 'mediatheque' ),
+				'view_item'             => __( 'Afficher le media utilisateur', 'mediatheque' ),
+				'search_items'          => __( 'Rechercher un media utilisateur', 'mediatheque' ),
+				'not_found'             => __( 'Media utilisateur introuvable', 'mediatheque' ),
+				'not_found_in_trash'    => __( 'Media utilisateur introuvable dans la corbeille', 'mediatheque' ),
+				'insert_into_item'      => __( 'Insérer dans le contenu', 'mediatheque' ),
+				'use_as_avatar'         => __( 'Utiliser comme avatar', 'mediatheque' ),
+				'uploaded_to_this_item' => __( 'Attaché à ce contenu', 'mediatheque' ),
+				'filter_items_list'     => __( 'Filtrer les Media utilisateurs', 'mediatheque' ),
+				'items_list_navigation' => __( 'Navigation des Media utilisateurs', 'mediatheque' ),
+				'items_list'            => __( 'Liste des Media utilisateurs', 'mediatheque' ),
+			),
+			'public'                => true,
+			'query_var'             => 'mediatheque',
+			'rewrite'               => array(
+				'slug'       => mediatheque_get_root_slug(),
+				'with_front' => false,
+			),
+			'has_archive'           => false,
+			'exclude_from_search'   => true,
+			'show_in_nav_menus'     => false,
+			'show_ui'               => false,
+			'supports'              => array( 'title', 'editor', 'comments' ),
+			'taxonomies'            => array( 'user_media_type' ),
+			'capability_type'       => array( 'user_upload', 'user_uploads' ),
+			'capabilities'          => mediatheque_capabilities(),
+			'delete_with_user'      => false,
+			'can_export'            => true,
+			'show_in_rest'          => true,
+			'rest_controller_class' => 'MediaTheque_REST_Controller',
+			'rest_base'             => 'user-media',
+		)
+	);
 
-	register_post_type( 'user_media', array(
-		'labels'  => array(
-			'name'                  => __( 'Media utilisateurs',                              'mediatheque' ),
-			'menu_name'             => _x( 'Ma MediaThèque', 'Plugin submenu',                'mediatheque' ),
-			'all_items'             => __( 'Tous les media utilisateurs',                     'mediatheque' ),
-			'singular_name'         => __( 'Media utilisateur',                               'mediatheque' ),
-			'add_new'               => __( 'Nouveau media utilisateur',                       'mediatheque' ),
-			'add_new_item'          => __( 'Ajouter un media utilisateur',                    'mediatheque' ),
-			'edit_item'             => __( 'Modifier le media utilisateur',                   'mediatheque' ),
-			'new_item'              => __( 'Nouveau media utilisateur',                       'mediatheque' ),
-			'view_item'             => __( 'Afficher le media utilisateur',                   'mediatheque' ),
-			'search_items'          => __( 'Rechercher un media utilisateur',                 'mediatheque' ),
-			'not_found'             => __( 'Media utilisateur introuvable',                   'mediatheque' ),
-			'not_found_in_trash'    => __( 'Media utilisateur introuvable dans la corbeille', 'mediatheque' ),
-			'insert_into_item'      => __( 'Insérer dans le contenu',                         'mediatheque' ),
-			'use_as_avatar'         => __( 'Utiliser comme avatar',                           'mediatheque' ),
-			'uploaded_to_this_item' => __( 'Attaché à ce contenu',                            'mediatheque' ),
-			'filter_items_list'     => __( 'Filtrer les Media utilisateurs',                  'mediatheque' ),
-			'items_list_navigation' => __( 'Navigation des Media utilisateurs',               'mediatheque' ),
-			'items_list'            => __( 'Liste des Media utilisateurs',                    'mediatheque' ),
-		),
-		'public'                => true,
-		'query_var'             => 'mediatheque',
-		'rewrite'               => array(
-			'slug'              => mediatheque_get_root_slug(),
-			'with_front'        => false
-		),
-		'has_archive'           => false,
-		'exclude_from_search'   => true,
-		'show_in_nav_menus'     => false,
-		'show_ui'               => false,
-		'supports'              => array( 'title', 'editor', 'comments' ),
-		'taxonomies'            => array( 'user_media_type' ),
-		'capability_type'       => array( 'user_upload', 'user_uploads' ),
-		'capabilities'          => mediatheque_capabilities(),
-		'delete_with_user'      => false,
-		'can_export'            => true,
-		'show_in_rest'          => true,
-		'rest_controller_class' => 'MediaTheque_REST_Controller',
-		'rest_base'             => 'user-media',
-	) );
+	// Taxonomy.
+	register_taxonomy(
+		'user_media_types',
+		'user_media',
+		array(
+			'public'                => false,
+			'hierarchical'          => true,
+			'label'                 => 'User Media Types',
+			'labels'                => array(
+				'name'          => _x( 'Types', 'taxonomy general name', 'mediatheque' ),
+				'singular_name' => _x( 'Type', 'taxonomy singular name', 'mediatheque' ),
+			),
+			'show_ui'               => false,
+			'show_admin_column'     => false,
+			'update_count_callback' => '_update_post_term_count',
+			'query_var'             => false,
+			'rewrite'               => false,
+			'capabilities'          => mediatheque_types_capabilities(),
+			'show_in_rest'          => true,
+		)
+	);
 
-	/** Taxonomy *************************************************************/
-
-	register_taxonomy( 'user_media_types', 'user_media', array(
-		'public'                => false,
-		'hierarchical'          => true,
-		'label'                 => 'User Media Types',
-		'labels'                => array(
-			'name'              => _x( 'Types', 'taxonomy general name', 'mediatheque' ),
-			'singular_name'     => _x( 'Type', 'taxonomy singular name', 'mediatheque' ),
-		),
-		'show_ui'               => false,
-		'show_admin_column'     => false,
-		'update_count_callback' => '_update_post_term_count',
-		'query_var'             => false,
-		'rewrite'               => false,
-		'capabilities'          => mediatheque_types_capabilities(),
-		'show_in_rest'          => true,
-	) );
-
-	/** Post statuses ********************************************************/
-
+	// Post statuses.
 	mediatheque_register_post_statuses();
 
-	/** Rewrites *************************************************************/
-
+	// Rewrites.
 	add_rewrite_tag(
 		'%' . mediatheque_get_download_rewrite_tag() . '%',
 		'([1]{1,})'
 	);
 
 	add_rewrite_rule(
-		mediatheque_get_root_slug() . '/([^/]+)/'  . mediatheque_get_download_rewrite_slug() . '/?$',
-		'index.php?mediatheque=$matches[1]&' . mediatheque_get_download_rewrite_tag()  . '=1',
+		mediatheque_get_root_slug() . '/([^/]+)/' . mediatheque_get_download_rewrite_slug() . '/?$',
+		'index.php?mediatheque=$matches[1]&' . mediatheque_get_download_rewrite_tag() . '=1',
 		'top'
 	);
 
-	/** User Meta ************************************************************/
-
+	// User Meta.
 	register_meta(
 		'user',
 		'_mediatheque_disk_usage',
@@ -799,7 +869,7 @@ function mediatheque_register_objects() {
 			'show_in_rest'      => array(
 				'name'             => 'disk_usage',
 				'prepare_callback' => 'mediatheque_disk_usage_prepare',
-			)
+			),
 		)
 	);
 
@@ -816,16 +886,14 @@ function mediatheque_register_objects() {
 		)
 	);
 
-	/** Uploads dir **********************************************************/
-
+	// Uploads dir.
 	mediatheque_register_upload_dir();
 
-	/** Scripts & Css *******************************************************/
+	// Scripts & CSS.
 
 	mediatheque_register_scripts();
 
-	/** Avatar image sizes **************************************************/
-
+	// Avatar image sizes.
 	if ( mediatheque_use_personal_avatar() ) {
 		foreach ( (array) rest_get_avatar_sizes() as $size ) {
 			add_image_size( sprintf( 'avatar-%s', $size ), $size, $size, true );
@@ -869,13 +937,17 @@ function mediatheque_block_editor() {
 	}
 
 	wp_enqueue_script( 'mediatheque-block' );
-	wp_localize_script( 'mediatheque-block', 'mediaThequeBlock', array(
-		'insertBtn'      => _x( 'Insérer un Media d\'utilisateur.', 'Gutenberg block', 'mediatheque' ),
-		'alignmentLabel' => _x( 'Alignement du Media d\'utilisateur', 'Gutenberg block', 'mediatheque' ),
-		'editTitle'      => _x( 'Modifier', 'Gutenberg block', 'mediatheque' ),
-		'genericError'   => _x( 'Une erreur est survenue, merci de réessayer.', 'Gutenberg block', 'mediatheque' ),
-		'description'    => _x( 'Un Media de votre MediaThèque personnelle.', 'Gutenberg block', 'mediatheque' )
-	) );
+	wp_localize_script(
+		'mediatheque-block',
+		'mediaThequeBlock',
+		array(
+			'insertBtn'      => _x( 'Insérer un Media d\'utilisateur.', 'Gutenberg block', 'mediatheque' ),
+			'alignmentLabel' => _x( 'Alignement du Media d\'utilisateur', 'Gutenberg block', 'mediatheque' ),
+			'editTitle'      => _x( 'Modifier', 'Gutenberg block', 'mediatheque' ),
+			'genericError'   => _x( 'Une erreur est survenue, merci de réessayer.', 'Gutenberg block', 'mediatheque' ),
+			'description'    => _x( 'Un Media de votre MediaThèque personnelle.', 'Gutenberg block', 'mediatheque' ),
+		)
+	);
 }
 
 /**
@@ -908,11 +980,21 @@ function mediatheque_locate_template_part( $template = '', $type = 'html' ) {
 	$template = str_replace( ".{$type}", '', $template );
 	$located  = '';
 
-	$template_locations = (array) apply_filters( 'mediatheque_locate_template_part', array(
-		trailingslashit( get_stylesheet_directory() ) . 'mediatheque/' . $template . '.' . $type,
-		trailingslashit( get_template_directory() ) . 'mediatheque/' . $template . '.' . $type,
-		mediatheque_templates() . $template . '.' . $type,
-	) );
+	/**
+	 * Uset this filter to edit the available template parts.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param array $value The list of template parts paths.
+	 */
+	$template_locations = (array) apply_filters(
+		'mediatheque_locate_template_part',
+		array(
+			trailingslashit( get_stylesheet_directory() ) . 'mediatheque/' . $template . '.' . $type,
+			trailingslashit( get_template_directory() ) . 'mediatheque/' . $template . '.' . $type,
+			mediatheque_templates() . $template . '.' . $type,
+		)
+	);
 
 	foreach ( $template_locations as $template_location ) {
 		if ( ! $template_location ) {
@@ -934,8 +1016,8 @@ function mediatheque_locate_template_part( $template = '', $type = 'html' ) {
  * @since  1.0.0
  *
  * @param  string  $template The template file name.
- * @param  string  $name     The Undersore template ID.
- * @param  bool    $load     Whether to load or return the found template.
+ * @param  string  $id       The Undersore template ID.
+ * @param  boolean $load     Whether to load or return the found template.
  * @param  string  $type     The template type (php or html).
  * @return string            The template path.
  */
@@ -965,17 +1047,27 @@ function mediatheque_get_template_part( $template = '', $id = '', $load = true, 
  * @param array $list An associative array containing all template Ids to keep.
  */
 function mediatheque_get_template_parts( $list = array() ) {
-	$template_parts = (array) apply_filters( 'mediatheque_get_template_parts', array(
-		'toolbar-item'     => 'mediatheque-toolbar-item',
-		'feedback'         => 'mediatheque-feedback',
-		'user'             => 'mediatheque-user',
-		'user-media'       => 'mediatheque-media',
-		'user-media-trail' => 'mediatheque-trail',
-		'uploader'         => 'mediatheque-uploader',
-		'progress'         => 'mediatheque-progress',
-		'dirmaker'         => 'mediatheque-dirmaker',
-		'field-item'       => 'mediatheque-field-item',
-	) );
+	/**
+	 * Use this filrer to edit the list of template parts to use.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param array $value The list of template parts to use.
+	 */
+	$template_parts = (array) apply_filters(
+		'mediatheque_get_template_parts',
+		array(
+			'toolbar-item'     => 'mediatheque-toolbar-item',
+			'feedback'         => 'mediatheque-feedback',
+			'user'             => 'mediatheque-user',
+			'user-media'       => 'mediatheque-media',
+			'user-media-trail' => 'mediatheque-trail',
+			'uploader'         => 'mediatheque-uploader',
+			'progress'         => 'mediatheque-progress',
+			'dirmaker'         => 'mediatheque-dirmaker',
+			'field-item'       => 'mediatheque-field-item',
+		)
+	);
 
 	if ( ! empty( $list ) ) {
 		return array_intersect_key( $template_parts, $list );
@@ -1006,7 +1098,7 @@ function mediatheque_print_template_parts() {
 function mediatheque_embed_template( $template = '' ) {
 	$object = get_queried_object();
 
-	// Only Apply the template override on Embedded User Media
+	// Only Apply the template override on Embedded User Media.
 	if ( empty( $object->post_type ) || 'user_media' !== $object->post_type ) {
 		return $template;
 	}
@@ -1046,8 +1138,8 @@ function mediatheque_get_image_download_url( $url = '', $id = 0 ) {
 
 	$user_media = $mediatheque->user_media_image_attachment;
 
-	// Resets
-	$GLOBALS['post'] = $user_media;
+	// Resets.
+	$GLOBALS['post'] = $user_media; // phpcs:ignore
 	wp_cache_set( $user_media->ID, $user_media, 'posts' );
 	unset( $mediatheque->user_media_image_attachment );
 
@@ -1078,8 +1170,9 @@ function mediatheque_image_downsize( $out = false, $id = 0, $size = '' ) {
 		return $out;
 	}
 
-	$user_media = $mediatheque->user_media_image_attachment;
-	$GLOBALS['post']->post_type = 'attachment';
+	$user_media                 = $mediatheque->user_media_image_attachment;
+	$GLOBALS['post']->post_type = 'attachment'; // phpcs:ignore
+
 	wp_cache_set( $user_media->ID, $GLOBALS['post'], 'posts' );
 
 	$out = image_downsize( false, $id, $size );
@@ -1109,7 +1202,7 @@ function mediatheque_image_downsize( $out = false, $id = 0, $size = '' ) {
  *
  * @since  1.0.0
  *
- * @param  WP_Query $query The WordPress Main Query
+ * @param  WP_Query $query The WordPress Main Query.
  */
 function mediatheque_parse_query( WP_Query $query ) {
 	$bail = false;
@@ -1187,7 +1280,7 @@ function mediatheque_parse_query( WP_Query $query ) {
  * @return array             The editor settings.
  */
 function mediatheque_editor_settings( $settings = array(), $editor_id = '' ) {
-	// In this case, the User Media UI is a sidebar item of the WP Media Editor
+	// In this case, the User Media UI is a sidebar item of the WP Media Editor.
 	if ( current_user_can( 'upload_files' ) && ( ! isset( $settings['media_buttons'] ) || ! empty( $settings['media_buttons'] ) ) ) {
 		return $settings;
 	}
@@ -1227,10 +1320,10 @@ function mediatheque_wp_link_query_args( $args = array() ) {
  *
  * @since 1.0.0
  *
- * @param string       $result The oEmbed HTML output result.
- * @param object       $data   Data object from WP_oEmbed::data2html().
- * @param string       $url    The embedded URL.
- * @return false|string        The oEmbed HTML output result.
+ * @param string $result The oEmbed HTML output result.
+ * @param object $data   Data object from WP_oEmbed::data2html().
+ * @param string $url    The embedded URL.
+ * @return false|string  The oEmbed HTML output result.
  */
 function mediatheque_oembed_pre_dataparse( $result = null, $data = null, $url = '' ) {
 	$mediatheque = mediatheque();
@@ -1247,10 +1340,10 @@ function mediatheque_oembed_pre_dataparse( $result = null, $data = null, $url = 
  *
  * @since 1.0.0
  *
- * @param string       $result The oEmbed HTML output result.
- * @param object       $data   Data object from WP_oEmbed::data2html().
- * @param string       $url    The embedded URL.
- * @return false|string        The oEmbed HTML output result.
+ * @param string $result The oEmbed HTML output result.
+ * @param object $data   Data object from WP_oEmbed::data2html().
+ * @param string $url    The embedded URL.
+ * @return false|string  The oEmbed HTML output result.
  */
 function mediatheque_oembed_dataparse( $result = null, $data = null, $url = '' ) {
 	$mediatheque = mediatheque();
@@ -1284,9 +1377,9 @@ function mediatheque_oembed_get_url_args( $url = '' ) {
 	}
 
 	$url       = str_replace( '&amp;', '&', $url );
-	$url_parts = parse_url( $url );
+	$url_parts = wp_parse_url( $url );
 
-	if ( false === array_search( mediatheque_get_root_slug(), explode( '/', wp_unslash( $url_parts['path'] ) ) ) ) {
+	if ( false === array_search( mediatheque_get_root_slug(), explode( '/', wp_unslash( $url_parts['path'] ) ), true ) ) {
 		return $args;
 	}
 
@@ -1294,12 +1387,15 @@ function mediatheque_oembed_get_url_args( $url = '' ) {
 		return $args;
 	}
 
-	return wp_parse_args( $url_parts['query'], array(
-		'attached' => false,
-		'size'     => 'full',
-		'align'    => 'none',
-		'link'     => 'file'
-	) );
+	return wp_parse_args(
+		$url_parts['query'],
+		array(
+			'attached' => false,
+			'size'     => 'full',
+			'align'    => 'none',
+			'link'     => 'file',
+		)
+	);
 }
 
 /**
@@ -1329,7 +1425,7 @@ function mediatheque_oembed_user_media_id( $id = 0, $url = '' ) {
 		}
 
 		$slug = trim( $matches[1], '/' );
-		$_id = mediatheque_get_post_by_slug( $slug );
+		$_id  = mediatheque_get_post_by_slug( $slug );
 	}
 
 	/**
@@ -1364,7 +1460,7 @@ function mediatheque_oembed_user_media_id( $id = 0, $url = '' ) {
 	$user_media = get_post( $_id );
 	$media_type = mediatheque_get_media_info( $user_media );
 
-	// Take care of images
+	// Take care of images.
 	if ( 'image' === $media_type ) {
 		$image = mediatheque_image_get_intermediate_size( $user_media, $args['size'] );
 
@@ -1405,7 +1501,7 @@ function mediatheque_oembed_user_media_id( $id = 0, $url = '' ) {
 			mediatheque()->user_media_oembeds[ $url ] = $output;
 		}
 
-	// Take care of audios or videos
+		// Take care of audios or videos.
 	} elseif ( 'video' === $media_type || 'audio' === $media_type ) {
 		$default_av_args = array(
 			'src'      => '',
@@ -1425,7 +1521,7 @@ function mediatheque_oembed_user_media_id( $id = 0, $url = '' ) {
 			return $id;
 		}
 
-		// Video Shortcode
+		// Video Shortcode.
 		if ( 'video' === $media_type ) {
 			if ( 'none' !== $args['align'] ) {
 				$av_args['class'] .= sprintf( ' align%s', $args['align'] );
@@ -1437,7 +1533,7 @@ function mediatheque_oembed_user_media_id( $id = 0, $url = '' ) {
 				$av_args['height'] = $size['height'];
 			}
 
-			// Check the Themes content width
+			// Check the Themes content width.
 			if ( ! empty( $GLOBALS['content_width'] ) && $av_args['width'] > $GLOBALS['content_width'] ) {
 				$av_args['height'] = round( ( $av_args['height'] * $GLOBALS['content_width'] ) / $av_args['width'] );
 				$av_args['width']  = $GLOBALS['content_width'];
@@ -1445,7 +1541,7 @@ function mediatheque_oembed_user_media_id( $id = 0, $url = '' ) {
 
 			$output = wp_video_shortcode( $av_args );
 
-		// Audio Shortcode
+			// Audio Shortcode.
 		} else {
 			unset( $av_args['class'] );
 
@@ -1458,7 +1554,7 @@ function mediatheque_oembed_user_media_id( $id = 0, $url = '' ) {
 
 		mediatheque()->user_media_oembeds[ $url ] = $output;
 
-	// Take care of other files
+		// Take care of other files.
 	} else {
 		$output = mediatheque_file_shortcode( $user_media, $args );
 
@@ -1471,7 +1567,7 @@ function mediatheque_oembed_user_media_id( $id = 0, $url = '' ) {
 
 	// Track cached user media.
 	if ( ! empty( $output ) ) {
-		$key_suffix = md5( $url_id . serialize( wp_embed_defaults( $url ) ) );
+		$key_suffix = md5( $url_id . serialize( wp_embed_defaults( $url ) ) ); // phpcs:ignore
 		$cache_keys = array( '_oembed_' . $key_suffix, '_oembed_time_' . $key_suffix );
 
 		$cached_keys = get_post_meta( $user_media->ID, '_user_media_cached_keys', true );
@@ -1523,7 +1619,7 @@ function mediatheque_clear_cached_media( $user_media = null ) {
 	delete_post_meta( $user_media->ID, '_user_media_cached_keys' );
 
 	// Delete cached meta keys so that the cache will be reset at next media load.
-	$return = $wpdb->query( "DELETE FROM {$wpdb->postmeta} WHERE meta_key IN ({$in})" );
+	$return = $wpdb->query( "DELETE FROM {$wpdb->postmeta} WHERE meta_key IN ({$in})" ); // phpcs:ignore
 
 	if ( $return ) {
 		wp_cache_flush();
@@ -1545,11 +1641,14 @@ function mediatheque_get_attached_posts( $s = '' ) {
 		return array();
 	}
 
-	$search_posts   = new WP_Query;
-	return $search_posts->query( array(
-		'post_type' => 'any',
-		's'         => $s,
-	) );
+	$search_posts = new WP_Query();
+
+	return $search_posts->query(
+		array(
+			'post_type' => 'any',
+			's'         => $s,
+		)
+	);
 }
 
 /**
@@ -1567,7 +1666,9 @@ function mediatheque_load_textdomain() {
  *
  * @since 1.1.0
  *
- * @return string Base 64 encoded string.
+ * @param string $color The color of the SVG icon.
+ * @param string $bgcolor The background color of the SVG icon.
+ * @return string         Base 64 encoded string.
  */
 function mediatheque_get_svg_icon( $color = '#23282d', $bgcolor = '#23282d' ) {
 	$fill_head = '';
@@ -1575,14 +1676,15 @@ function mediatheque_get_svg_icon( $color = '#23282d', $bgcolor = '#23282d' ) {
 		$fill_head = ' fill="' . $bgcolor . '" ';
 	}
 
-	return 'data:image/svg+xml;base64,' . base64_encode( '
-		<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="20px" height="20px" viewBox="0 0 20 20">
+	// phpcs:ignore
+	return 'data:image/svg+xml;base64,' . base64_encode(
+		'<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="20px" height="20px" viewBox="0 0 20 20">
 			<path fill="' . $color . '" d="M 13 11 L 13 4 C 13 3.45 12.55 3 12 3 L 10.33 3 L 9 1 L 5 1 L 3.67 3 L 2 3 C 1.45 3 1 3.45 1 4 L 1 11 C 1 11.55 1.45 12 2 12 L 12 12 C 12.55 12 13 11.55 13 11 Z"/>
 			<path fill="' . $color . '" d="M 14 6 L 19 6 L 19 16.5 C 19 17.88 17.88 19 16.5 19 C 15.12 19 14 17.88 14 16.5 C 14 15.12 15.12 14 16.5 14 C 16.67 14 16.84 14.02 17 14.05 L 17 9 L 14 9 L 14 6 Z"/>
 			<path ' . $fill_head . 'd="M 7 4.5 C 8.38 4.5 9.5 5.62 9.5 7 C 9.5 8.38 8.38 9.5 7 9.5 C 5.62 9.5 4.5 8.38 4.5 7 C 4.5 5.62 5.62 4.5 7 4.5 Z"/>
 			<path fill="' . $color . '" stroke="' . $bgcolor . '" d="M 7.006 11.465 L 9.121 10.05 C 10.979 10.05 12.636 11.861 12.636 13.573 L 12.636 15.508 C 12.636 15.508 9.797 16.386 7.006 16.386 C 4.168 16.386 1.376 15.508 1.376 15.508 L 1.376 13.573 C 1.376 11.823 2.885 10.089 4.852 10.089 Z"/>
-		</svg>
-	' );
+		</svg>'
+	);
 }
 
 /**
@@ -1590,8 +1692,8 @@ function mediatheque_get_svg_icon( $color = '#23282d', $bgcolor = '#23282d' ) {
  *
  * @since  1.3.0
  *
- * @param  array  $names The subdirectory reserved names.
- * @return array         The subdirectory reserved names.
+ * @param  array $names The subdirectory reserved names.
+ * @return array        The subdirectory reserved names.
  */
 function mediatheque_reserved_name( $names = array() ) {
 	$names[] = mediatheque_get_root_slug();
