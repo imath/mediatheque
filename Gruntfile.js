@@ -111,6 +111,13 @@ module.exports = function( grunt ) {
 					'tree-ish': 'HEAD@{0}'
 				}
 			}
+		},
+		exec: {
+			wpcs: {
+				command: './vendor/bin/phpcs *.php inc/*.php inc/classes/*.php templates/*.php --standard=WordPress',
+				stdout: true,
+				stderr: true
+			}
 		}
 	} );
 
@@ -134,6 +141,8 @@ module.exports = function( grunt ) {
 	grunt.registerTask( 'compress', ['git-archive'] );
 
 	grunt.registerTask( 'translate', ['checktextdomain', 'makepot'] );
+
+	grunt.registerTask( 'phpcs', 'exec:wpcs' );
 
 	grunt.registerTask( 'release', ['translate', 'clean', 'jstest', 'shrink'] );
 
