@@ -21,6 +21,7 @@ php:
 # x.y mirrors the latest from the x.y branch
 env:
   - WP_VERSION=master MT_TRAVISCI=travis:phpunit
+  - WP_VERSION=5.5 MT_TRAVISCI=travis:phpunit
   - WP_VERSION=5.4 MT_TRAVISCI=travis:phpunit
   - WP_VERSION=5.3 MT_TRAVISCI=travis:phpunit
   - WP_VERSION=5.2 MT_TRAVISCI=travis:phpunit
@@ -30,6 +31,9 @@ matrix:
   include:
     - php: 7.2
       env: WP_VERSION=master MT_TRAVISCI=travis:phpunit
+      dist: precise
+    - php: 7.2
+      env: WP_VERSION=5.5 MT_TRAVISCI=travis:phpunit
       dist: precise
     - php: 7.2
       env: WP_VERSION=5.4 MT_TRAVISCI=travis:phpunit
@@ -70,6 +74,8 @@ before_install:
 
   # setup NodeJS version using NVM
   - export PATH="$HOME/.composer/vendor/bin:$PATH"
+  # make sure composer is < 2.0.0 to avoid dependencies install errors.
+  - composer self-update 1.10.16
   - node --version
   - nvm install 10.13.0
   - node --version
