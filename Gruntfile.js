@@ -137,8 +137,8 @@ module.exports = function( grunt ) {
 
 	grunt.registerTask( 'release', ['translate', 'clean', 'jstest', 'shrink'] );
 
-	// Travis CI Tasks.
-	grunt.registerTask( 'travis:phpunit', ['jstest', 'checktextdomain', 'phpunit'] );
+	// Test.
+	grunt.registerTask( 'test', ['jstest', 'checktextdomain', 'phpunit'] );
 
 	// Default task.
 	grunt.registerTask( 'default', ['commit'] );
