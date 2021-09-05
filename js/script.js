@@ -466,7 +466,12 @@ window.mediaTheque = window.mediaTheque || _.extend( {}, _.pick( window.wp, 'Bac
 			}
 
 			if ( this.frame.options.gutenbergBlock ) {
-				var block = $( '.editor-block-list__block.is-selected .mediatheque-block' ).get( 0 );
+				var block = $( '.block-editor-block-list__block.is-selected .mediatheque-block' ).get( 0 );
+
+				// Backward compat.
+				if ( ! block && $( '.editor-block-list__block.is-selected .mediatheque-block' ).length ) {
+					block = $( '.editor-block-list__block.is-selected .mediatheque-block' ).get( 0 );
+				}
 
 				block.dataset.link = link;
 

@@ -3,7 +3,7 @@
  * Plugin Name: MediaThèque
  * Plugin URI: https://imathi.eu/tag/mediatheque/
  * Description: Une gestion alternative des media dans WordPress, pour tous.
- * Version: 1.3.2
+ * Version: 1.4.0-alpha
  * Requires at least: 4.7
  * Tested up to: 5.3
  * License: GNU/GPL 2
@@ -69,7 +69,7 @@ final class MediaTheque {
 	 */
 	private function globals() {
 		// Version
-		$this->version = '1.3.2';
+		$this->version = '1.4.0-alpha';
 
 		// Domain
 		$this->domain = 'mediatheque';
