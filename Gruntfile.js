@@ -93,16 +93,6 @@ module.exports = function( grunt ) {
 				verbose: false
 			}
 		},
-		phpunit: {
-			'default': {
-				cmd: 'phpunit',
-				args: ['-c', 'phpunit.xml.dist']
-			},
-			'multisite': {
-				cmd: 'phpunit',
-				args: ['-c', 'tests/phpunit/multisite.xml']
-			}
-		},
 		'git-archive': {
 			archive: {
 				options: {
@@ -111,19 +101,22 @@ module.exports = function( grunt ) {
 					'tree-ish': 'HEAD@{0}'
 				}
 			}
+		},
+		exec: {
+			test_php: {
+				command: 'composer test',
+				stdout: true,
+				stderr: true
+			},
+			test_php_multisite: {
+				command: 'composer test_multisite',
+				stdout: true,
+				stderr: true
+			}
 		}
 	} );
 
-	/**
-	 * Register tasks.
-	 */
-	grunt.registerMultiTask( 'phpunit', 'Runs PHPUnit tests, including the multisite tests.', function() {
-		grunt.util.spawn( {
-			args: this.data.args,
-			cmd:  this.data.cmd,
-			opts: { stdio: 'inherit' }
-		}, this.async() );
-	} );
+	grunt.registerTask( 'phpunit', ['exec:test_php', 'exec:test_php_multisite'] );
 
 	grunt.registerTask( 'commit', ['checktextdomain', 'phpunit'] );
 
