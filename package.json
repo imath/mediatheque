@@ -1,38 +1,37 @@
 {
-  "author": "imath",
-  "bugs": {
-    "url": "https://github.com/imath/mediatheque/issues"
-  },
-  "description": "An alternative Media Library for every WordPress user!",
-  "devDependencies": {
-    "grunt": "^1.4.1",
-    "grunt-check-dependencies": "^1.0.0",
-    "grunt-checktextdomain": "~1.0.1",
-    "grunt-contrib-clean": "^2.0.0",
-    "grunt-contrib-copy": "~1.0.0",
-    "grunt-contrib-cssmin": "^4.0.0",
-    "grunt-contrib-jshint": "^3.0.0",
-    "grunt-contrib-uglify": "^5.0.1",
-    "grunt-exec": "^3.0.0",
-    "grunt-git-archive": "^0.0.3",
-    "grunt-jsvalidate": "^0.2.2",
-    "grunt-wp-i18n": "^1.0.3",
-    "matchdep": "^2.0.0"
-  },
-  "engines": {
-    "node": ">=14.15.3",
-    "npm": ">=6.14.8"
-  },
-  "keywords": [
-    "media",
-    "users"
-  ],
-  "homepage": "https://imathi.eu/tag/mediatheque",
-  "license": "GPL-2.0+",
-  "name": "mediatheque",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/imath/mediatheque.git"
-  },
-  "version": "1.4.0-alpha"
+	"author": "imath",
+	"bugs": {
+		"url": "https://github.com/imath/mediatheque/issues"
+	},
+	"description": "An alternative Media Library for every WordPress user!",
+	"devDependencies": {
+		"grunt": "^1.4.1",
+		"grunt-check-dependencies": "^1.0.0",
+		"grunt-checktextdomain": "~1.0.1",
+		"grunt-contrib-clean": "^2.0.0",
+		"grunt-contrib-copy": "~1.0.0",
+		"grunt-contrib-cssmin": "^4.0.0",
+		"grunt-contrib-jshint": "^3.0.0",
+		"grunt-contrib-uglify": "^5.0.1",
+		"grunt-exec": "^3.0.0",
+		"grunt-git-archive": "^0.0.3",
+		"grunt-jsvalidate": "^0.2.2",
+		"grunt-wp-i18n": "^1.0.3"
+	},
+	"engines": {
+		"node": ">=14.15.3",
+		"npm": ">=6.14.8"
+	},
+	"keywords": [
+		"media",
+		"users"
+	],
+	"homepage": "https://imathi.eu/tag/mediatheque",
+	"license": "GPL-2.0+",
+	"name": "mediatheque",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/imath/mediatheque.git"
+	},
+	"version": "1.4.0-alpha"
 }

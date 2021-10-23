@@ -1,8 +1,12 @@
 /* jshint node:true */
 /* global module */
 module.exports = function( grunt ) {
-	require( 'matchdep' ).filterDev( ['grunt-*', '!grunt-legacy-util'] ).forEach( grunt.loadNpmTasks );
-	grunt.util = require( 'grunt-legacy-util' );
+	var jsonFile = grunt.file.readJSON( 'package.json' );
+	Object.keys( jsonFile.devDependencies ).forEach( function( plugin ) {
+		if ( plugin.match( /grunt-.*/ ) ) {
+			grunt.loadNpmTasks( plugin );
+		}
+	} );
 
 	grunt.initConfig( {
 		pkg: grunt.file.readJSON( 'package.json' ),
@@ -35,7 +39,7 @@ module.exports = function( grunt ) {
 				]
 			},
 			files: {
-				src: ['**/*.php', '!**/node_modules/**'],
+				src: ['**/*.php', '!**/node_modules/**', '!**/vendor/**'],
 				expand: true
 			}
 		},
@@ -46,7 +50,7 @@ module.exports = function( grunt ) {
 			target: {
 				options: {
 					domainPath: '/languages',
-					exclude: ['/node_modules'],
+					exclude: ['/node_modules', '/vendor'],
 					mainFile: 'mediatheque.php',
 					potFilename: 'mediatheque.pot',
 					processPot: function( pot ) {
