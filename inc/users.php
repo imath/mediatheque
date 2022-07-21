@@ -264,7 +264,7 @@ function mediatheque_additionnal_user_rest_param( $query_params = array() ) {
  * @param  WP_REST_Request $request       Rest request object.
  * @return array           $prepared_args The prepared params for the users collection.
  */
-function mediatheque_rest_user_query( $prepared_args = array(), WP_REST_Request $request ) {
+function mediatheque_rest_user_query( $prepared_args, WP_REST_Request $request ) {
 	if ( $request->get_param( 'has_disk_usage' ) ) {
 		$capacity = 'list_users';
 

@@ -59,7 +59,7 @@ function mediatheque_get_personal_avatar( $user_media_id = 0, $size = 96 ) {
  * @param  mixed $id_or_email A user ID, email, a User, a Post or a Comment object.
  * @return array              Avatar data.
  */
-function mediatheque_get_avatar_data( $args = array(), $id_or_email ) {
+function mediatheque_get_avatar_data( $args = array(), $id_or_email = null ) {
 	if ( empty( $id_or_email ) ) {
 		return $args;
 	}
